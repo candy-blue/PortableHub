@@ -268,7 +268,9 @@
                                         Margin="8"
                                         Padding="10"
                                         Cursor="Hand"
+                                        Focusable="True"
                                         Tag="{Binding}"
+                                        GotFocus="Card_GotFocus"
                                         PreviewMouseLeftButtonDown="Card_PreviewMouseLeftButtonDown"
                                         PreviewMouseMove="Card_PreviewMouseMove"
                                         Drop="Card_Drop"
@@ -315,7 +317,8 @@
                                             <!-- Favorite Star Button -->
                                             <Button HorizontalAlignment="Right" VerticalAlignment="Center" 
                                                     Command="{Binding ToggleFavoriteCommand}"
-                                                    Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="2">
+                                                    Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="2"
+                                                    ToolTip="切换收藏">
                                                 <TextBlock Text="{Binding IsFavorite, Converter={StaticResource InverseBooleanConverter}, FallbackValue='☆'}" 
                                                            FontSize="15" Foreground="#F59E0B">
                                                     <TextBlock.Style>
@@ -351,11 +354,22 @@
                                                    Margin="0,6,0,2"
                                                    ToolTip="{Binding Name}" />
 
-                                        <!-- Category Tag & Launch Hint -->
-                                        <Grid Grid.Row="3">
-                                            <Border HorizontalAlignment="Center" Background="{DynamicResource BrushBorder}" CornerRadius="4" Padding="6,2">
-                                                <TextBlock Text="{Binding CategoryName}" FontSize="10" Foreground="{DynamicResource BrushTextSecondary}" />
+                                        <!-- Category Tag & Quick Launch Button -->
+                                        <Grid Grid.Row="3" Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0" HorizontalAlignment="Left" Background="{DynamicResource BrushBorder}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding CategoryName}" FontSize="10" Foreground="{DynamicResource BrushTextSecondary}" TextTrimming="CharacterEllipsis" />
                                             </Border>
+
+                                            <Button Grid.Column="1" Command="{Binding LaunchCommand}"
+                                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                    ToolTip="启动软件 (或双击卡片)" Padding="4,1" VerticalAlignment="Center">
+                                                <TextBlock Text="▶" FontSize="11" Foreground="{DynamicResource BrushAccent}" FontWeight="Bold" />
+                                            </Button>
                                         </Grid>
                                     </Grid>
                                 </Border>

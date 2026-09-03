@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private readonly ISettingsService _settingsService;
     private Point _dragStartPoint;
     private bool _isRealExit;
+    private System.Windows.Threading.DispatcherTimer? _statusRefreshTimer;
 
     public MainWindow(MainViewModel viewModel, ISettingsService settingsService)
     {
@@ -38,6 +39,20 @@ public partial class MainWindow : Window
         RestoreWindowBounds();
 
         await _viewModel.InitializeAsync();
+
+        // Setup low-overhead status refresh timer (every 5 seconds, only when active)
+        _statusRefreshTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(5)
+        };
+        _statusRefreshTimer.Tick += (s, ev) =>
+        {
+            if (IsVisible && WindowState != WindowState.Minimized)
+            {
+                _viewModel.RefreshRunningStates();
+            }
+        };
+        _statusRefreshTimer.Start();
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -142,6 +157,30 @@ public partial class MainWindow : Window
                 e.Handled = true;
             }
         }
+        else if (e.Key == Key.Escape)
+        {
+            if (!string.IsNullOrEmpty(TopSearchBox.Text))
+            {
+                TopSearchBox.Text = string.Empty;
+                e.Handled = true;
+            }
+        }
+        else if (e.Key == Key.Enter)
+        {
+            if (_viewModel.SelectedSoftware != null && !TopSearchBox.IsFocused)
+            {
+                _ = _viewModel.SelectedSoftware.LaunchAsync();
+                e.Handled = true;
+            }
+        }
+        else if (e.Key == Key.Delete)
+        {
+            if (_viewModel.SelectedSoftware != null && !TopSearchBox.IsFocused)
+            {
+                _viewModel.SelectedSoftware.Delete();
+                e.Handled = true;
+            }
+        }
         else if (e.Key == Key.F5)
         {
             _ = _viewModel.RefreshAsync();
@@ -182,9 +221,32 @@ public partial class MainWindow : Window
     }
     #endregion
 
-    #region Card Drag and Drop Reordering
+    #region Card Drag, Drop and Click Actions
+    private void Card_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement element && element.Tag is SoftwareCardViewModel card)
+        {
+            _viewModel.SelectedSoftware = card;
+        }
+    }
+
     private void Card_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (sender is FrameworkElement element && element.Tag is SoftwareCardViewModel card)
+        {
+            _viewModel.SelectedSoftware = card;
+
+            // Double click to launch immediately
+            if (e.ClickCount >= 2 && e.ChangedButton == MouseButton.Left)
+            {
+                if (card.LaunchCommand.CanExecute(null))
+                {
+                    card.LaunchCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
         _dragStartPoint = e.GetPosition(null);
     }
 

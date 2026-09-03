@@ -47,13 +47,16 @@ public partial class SettingsViewModel : ObservableObject
     private string _backupFrequency = "Weekly";
 
     [ObservableProperty]
+    private int _maxBackupCount = 5;
+
+    [ObservableProperty]
     private string _dataDirectory = string.Empty;
 
     [ObservableProperty]
     private bool _isPortableMode;
 
     [ObservableProperty]
-    private string _hotkeyStatus = "✓ 快捷键已注册生效";
+    private string _hotkeyStatus = "✓ 快捷键可用";
 
     public ObservableCollection<RootDirectory> RootDirectories { get; } = [];
     public ObservableCollection<string> ExistingBackups { get; } = [];
@@ -91,11 +94,24 @@ public partial class SettingsViewModel : ObservableObject
         CloseToTray = s.CloseToTray;
         GlobalHotkey = s.GlobalHotkey;
         BackupFrequency = s.BackupFrequency;
+        MaxBackupCount = s.MaxBackupCount;
         DataDirectory = _settingsService.GetDataDirectory();
         IsPortableMode = _settingsService.IsPortableMode;
 
         await RefreshRootsAsync();
         RefreshBackupsList();
+    }
+
+    partial void OnGlobalHotkeyChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            HotkeyStatus = "⚠ 快捷键不能为空";
+            return;
+        }
+
+        var available = _hotkeyService.TestHotkeyAvailable(value);
+        HotkeyStatus = available ? "✓ 快捷键可用" : "⚠ 快捷键格式无效或已被其他程序占用";
     }
 
     private async Task RefreshRootsAsync()
@@ -274,6 +290,16 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public async Task SaveAndCloseAsync()
     {
+        if (!string.IsNullOrWhiteSpace(GlobalHotkey))
+        {
+            var isAvailable = _hotkeyService.TestHotkeyAvailable(GlobalHotkey);
+            if (!isAvailable)
+            {
+                MessageBox.Show($"快捷键【{GlobalHotkey}】格式无效或已被其他系统程序占用，请修改后重试。", "快捷键冲突", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+        }
+
         var s = _settingsService.CurrentSettings;
         s.Theme = Theme;
         s.CardSize = CardSize;
@@ -283,6 +309,7 @@ public partial class SettingsViewModel : ObservableObject
         s.CloseToTray = CloseToTray;
         s.GlobalHotkey = GlobalHotkey;
         s.BackupFrequency = BackupFrequency;
+        s.MaxBackupCount = Math.Max(1, MaxBackupCount);
 
         await _settingsService.SaveSettingsAsync();
 

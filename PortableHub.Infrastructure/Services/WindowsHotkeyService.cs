@@ -6,6 +6,7 @@ namespace PortableHub.Infrastructure.Services;
 public class WindowsHotkeyService : IHotkeyService
 {
     private const int HOTKEY_ID = 9001;
+    private const int TEST_HOTKEY_ID = 9002;
     private const int WM_HOTKEY = 0x0312;
 
     private IntPtr _windowHandle = IntPtr.Zero;
@@ -58,6 +59,32 @@ public class WindowsHotkeyService : IHotkeyService
         {
             HotkeyPressed?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public bool TestHotkeyAvailable(string hotkeyString)
+    {
+        if (string.IsNullOrWhiteSpace(hotkeyString))
+            return false;
+
+        if (!ParseHotkey(hotkeyString, out var modifiers, out var vk))
+            return false;
+
+        // If it's already registered as our current hotkey, it is available
+        if (_isRegistered && string.Equals(_currentHotkey, hotkeyString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (_windowHandle != IntPtr.Zero)
+        {
+            var success = RegisterHotKey(_windowHandle, TEST_HOTKEY_ID, modifiers, vk);
+            if (success)
+            {
+                UnregisterHotKey(_windowHandle, TEST_HOTKEY_ID);
+                return true;
+            }
+            return false;
+        }
+
+        return true;
     }
 
     public static bool ParseHotkey(string hotkeyString, out uint modifiers, out uint vk)

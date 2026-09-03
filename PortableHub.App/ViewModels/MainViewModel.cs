@@ -63,6 +63,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int _totalSoftwareCount;
 
+    [ObservableProperty]
+    private SoftwareCardViewModel? _selectedSoftware;
+
     public ObservableCollection<CategoryNavModel> NavItems { get; } = [];
     public ObservableCollection<CategoryNavModel> CustomCategories { get; } = [];
     public ObservableCollection<SoftwareCardViewModel> FilteredSoftware { get; } = [];
@@ -482,4 +485,12 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     public async Task RefreshAsync() => await RefreshDataAsync();
+
+    public void RefreshRunningStates()
+    {
+        foreach (var card in _allSoftwareCards)
+        {
+            card.RefreshState();
+        }
+    }
 }

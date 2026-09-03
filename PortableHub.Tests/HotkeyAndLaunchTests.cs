@@ -58,4 +58,19 @@ public class HotkeyAndLaunchTests
         Assert.NotNull(result.ErrorMessage);
         Assert.Contains("为空", result.ErrorMessage);
     }
+
+    [Theory]
+    [InlineData("Ctrl+Alt+Space", true)]
+    [InlineData("Ctrl+Shift+K", true)]
+    [InlineData("Alt+F1", true)]
+    [InlineData("", false)]
+    [InlineData("   ", false)]
+    [InlineData("Ctrl+NotAKey", false)]
+    [InlineData("JustText", false)]
+    public void TestHotkeyAvailable_ShouldValidateSyntaxAndFormat(string hotkey, bool expectedValid)
+    {
+        using var hotkeyService = new WindowsHotkeyService();
+        var available = hotkeyService.TestHotkeyAvailable(hotkey);
+        Assert.Equal(expectedValid, available);
+    }
 }

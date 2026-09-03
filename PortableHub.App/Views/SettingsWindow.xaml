@@ -27,20 +27,24 @@
                         <StackPanel>
                             <TextBlock Text="界面主题" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
-                                <RadioButton Content="跟随系统" IsChecked="{Binding Theme, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=True}"
-                                             GroupName="ThemeGroup" Command="{Binding DataContext.OnThemeChanged, RelativeSource={RelativeSource AncestorType=Window}}"
-                                             CommandParameter="System" />
-                                <RadioButton Content="浅色模式" GroupName="ThemeGroup" />
-                                <RadioButton Content="深色模式" GroupName="ThemeGroup" />
+                                <RadioButton Content="跟随系统" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=System}"
+                                             GroupName="ThemeGroup" />
+                                <RadioButton Content="浅色模式" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=Light}"
+                                             GroupName="ThemeGroup" Margin="16,0,0,0" />
+                                <RadioButton Content="深色模式" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=Dark}"
+                                             GroupName="ThemeGroup" Margin="16,0,0,0" />
                             </StackPanel>
                         </StackPanel>
 
-                        <StackPanel>
+                        <StackPanel Margin="0,16,0,0">
                             <TextBlock Text="软件卡片尺寸" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
-                                <RadioButton Content="小 (紧凑)" GroupName="CardSizeGroup" />
-                                <RadioButton Content="中 (推荐)" GroupName="CardSizeGroup" IsChecked="True" />
-                                <RadioButton Content="大 (醒目)" GroupName="CardSizeGroup" />
+                                <RadioButton Content="小 (紧凑)" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Small}"
+                                             GroupName="CardSizeGroup" />
+                                <RadioButton Content="中 (推荐)" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Medium}"
+                                             GroupName="CardSizeGroup" Margin="16,0,0,0" />
+                                <RadioButton Content="大 (醒目)" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Large}"
+                                             GroupName="CardSizeGroup" Margin="16,0,0,0" />
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -88,11 +92,34 @@
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel>
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBlock Text="自动备份设置" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8" />
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="备份周期:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource BrushTextSecondary}" />
+                                <ComboBox Grid.Column="1" SelectedValue="{Binding BackupFrequency, Mode=TwoWay}" SelectedValuePath="Tag" Height="32">
+                                    <ComboBoxItem Content="每周 (默认)" Tag="Weekly" />
+                                    <ComboBoxItem Content="每天" Tag="Daily" />
+                                    <ComboBoxItem Content="每月" Tag="Monthly" />
+                                    <ComboBoxItem Content="关闭" Tag="Off" />
+                                </ComboBox>
+
+                                <TextBlock Grid.Column="3" Text="最多保留份数:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource BrushTextSecondary}" />
+                                <TextBox Grid.Column="4" Text="{Binding MaxBackupCount, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,12,0,0">
                             <TextBlock Text="备份管理 (.phbackup)" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="立即创建备份" Style="{StaticResource PrimaryButton}" Command="{Binding CreateBackupCommand}" />
-                                <Button Content="从备份恢复..." Style="{StaticResource ModernButton}" Command="{Binding RestoreBackupCommand}" />
+                                <Button Content="从备份恢复..." Style="{StaticResource ModernButton}" Command="{Binding RestoreBackupCommand}" Margin="10,0,0,0" />
                             </StackPanel>
                         </StackPanel>
 

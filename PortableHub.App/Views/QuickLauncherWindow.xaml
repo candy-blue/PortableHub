@@ -4,7 +4,7 @@
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
         Title="快速启动" 
         Height="460" Width="680"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="Manual"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"

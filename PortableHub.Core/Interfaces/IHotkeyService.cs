@@ -7,4 +7,5 @@ public interface IHotkeyService : IDisposable
     void Unregister(IntPtr windowHandle);
     bool IsRegistered { get; }
     string CurrentHotkey { get; }
+    bool TestHotkeyAvailable(string hotkeyString);
 }

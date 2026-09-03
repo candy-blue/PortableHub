@@ -20,10 +20,42 @@ public partial class QuickLauncherWindow : Window
     public void Summon()
     {
         _viewModel.OnOpened();
+        PositionOnCurrentScreen();
         Show();
         Activate();
         SearchBox.Focus();
         SearchBox.SelectAll();
+    }
+
+    private void PositionOnCurrentScreen()
+    {
+        try
+        {
+            var cursorPos = System.Windows.Forms.Cursor.Position;
+            var screen = System.Windows.Forms.Screen.FromPoint(cursorPos);
+            var workingArea = screen.WorkingArea;
+
+            var source = PresentationSource.FromVisual(this);
+            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+            if (dpiX <= 0) dpiX = 1.0;
+            if (dpiY <= 0) dpiY = 1.0;
+
+            double screenLeftDip = workingArea.Left / dpiX;
+            double screenTopDip = workingArea.Top / dpiY;
+            double screenWidthDip = workingArea.Width / dpiX;
+            double screenHeightDip = workingArea.Height / dpiY;
+
+            Left = screenLeftDip + (screenWidthDip - Width) / 2.0;
+            Top = screenTopDip + (screenHeightDip - Height) / 2.0;
+        }
+        catch
+        {
+            // Fallback to center screen if any calculation issue
+            Left = (SystemParameters.PrimaryScreenWidth - Width) / 2.0;
+            Top = (SystemParameters.PrimaryScreenHeight - Height) / 2.0;
+        }
     }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
