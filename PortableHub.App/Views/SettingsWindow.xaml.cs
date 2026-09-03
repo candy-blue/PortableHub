@@ -1,4 +1,5 @@
 using System.Windows;
+using PortableHub.App.Services;
 using PortableHub.App.ViewModels;
 
 namespace PortableHub.App.Views;
@@ -9,7 +10,13 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         DataContext = viewModel;
-        Loaded += async (s, e) => await viewModel.InitializeAsync();
+        Loaded += async (s, e) =>
+        {
+            await viewModel.InitializeAsync();
+            var isDark = viewModel.Theme == "Dark" ||
+                         (viewModel.Theme == "System" && ThemeService.IsWindowsInDarkMode());
+            ThemeService.ApplyDwmAttributes(this, isDark);
+        };
         viewModel.RequestClose += (s, e) => Close();
     }
 }

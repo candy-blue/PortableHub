@@ -53,6 +53,26 @@ public partial class MainWindow : Window
             }
         };
         _statusRefreshTimer.Start();
+
+        // Apply Windows 11 DWM dark titlebar & rounded corners
+        var isDark = _settingsService.CurrentSettings.Theme == "Dark" ||
+                     (_settingsService.CurrentSettings.Theme == "System" && ThemeService.IsWindowsInDarkMode());
+        ThemeService.ApplyDwmAttributes(this, isDark);
+    }
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

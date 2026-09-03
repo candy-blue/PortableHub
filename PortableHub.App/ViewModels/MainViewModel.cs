@@ -19,6 +19,14 @@ public class CategoryNavModel : ObservableObject
     public bool IsSystem { get; set; }
     public int SortOrder { get; set; }
 
+    public string Glyph => NavMode switch
+    {
+        "All" => "\uE80F",
+        "Favorite" => "\uE735",
+        "Recent" => "\uEC92",
+        _ => "\uE8B7"
+    };
+
     private int _count;
     public int Count
     {
