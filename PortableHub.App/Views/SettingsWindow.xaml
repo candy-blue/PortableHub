@@ -283,7 +283,7 @@
                                     </Grid>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon ArrowDownload24, FontSize=20}" Content="立即创建备份" Command="{Binding CreateBackupCommand}" Height="36" />
+                                        <ui:Button Appearance="Primary" Foreground="#FFFFFF" FontWeight="SemiBold" Icon="{ui:SymbolIcon ArrowDownload24, FontSize=20}" Content="立即创建备份" Command="{Binding CreateBackupCommand}" Height="36" />
                                         <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon History24, FontSize=20}" Content="从备份文件恢复..." Command="{Binding RestoreBackupCommand}" Margin="8,0,0,0" Height="36" />
                                     </StackPanel>
                                 </StackPanel>
@@ -319,7 +319,7 @@
                                             <TextBlock Text="便携软件根目录" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                             <TextBlock Text="添加 Portable 软件主文件夹，用于多盘迁移自动重连与相对路径支持" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
-                                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Add24}" Content="添加根目录" Command="{Binding AddRootDirectoryCommand}" HorizontalAlignment="Right" Height="36" />
+                                        <ui:Button Appearance="Primary" Foreground="#FFFFFF" FontWeight="SemiBold" Icon="{ui:SymbolIcon Add24}" Content="添加根目录" Command="{Binding AddRootDirectoryCommand}" HorizontalAlignment="Right" Height="36" />
                                     </Grid>
 
                                     <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Height="220">
@@ -401,7 +401,7 @@
         <!-- Bottom Action Bar -->
         <Border Grid.Row="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="24,12">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Save24, FontSize=20}" Content="保存" Command="{Binding SaveAndCloseCommand}" Width="100" Height="36" FontSize="14" />
+                <ui:Button Appearance="Primary" Foreground="#FFFFFF" FontWeight="SemiBold" Icon="{ui:SymbolIcon Save24, FontSize=20}" Content="保存" Command="{Binding SaveAndCloseCommand}" Width="100" Height="36" FontSize="14" />
                 <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Margin="8,0,0,0" Width="80" Height="36" FontSize="14" />
             </StackPanel>
         </Border>

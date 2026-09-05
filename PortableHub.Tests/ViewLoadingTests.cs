@@ -380,6 +380,55 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
         }
     }
 
+    [Fact]
+    public void Verify_PrimaryButtons_HaveWhiteTextAndBrushes()
+    {
+        _fixture.Run(() =>
+        {
+            // Verify ThemeService provides pure white TextOnAccent in both light and dark modes
+            ThemeService.UpdateDynamicThemeColors(true);
+            Assert.True(Application.Current.Resources.Contains("TextOnAccentFillColorPrimaryBrush"));
+            var darkBrush = Application.Current.Resources["TextOnAccentFillColorPrimaryBrush"] as System.Windows.Media.SolidColorBrush;
+            Assert.NotNull(darkBrush);
+            Assert.Equal(System.Windows.Media.Colors.White, darkBrush.Color);
+
+            ThemeService.UpdateDynamicThemeColors(false);
+            Assert.True(Application.Current.Resources.Contains("TextOnAccentFillColorPrimaryBrush"));
+            var lightBrush = Application.Current.Resources["TextOnAccentFillColorPrimaryBrush"] as System.Windows.Media.SolidColorBrush;
+            Assert.NotNull(lightBrush);
+            Assert.Equal(System.Windows.Media.Colors.White, lightBrush.Color);
+        });
+
+        // Verify XAML views declare white foreground on Primary buttons
+        var appDir = GetAppDirectory();
+        var mainWindowXaml = File.ReadAllText(Path.Combine(appDir, "Views", "MainWindow.xaml"));
+        var categoryDialogXaml = File.ReadAllText(Path.Combine(appDir, "Views", "CategoryEditDialog.xaml"));
+        var softwareDialogXaml = File.ReadAllText(Path.Combine(appDir, "Views", "SoftwareEditDialog.xaml"));
+        var scannerDialogXaml = File.ReadAllText(Path.Combine(appDir, "Views", "ScannerDialog.xaml"));
+        var settingsXaml = File.ReadAllText(Path.Combine(appDir, "Views", "SettingsWindow.xaml"));
+
+        Assert.Contains("Foreground=\"#FFFFFF\"", mainWindowXaml);
+        Assert.Contains("Foreground=\"#FFFFFF\"", categoryDialogXaml);
+        Assert.Contains("Foreground=\"#FFFFFF\"", softwareDialogXaml);
+        Assert.Contains("Foreground=\"#FFFFFF\"", scannerDialogXaml);
+        Assert.Contains("Foreground=\"#FFFFFF\"", settingsXaml);
+    }
+
+    [Fact]
+    public void Verify_SidebarCollapse_StructureAndNoScrollbar()
+    {
+        var appDir = GetAppDirectory();
+        var mainWindowXaml = File.ReadAllText(Path.Combine(appDir, "Views", "MainWindow.xaml"));
+
+        // Verify ScrollViewer hides scrollbar when collapsed
+        Assert.Contains("DataTrigger Binding=\"{Binding IsSidebarCollapsed}\" Value=\"True\"", mainWindowXaml);
+        Assert.Contains("Setter Property=\"VerticalScrollBarVisibility\" Value=\"Hidden\"", mainWindowXaml);
+
+        // Verify centered 40px icon columns for sidebar items
+        Assert.Contains("<ColumnDefinition Width=\"40\" />", mainWindowXaml);
+        Assert.Contains("HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\"", mainWindowXaml);
+    }
+
     private class FakeHotkeyService : IHotkeyService
     {
         public event EventHandler? HotkeyPressed { add {} remove {} }

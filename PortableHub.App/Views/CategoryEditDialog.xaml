@@ -169,7 +169,7 @@
         <Border Grid.Row="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="20,12">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Width="80" Height="36" Margin="0,0,8,0" />
-                <ui:Button Appearance="Primary" Content="保存" Command="{Binding SaveCommand}" Width="80" Height="36" />
+                <ui:Button Appearance="Primary" Foreground="#FFFFFF" FontWeight="SemiBold" Content="保存" Command="{Binding SaveCommand}" Width="80" Height="36" />
             </StackPanel>
         </Border>
     </Grid>

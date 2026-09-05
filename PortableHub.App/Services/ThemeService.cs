@@ -97,6 +97,10 @@ public class ThemeService
         var favColor = System.Windows.Media.Color.FromRgb(0xF5, 0x9E, 0x0B);
         res["AppFavorite"] = favColor;
         res["BrushFavorite"] = new System.Windows.Media.SolidColorBrush(favColor);
+
+        // Ensure text and icons on primary accent buttons are always pure crisp white in both light and dark modes
+        res["TextOnAccentFillColorPrimaryBrush"] = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White);
+        res["TextOnAccentFillColorSecondaryBrush"] = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0xEE, 0xFF, 0xFF, 0xFF));
     }
 
     public static bool IsWindowsInDarkMode()

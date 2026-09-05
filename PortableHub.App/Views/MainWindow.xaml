@@ -114,18 +114,32 @@
                     </Grid.RowDefinitions>
 
                     <!-- Sidebar Header with Collapse Toggle Button (Design Doc Section 14) -->
-                    <Grid Grid.Row="0" Margin="4,0,4,8">
-                        <TextBlock Text="导航" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="6,0,0,0"
+                    <Grid Grid.Row="0" Margin="0,0,0,8" Height="40">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="导航" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="10,0,0,0"
                                    Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                        <ui:Button Appearance="Transparent" Command="{Binding ToggleSidebarCommand}" 
-                                   Width="32" Height="32" Padding="0" 
-                                   HorizontalAlignment="Right" ToolTip="展开/折叠导航栏 (Ctrl+B)">
-                            <ui:SymbolIcon Symbol="Navigation24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ui:Button Grid.Column="1" Appearance="Transparent" Command="{Binding ToggleSidebarCommand}" 
+                                   Width="40" Height="40" Padding="0" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="展开/折叠导航栏 (Ctrl+B)">
+                            <ui:SymbolIcon Symbol="Navigation24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </ui:Button>
                     </Grid>
 
                     <!-- Nav Items & Custom Categories -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                        <ScrollViewer.Style>
+                            <Style TargetType="ScrollViewer">
+                                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSidebarCollapsed}" Value="True">
+                                        <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollViewer.Style>
                         <StackPanel>
                             <!-- Primary Nav (首页, 全部软件, 收藏, 最近使用) -->
                             <ListBox ItemsSource="{Binding NavItems}" 
@@ -141,8 +155,8 @@
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListBoxItem">
                                                     <Grid Height="40">
-                                                        <Border x:Name="NavBorder" CornerRadius="6" Background="Transparent" Padding="10,0" Cursor="Hand">
-                                                            <ContentPresenter VerticalAlignment="Center" />
+                                                        <Border x:Name="NavBorder" CornerRadius="6" Background="Transparent" Cursor="Hand">
+                                                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" />
                                                         </Border>
                                                         <Border x:Name="SelectionPill" Width="3" Height="18" CornerRadius="1.5"
                                                                 Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
@@ -163,16 +177,16 @@
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="2,0">
+                                        <Grid Height="40">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="24" />
+                                                <ColumnDefinition Width="40" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                            <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
                                                        Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center"
+                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0"
                                                     Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding Count}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             </Border>
@@ -181,10 +195,10 @@
                                 </ListBox.ItemTemplate>
                             </ListBox>
 
-                            <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,10" Height="1" />
+                            <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,8" Height="1" />
 
                             <!-- Category Header with Add Button -->
-                            <Grid Margin="6,0,6,6" Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <Grid Margin="10,0,6,6" Height="28" Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                 <TextBlock Text="分类" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                                 <ui:Button Appearance="Transparent" Command="{Binding AddCategoryCommand}" 
                                            Icon="{ui:SymbolIcon Add24, FontSize=16}" Width="24" Height="24" Padding="0" 
@@ -209,8 +223,8 @@
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListBoxItem">
                                                     <Grid Height="40">
-                                                        <Border x:Name="CatBorder" CornerRadius="6" Background="Transparent" Padding="10,0" Cursor="Hand">
-                                                            <ContentPresenter VerticalAlignment="Center" />
+                                                        <Border x:Name="CatBorder" CornerRadius="6" Background="Transparent" Cursor="Hand">
+                                                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" />
                                                         </Border>
                                                         <Border x:Name="CatPill" Width="3" Height="18" CornerRadius="1.5"
                                                                 Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
@@ -231,7 +245,7 @@
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="2,0" Background="Transparent"
+                                        <Grid Height="40" Background="Transparent"
                                               Tag="{Binding}"
                                               PreviewMouseLeftButtonDown="CategoryItem_PreviewMouseLeftButtonDown"
                                               PreviewMouseMove="CategoryItem_PreviewMouseMove"
@@ -239,7 +253,7 @@
                                               Drop="CategoryItem_Drop"
                                               AllowDrop="True">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="40" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
@@ -252,12 +266,12 @@
 
                                             <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="20" 
                                                            Foreground="{Binding Color, Converter={StaticResource ColorHexToBrushConverter}}" 
-                                                           Margin="0,0,8,0" VerticalAlignment="Center" />
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
                                                        Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
-                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center"
+                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0"
                                                     Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding Count}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             </Border>
@@ -273,35 +287,47 @@
                         <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
                         
                         <ui:Button Appearance="Transparent" Command="{Binding AddSoftwareCommand}" 
-                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" 
-                                   Height="40" Padding="10,0" Margin="0,1" Cursor="Hand" ToolTip="添加便携软件 (Ctrl+N)">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:SymbolIcon Symbol="Add24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                <TextBlock Text="添加软件" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
+                                   Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="添加便携软件 (Ctrl+N)">
+                            <Grid Height="40">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Grid.Column="0" Symbol="Add24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="添加软件" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
                                            Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                            </StackPanel>
+                            </Grid>
                         </ui:Button>
 
                         <ui:Button Appearance="Transparent" Command="{Binding OpenScannerCommand}" 
-                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" 
-                                   Height="40" Padding="10,0" Margin="0,1" Cursor="Hand" ToolTip="扫描目录发现便携软件">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:SymbolIcon Symbol="Search24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                <TextBlock Text="扫描目录" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
+                                   Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="扫描目录发现便携软件">
+                            <Grid Height="40">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Grid.Column="0" Symbol="Search24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="扫描目录" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
                                            Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                            </StackPanel>
+                            </Grid>
                         </ui:Button>
 
                         <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
 
                         <ui:Button Appearance="Transparent" Command="{Binding OpenSettingsCommand}" 
-                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" 
-                                   Height="40" Padding="10,0" Margin="0,1" Cursor="Hand" ToolTip="系统设置 (Ctrl+,)">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:SymbolIcon Symbol="Settings24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                <TextBlock Text="系统设置" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
+                                   Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="系统设置 (Ctrl+,)">
+                            <Grid Height="40">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Grid.Column="0" Symbol="Settings24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="系统设置" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
                                            Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                            </StackPanel>
+                            </Grid>
                         </ui:Button>
                     </StackPanel>
                 </Grid>
@@ -396,10 +422,10 @@
                             </Border>
 
                             <!-- Primary Add Button -->
-                            <ui:Button Appearance="Primary" Command="{Binding AddSoftwareCommand}" Height="36" Padding="12,0" VerticalAlignment="Center" ToolTip="添加便携软件 (Ctrl+N)">
+                            <ui:Button Appearance="Primary" Foreground="#FFFFFF" FontWeight="SemiBold" Command="{Binding AddSoftwareCommand}" Height="36" Padding="14,0" VerticalAlignment="Center" ToolTip="添加便携软件 (Ctrl+N)">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <ui:SymbolIcon Symbol="Add24" FontSize="20" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                    <TextBlock Text="添加" VerticalAlignment="Center" FontSize="14" />
+                                    <ui:SymbolIcon Symbol="Add24" FontSize="20" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                    <TextBlock Text="添加" Foreground="#FFFFFF" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="14" />
                                 </StackPanel>
                             </ui:Button>
                         </StackPanel>
@@ -415,7 +441,7 @@
                     <TextBlock Text="还没有软件" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                     <TextBlock Text="将 Portable 软件拖到这里，或点击下方按钮添加" 
                                FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,8,0,18" />
-                    <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Add24, FontSize=20}" Content="添加软件" Command="{Binding AddSoftwareCommand}" HorizontalAlignment="Center" Height="36" Padding="16,0" FontSize="14" />
+                    <ui:Button Appearance="Primary" Foreground="#FFFFFF" FontWeight="SemiBold" Icon="{ui:SymbolIcon Add24, FontSize=20}" Content="添加软件" Command="{Binding AddSoftwareCommand}" HorizontalAlignment="Center" Height="36" Padding="16,0" FontSize="14" />
                 </StackPanel>
 
                 <!-- Software Content Area (Grid Mode & List Mode) -->
