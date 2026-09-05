@@ -5,15 +5,27 @@ namespace PortableHub.App.Services;
 public class SingleInstanceManager : IDisposable
 {
     private const string MutexName = "PortableHub_SingleInstance_Mutex";
-    public const int WM_SHOWME = 0x8001;
+    public static readonly int WM_SHOWME = RegisterWindowMessage("WM_PORTABLEHUB_SHOWME");
 
     private Mutex? _mutex;
     private bool _hasHandle;
 
     public bool IsFirstInstance()
     {
-        _mutex = new Mutex(true, MutexName, out _hasHandle);
-        return _hasHandle;
+        try
+        {
+            _mutex = new Mutex(true, MutexName, out _hasHandle);
+            return _hasHandle;
+        }
+        catch (AbandonedMutexException)
+        {
+            _hasHandle = true;
+            return true;
+        }
+        catch
+        {
+            return true;
+        }
     }
 
     public static void NotifyExistingInstance()
@@ -39,6 +51,9 @@ public class SingleInstanceManager : IDisposable
     }
 
     private const int HWND_BROADCAST = 0xffff;
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern int RegisterWindowMessage(string lpString);
 
     [DllImport("user32.dll")]
     private static extern bool PostMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);

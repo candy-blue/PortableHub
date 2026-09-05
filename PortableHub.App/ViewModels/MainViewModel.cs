@@ -27,6 +27,26 @@ public class CategoryNavModel : ObservableObject
         _ => "\uE8B7"
     };
 
+    public Wpf.Ui.Controls.SymbolRegular Symbol
+    {
+        get
+        {
+            if (NavMode == "All") return Wpf.Ui.Controls.SymbolRegular.Home24;
+            if (NavMode == "Favorite") return Wpf.Ui.Controls.SymbolRegular.Star24;
+            if (NavMode == "Recent") return Wpf.Ui.Controls.SymbolRegular.History24;
+
+            if (!string.IsNullOrWhiteSpace(Icon))
+            {
+                if (Enum.TryParse<Wpf.Ui.Controls.SymbolRegular>(Icon, true, out var exact))
+                    return exact;
+                if (Enum.TryParse<Wpf.Ui.Controls.SymbolRegular>(Icon + "24", true, out var with24))
+                    return with24;
+            }
+
+            return Wpf.Ui.Controls.SymbolRegular.Tag24;
+        }
+    }
+
     private int _count;
     public int Count
     {
@@ -278,22 +298,37 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public async Task AddSoftwareFromPathAsync(string exePath)
+    public async Task AddSoftwareFromPathAsync(string exePath, int? targetCategoryId = null)
     {
-        if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
+        var normalized = PortableHub.Infrastructure.Windows.ShortcutHelper.NormalizeDroppedPath(exePath);
+        if (string.IsNullOrWhiteSpace(normalized) || !File.Exists(normalized))
             return;
 
         var categories = await _categoryRepository.GetAllAsync();
-        var candidate = _scannerService.AnalyzeExe(exePath, categories);
+        var candidate = _scannerService.AnalyzeExe(normalized, categories);
+
+        int assignedCategoryId;
+        if (targetCategoryId.HasValue && targetCategoryId.Value > 0)
+        {
+            assignedCategoryId = targetCategoryId.Value;
+        }
+        else if (SelectedNav?.NavMode == "Category" && SelectedNav.Id.HasValue)
+        {
+            assignedCategoryId = SelectedNav.Id.Value;
+        }
+        else
+        {
+            assignedCategoryId = candidate.CategoryId;
+        }
 
         // Extract icon asynchronously
-        var iconPath = await _iconService.ExtractAndCacheIconAsync(exePath);
+        var iconPath = await _iconService.ExtractAndCacheIconAsync(normalized);
 
         var software = new Software
         {
             Name = candidate.DeducedName,
-            ExePath = exePath,
-            CategoryId = candidate.CategoryId,
+            ExePath = normalized,
+            CategoryId = assignedCategoryId,
             Description = candidate.FileDescription,
             IconPath = iconPath,
             SortOrder = _allSoftwareCards.Count + 1
@@ -465,6 +500,42 @@ public partial class MainViewModel : ObservableObject
             {
                 var pairs = FilteredSoftware.Select((c, idx) => (c.Id, idx + 1)).ToList();
                 await _softwareRepository.UpdateSortOrdersAsync(pairs);
+            }
+        }, TaskScheduler.Default);
+    }
+
+    private CancellationTokenSource? _reorderCategoryDebounceCts;
+
+    public void ReorderCategories(int sourceIndex, int targetIndex)
+    {
+        if (sourceIndex < 0 || sourceIndex >= CustomCategories.Count ||
+            targetIndex < 0 || targetIndex >= CustomCategories.Count ||
+            sourceIndex == targetIndex)
+        {
+            return;
+        }
+
+        var item = CustomCategories[sourceIndex];
+        CustomCategories.Move(sourceIndex, targetIndex);
+
+        for (int i = 0; i < CustomCategories.Count; i++)
+        {
+            CustomCategories[i].SortOrder = i + 1;
+        }
+
+        _reorderCategoryDebounceCts?.Cancel();
+        _reorderCategoryDebounceCts = new CancellationTokenSource();
+        var token = _reorderCategoryDebounceCts.Token;
+
+        Task.Delay(500, token).ContinueWith(async t =>
+        {
+            if (!t.IsCanceled)
+            {
+                var pairs = CustomCategories
+                    .Where(c => c.Id.HasValue)
+                    .Select((c, idx) => (c.Id!.Value, idx + 1))
+                    .ToList();
+                await _categoryRepository.UpdateSortOrdersAsync(pairs);
             }
         }, TaskScheduler.Default);
     }

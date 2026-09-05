@@ -17,14 +17,42 @@ public partial class QuickLauncherWindow : Window
         _viewModel.RequestClose += (s, e) => Hide();
     }
 
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool BringWindowToTop(IntPtr hWnd);
+
+    private bool _isSummoning;
+
     public void Summon()
     {
+        if (IsVisible)
+        {
+            Hide();
+            return;
+        }
+
+        _isSummoning = true;
         _viewModel.OnOpened();
         PositionOnCurrentScreen();
+
         Show();
+        Topmost = true;
         Activate();
+
+        var helper = new System.Windows.Interop.WindowInteropHelper(this);
+        helper.EnsureHandle();
+        SetForegroundWindow(helper.Handle);
+        BringWindowToTop(helper.Handle);
+
         SearchBox.Focus();
         SearchBox.SelectAll();
+
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
+        {
+            _isSummoning = false;
+        });
     }
 
     private void PositionOnCurrentScreen()
@@ -100,6 +128,9 @@ public partial class QuickLauncherWindow : Window
 
     private void Window_Deactivated(object? sender, EventArgs e)
     {
-        Hide();
+        if (!_isSummoning && IsVisible)
+        {
+            Hide();
+        }
     }
 }

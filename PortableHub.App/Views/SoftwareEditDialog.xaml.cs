@@ -4,7 +4,7 @@ using PortableHub.App.ViewModels;
 
 namespace PortableHub.App.Views;
 
-public partial class SoftwareEditDialog : Window
+public partial class SoftwareEditDialog : Wpf.Ui.Controls.FluentWindow
 {
     public SoftwareEditDialog(SoftwareEditViewModel viewModel)
     {
@@ -13,7 +13,7 @@ public partial class SoftwareEditDialog : Window
         Loaded += async (s, e) =>
         {
             await viewModel.InitializeAsync();
-            ThemeService.ApplyDwmAttributes(this, ThemeService.IsWindowsInDarkMode());
+            Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
         };
         viewModel.RequestClose += (s, success) =>
         {

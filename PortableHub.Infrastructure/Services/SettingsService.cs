@@ -96,6 +96,11 @@ public class SettingsService : ISettingsService
                 if (loaded != null)
                 {
                     _settings = loaded;
+                    if (string.IsNullOrWhiteSpace(_settings.GlobalHotkey) ||
+                        !WindowsHotkeyService.ParseHotkey(_settings.GlobalHotkey, out _, out _))
+                    {
+                        _settings.GlobalHotkey = "Ctrl+Alt+Space";
+                    }
                 }
             }
             catch

@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using PortableHub.App.Services;
 using PortableHub.Core.Interfaces;
 using PortableHub.Core.Models;
+using PortableHub.Infrastructure.Services;
 
 namespace PortableHub.App.ViewModels;
 
@@ -110,8 +111,14 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
+        if (WindowsHotkeyService.IsMouseKey(value))
+        {
+            HotkeyStatus = "ℹ 包含鼠标按键（保存时将提示确认，已解除强制阻断）";
+            return;
+        }
+
         var available = _hotkeyService.TestHotkeyAvailable(value);
-        HotkeyStatus = available ? "✓ 快捷键可用" : "⚠ 快捷键格式无效或已被其他程序占用";
+        HotkeyStatus = available ? "✓ 快捷键可用" : "⚠ 可能已被其他软件占用（保存时将提示确认，已解除强制阻断）";
     }
 
     private async Task RefreshRootsAsync()
@@ -292,11 +299,20 @@ public partial class SettingsViewModel : ObservableObject
     {
         if (!string.IsNullOrWhiteSpace(GlobalHotkey))
         {
+            var isMouse = WindowsHotkeyService.IsMouseKey(GlobalHotkey);
             var isAvailable = _hotkeyService.TestHotkeyAvailable(GlobalHotkey);
-            if (!isAvailable)
+
+            if (isMouse || !isAvailable)
             {
-                MessageBox.Show($"快捷键【{GlobalHotkey}】格式无效或已被其他系统程序占用，请修改后重试。", "快捷键冲突", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                string promptMsg = isMouse
+                    ? $"检测到快捷键【{GlobalHotkey}】包含鼠标按键。\n受 Windows 原生热键机制限制，鼠标按键可能无法全局拦截或与系统行为冲突。\n\n是否仍然确认保存并使用此快捷键？"
+                    : $"检测到快捷键【{GlobalHotkey}】可能已被系统或其他软件占用，或为特殊按键组合。\n\n是否仍然确认保存并使用此快捷键？";
+
+                var confirm = MessageBox.Show(promptMsg, "快捷键确认提示", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (confirm != MessageBoxResult.Yes)
+                {
+                    return; // 用户取消保存，保留在设置界面方便微调
+                }
             }
         }
 
@@ -313,9 +329,21 @@ public partial class SettingsViewModel : ObservableObject
 
         await _settingsService.SaveSettingsAsync();
 
+        // Apply updated global hotkey dynamically in real-time
+        if (!string.IsNullOrWhiteSpace(GlobalHotkey))
+        {
+            _hotkeyService.Register(GlobalHotkey, IntPtr.Zero);
+        }
+
         // Apply startup setting
         _startupService.SetAutoStart(StartWithWindows, StartMinimizedToTray);
 
+        RequestClose?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    public void Cancel()
+    {
         RequestClose?.Invoke(this, EventArgs.Empty);
     }
 }

@@ -117,4 +117,17 @@ public class PerformanceAndEdgeCaseTests
         Assert.Contains(allAfterRestore, s => s.Name == "Original App Before Backup");
         Assert.DoesNotContain(allAfterRestore, s => s.Name == "App Added After Backup");
     }
+
+    [Fact]
+    public async Task SettingsService_ShouldSanitizeDangerousGlobalHotkey_OnLoad()
+    {
+        using var env = new TestEnvironment();
+        var settingsFile = Path.Combine(env.TempDirectory, "settings.json");
+        await File.WriteAllTextAsync(settingsFile, "{\"GlobalHotkey\":\"ctrl+a\"}");
+
+        var settingsService = new SettingsService(env.TempDirectory);
+        await settingsService.LoadSettingsAsync();
+
+        Assert.Equal("Ctrl+Alt+Space", settingsService.CurrentSettings.GlobalHotkey);
+    }
 }

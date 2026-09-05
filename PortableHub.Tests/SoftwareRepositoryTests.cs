@@ -12,7 +12,7 @@ public class SoftwareRepositoryTests
         await env.InitializeAsync();
 
         var categories = await env.CategoryRepository.GetAllAsync();
-        var devCategory = categories.First(c => c.Name == "开发工具");
+        var category = categories.First(c => c.Name == "其他");
 
         var testSoftware = new Software
         {
@@ -20,7 +20,7 @@ public class SoftwareRepositoryTests
             ExePath = @"D:\我的便携软件\VS Code (x64)\Code.exe",
             Arguments = "--portable --verbose",
             WorkingDirectory = @"D:\我的便携软件\VS Code (x64)",
-            CategoryId = devCategory.Id,
+            CategoryId = category.Id,
             IsFavorite = true,
             SingleInstance = true,
             Tags = "#开发 #编辑器 #常用",
@@ -35,7 +35,7 @@ public class SoftwareRepositoryTests
         Assert.Equal("代码编辑器 (VS Code 便携版) [测试]", retrieved.Name);
         Assert.Equal(@"D:\我的便携软件\VS Code (x64)\Code.exe", retrieved.ExePath);
         Assert.Equal("--portable --verbose", retrieved.Arguments);
-        Assert.Equal(devCategory.Name, retrieved.CategoryName);
+        Assert.Equal(category.Name, retrieved.CategoryName);
         Assert.True(retrieved.IsFavorite);
         Assert.True(retrieved.SingleInstance);
     }

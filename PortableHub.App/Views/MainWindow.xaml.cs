@@ -10,7 +10,7 @@ using PortableHub.Core.Interfaces;
 
 namespace PortableHub.App.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly MainViewModel _viewModel;
     private readonly ISettingsService _settingsService;
@@ -28,13 +28,16 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
     }
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    protected override void OnSourceInitialized(EventArgs e)
     {
-        // Hook Win32 window message for single instance activation
+        base.OnSourceInitialized(e);
         var handle = new WindowInteropHelper(this).Handle;
         var source = HwndSource.FromHwnd(handle);
         source?.AddHook(WndProc);
+    }
 
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
         // Restore window dimensions and position
         RestoreWindowBounds();
 
@@ -54,25 +57,8 @@ public partial class MainWindow : Window
         };
         _statusRefreshTimer.Start();
 
-        // Apply Windows 11 DWM dark titlebar & rounded corners
-        var isDark = _settingsService.CurrentSettings.Theme == "Dark" ||
-                     (_settingsService.CurrentSettings.Theme == "System" && ThemeService.IsWindowsInDarkMode());
-        ThemeService.ApplyDwmAttributes(this, isDark);
-    }
-
-    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState.Minimized;
-    }
-
-    private void MaximizeButton_Click(object sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-    }
-
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
-    {
-        Close();
+        // Watch system theme changes for native Mica backdrop
+        Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -85,6 +71,9 @@ public partial class MainWindow : Window
         return IntPtr.Zero;
     }
 
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
     public void ShowAndActivate()
     {
         if (WindowState == WindowState.Minimized)
@@ -94,6 +83,18 @@ public partial class MainWindow : Window
         Show();
         Activate();
         Focus();
+
+        var helper = new WindowInteropHelper(this);
+        helper.EnsureHandle();
+        SetForegroundWindow(helper.Handle);
+    }
+
+    private void Window_StateChanged(object? sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Minimized && _settingsService.CurrentSettings.MinimizeToTray)
+        {
+            Hide();
+        }
     }
 
     public void ForceExit()
@@ -154,6 +155,10 @@ public partial class MainWindow : Window
             e.Cancel = true;
             Hide();
         }
+        else
+        {
+            System.Windows.Application.Current.Shutdown();
+        }
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -208,22 +213,40 @@ public partial class MainWindow : Window
         }
     }
 
-    #region Drag & Drop from Windows Explorer
-    private void Window_DragOver(object sender, DragEventArgs e)
+    #region Drag & Drop from Windows Explorer & Overlay
+    private void Window_PreviewDragOver(object sender, DragEventArgs e)
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
             e.Effects = DragDropEffects.Copy;
+            DropOverlay.Visibility = Visibility.Visible;
             e.Handled = true;
+        }
+        else if (e.Data.GetDataPresent(typeof(SoftwareCardViewModel)) || e.Data.GetDataPresent(typeof(CategoryNavModel)))
+        {
+            DropOverlay.Visibility = Visibility.Collapsed;
+            e.Effects = DragDropEffects.Move;
         }
         else
         {
+            DropOverlay.Visibility = Visibility.Collapsed;
             e.Effects = DragDropEffects.None;
+        }
+    }
+
+    private void Window_DragLeave(object sender, DragEventArgs e)
+    {
+        var pos = e.GetPosition(this);
+        if (pos.X <= 0 || pos.Y <= 0 || pos.X >= ActualWidth || pos.Y >= ActualHeight)
+        {
+            DropOverlay.Visibility = Visibility.Collapsed;
         }
     }
 
     private async void Window_Drop(object sender, DragEventArgs e)
     {
+        DropOverlay.Visibility = Visibility.Collapsed;
+
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
             var files = e.Data.GetData(DataFormats.FileDrop) as string[];
@@ -231,12 +254,10 @@ public partial class MainWindow : Window
             {
                 foreach (var file in files)
                 {
-                    if (Path.GetExtension(file).Equals(".exe", StringComparison.OrdinalIgnoreCase))
-                    {
-                        await _viewModel.AddSoftwareFromPathAsync(file);
-                    }
+                    await _viewModel.AddSoftwareFromPathAsync(file);
                 }
             }
+            e.Handled = true;
         }
     }
     #endregion
@@ -285,8 +306,25 @@ public partial class MainWindow : Window
         }
     }
 
-    private void Card_Drop(object sender, DragEventArgs e)
+    private async void Card_Drop(object sender, DragEventArgs e)
     {
+        // 1. Support dropping files from explorer directly on cards
+        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            DropOverlay.Visibility = Visibility.Collapsed;
+            var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (files != null)
+            {
+                foreach (var file in files)
+                {
+                    await _viewModel.AddSoftwareFromPathAsync(file);
+                }
+            }
+            e.Handled = true;
+            return;
+        }
+
+        // 2. Support reordering software cards
         if (e.Data.GetData(typeof(SoftwareCardViewModel)) is SoftwareCardViewModel sourceCard &&
             sender is FrameworkElement targetElement &&
             targetElement.Tag is SoftwareCardViewModel targetCard &&
@@ -298,29 +336,133 @@ public partial class MainWindow : Window
             {
                 _viewModel.ReorderCards(sourceIndex, targetIndex);
             }
+            e.Handled = true;
         }
     }
     #endregion
 
-    #region Category Drag and Drop
-    private void Category_PreviewDragOver(object sender, DragEventArgs e)
+    #region Category Drag, Drop and Reorder
+    private Point _categoryDragStartPoint;
+
+    private void CategoryItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.Data.GetDataPresent(typeof(SoftwareCardViewModel)))
+        _categoryDragStartPoint = e.GetPosition(null);
+    }
+
+    private void CategoryItem_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && sender is FrameworkElement element && element.Tag is CategoryNavModel catItem)
+        {
+            var currentPos = e.GetPosition(null);
+            var diff = _categoryDragStartPoint - currentPos;
+
+            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                DragDrop.DoDragDrop(element, catItem, DragDropEffects.Move);
+            }
+        }
+    }
+
+    private void CategoryItem_DragOver(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(typeof(CategoryNavModel)) || e.Data.GetDataPresent(typeof(SoftwareCardViewModel)))
         {
             e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+        }
+        else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+    }
+
+    private async void CategoryItem_Drop(object sender, DragEventArgs e)
+    {
+        DropOverlay.Visibility = Visibility.Collapsed;
+
+        if (sender is not FrameworkElement targetElement || targetElement.Tag is not CategoryNavModel targetCat)
+            return;
+
+        // 1. Reorder categories: dragged category over another category
+        if (e.Data.GetData(typeof(CategoryNavModel)) is CategoryNavModel sourceCat && sourceCat.Id.HasValue && targetCat.Id.HasValue)
+        {
+            if (sourceCat.Id != targetCat.Id)
+            {
+                int sourceIndex = _viewModel.CustomCategories.IndexOf(sourceCat);
+                int targetIndex = _viewModel.CustomCategories.IndexOf(targetCat);
+                if (sourceIndex >= 0 && targetIndex >= 0)
+                {
+                    _viewModel.ReorderCategories(sourceIndex, targetIndex);
+                }
+            }
+            e.Handled = true;
+            return;
+        }
+
+        // 2. Move existing software card into this category
+        if (e.Data.GetData(typeof(SoftwareCardViewModel)) is SoftwareCardViewModel sourceCard && targetCat.Id.HasValue)
+        {
+            await _viewModel.MoveSoftwareToCategoryAsync(sourceCard, targetCat.Id.Value);
+            e.Handled = true;
+            return;
+        }
+
+        // 3. Drop files from Explorer directly into this category
+        if (e.Data.GetDataPresent(DataFormats.FileDrop) && targetCat.Id.HasValue)
+        {
+            var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (files != null)
+            {
+                foreach (var file in files)
+                {
+                    await _viewModel.AddSoftwareFromPathAsync(file, targetCat.Id.Value);
+                }
+            }
+            e.Handled = true;
+        }
+    }
+
+    private void Category_PreviewDragOver(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(typeof(SoftwareCardViewModel)) || e.Data.GetDataPresent(typeof(CategoryNavModel)))
+        {
+            e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+        }
+        else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            e.Effects = DragDropEffects.Copy;
             e.Handled = true;
         }
     }
 
     private async void Category_Drop(object sender, DragEventArgs e)
     {
-        if (e.Data.GetData(typeof(SoftwareCardViewModel)) is SoftwareCardViewModel sourceCard)
+        DropOverlay.Visibility = Visibility.Collapsed;
+
+        var element = e.OriginalSource as FrameworkElement;
+        var catItem = (element?.DataContext as CategoryNavModel) ?? (element?.Tag as CategoryNavModel);
+
+        if (catItem != null && catItem.Id.HasValue && catItem.NavMode == "Category")
         {
-            var element = e.OriginalSource as FrameworkElement;
-            var catItem = element?.DataContext as CategoryNavModel;
-            if (catItem != null && catItem.Id.HasValue && catItem.NavMode == "Category")
+            if (e.Data.GetData(typeof(SoftwareCardViewModel)) is SoftwareCardViewModel sourceCard)
             {
                 await _viewModel.MoveSoftwareToCategoryAsync(sourceCard, catItem.Id.Value);
+                e.Handled = true;
+            }
+            else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+                if (files != null)
+                {
+                    foreach (var file in files)
+                    {
+                        await _viewModel.AddSoftwareFromPathAsync(file, catItem.Id.Value);
+                    }
+                }
+                e.Handled = true;
             }
         }
     }

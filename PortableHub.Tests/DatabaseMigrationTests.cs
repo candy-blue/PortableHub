@@ -15,15 +15,14 @@ public class DatabaseMigrationTests
         await conn.OpenAsync();
 
         // 1. Verify schema version
-        var version = await conn.ExecuteScalarAsync<int>("SELECT Version FROM SchemaVersion;");
-        Assert.Equal(1, version);
+        var version = await conn.ExecuteScalarAsync<int>("SELECT MAX(Version) FROM SchemaVersion;");
+        Assert.Equal(2, version);
 
-        // 2. Verify categories created
+        // 2. Verify categories created - only one default "其他" category
         var categories = await env.CategoryRepository.GetAllAsync();
-        Assert.True(categories.Count >= 9);
-        Assert.Contains(categories, c => c.Name == "开发工具");
-        Assert.Contains(categories, c => c.Name == "系统工具");
-        Assert.Contains(categories, c => c.Name == "其他");
+        Assert.Single(categories);
+        Assert.Equal("其他", categories[0].Name);
+        Assert.Equal("Apps24", categories[0].Icon);
 
         // 3. Verify WAL mode enabled
         var journalMode = await conn.ExecuteScalarAsync<string>("PRAGMA journal_mode;");

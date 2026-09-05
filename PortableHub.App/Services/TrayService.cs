@@ -32,6 +32,13 @@ public class TrayService : IDisposable
         // Create a default icon for tray
         _notifyIcon.Icon = CreateDefaultTrayIcon();
         _notifyIcon.DoubleClick += (s, e) => _onShowWindow?.Invoke();
+        _notifyIcon.MouseClick += (s, e) =>
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _onShowWindow?.Invoke();
+            }
+        };
 
         BuildContextMenu();
     }
