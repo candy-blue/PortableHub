@@ -42,6 +42,26 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _settingsService = settingsService;
         DataContext = viewModel;
 
+        // Ensure ListBox ItemsSources are attached for reliable selection sync
+        NavItemsListBox.ItemsSource = _viewModel.NavItems;
+        CategoriesListBox.ItemsSource = _viewModel.CustomCategories;
+
+        // Listen for sidebar collapse/expand animation and navigation selection exclusivity
+        _viewModel.PropertyChanged += (s, ev) =>
+        {
+            if (ev.PropertyName == nameof(MainViewModel.IsSidebarCollapsed))
+            {
+                AnimateSidebar(_viewModel.IsSidebarCollapsed);
+            }
+            else if (ev.PropertyName == nameof(MainViewModel.SelectedNav))
+            {
+                SyncNavSelection();
+            }
+        };
+
+        // Synchronize initial navigation selection
+        SyncNavSelection();
+
         Loaded += MainWindow_Loaded;
     }
 
@@ -60,15 +80,6 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         await _viewModel.InitializeAsync();
 
-        // Listen for sidebar collapse/expand animation
-        _viewModel.PropertyChanged += (s, ev) =>
-        {
-            if (ev.PropertyName == nameof(MainViewModel.IsSidebarCollapsed))
-            {
-                AnimateSidebar(_viewModel.IsSidebarCollapsed);
-            }
-        };
-
         // Setup low-overhead status refresh timer (every 5 seconds, only when active)
         _statusRefreshTimer = new System.Windows.Threading.DispatcherTimer
         {
@@ -85,6 +96,73 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         // Watch system theme changes for native Mica backdrop
         Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
+    }
+
+    private bool _isSyncingNav;
+
+    private void SyncNavSelection()
+    {
+        if (_isSyncingNav) return;
+        _isSyncingNav = true;
+        try
+        {
+            var selected = _viewModel.SelectedNav;
+            if (selected == null)
+            {
+                NavItemsListBox.SelectedItem = null;
+                CategoriesListBox.SelectedItem = null;
+            }
+            else if (_viewModel.NavItems.Contains(selected))
+            {
+                CategoriesListBox.SelectedItem = null;
+                NavItemsListBox.SelectedItem = selected;
+            }
+            else if (_viewModel.CustomCategories.Contains(selected))
+            {
+                NavItemsListBox.SelectedItem = null;
+                CategoriesListBox.SelectedItem = selected;
+            }
+        }
+        finally
+        {
+            _isSyncingNav = false;
+        }
+    }
+
+    private void NavItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isSyncingNav) return;
+        if (NavItemsListBox.SelectedItem is CategoryNavModel item)
+        {
+            _isSyncingNav = true;
+            try
+            {
+                CategoriesListBox.SelectedItem = null;
+                _viewModel.SelectedNav = item;
+            }
+            finally
+            {
+                _isSyncingNav = false;
+            }
+        }
+    }
+
+    private void CategoriesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isSyncingNav) return;
+        if (CategoriesListBox.SelectedItem is CategoryNavModel item)
+        {
+            _isSyncingNav = true;
+            try
+            {
+                NavItemsListBox.SelectedItem = null;
+                _viewModel.SelectedNav = item;
+            }
+            finally
+            {
+                _isSyncingNav = false;
+            }
+        }
     }
 
     private void AnimateSidebar(bool collapsed)

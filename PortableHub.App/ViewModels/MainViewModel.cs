@@ -55,6 +55,13 @@ public class CategoryNavModel : ObservableObject
         get => _count;
         set => SetProperty(ref _count, value);
     }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
 }
 
 public partial class MainViewModel : ObservableObject
@@ -148,9 +155,6 @@ public partial class MainViewModel : ObservableObject
         try
         {
             await RefreshDataAsync();
-
-            // Set default nav to 'Home' (or 'All' fallback)
-            SelectedNav = NavItems.FirstOrDefault(n => n.NavMode == "Home") ?? NavItems.FirstOrDefault(n => n.NavMode == "All");
         }
         finally
         {
@@ -163,8 +167,16 @@ public partial class MainViewModel : ObservableObject
         ApplyFilter();
     }
 
-    partial void OnSelectedNavChanged(CategoryNavModel? value)
+    partial void OnSelectedNavChanged(CategoryNavModel? oldValue, CategoryNavModel? newValue)
     {
+        if (oldValue != null)
+        {
+            oldValue.IsSelected = false;
+        }
+        if (newValue != null)
+        {
+            newValue.IsSelected = true;
+        }
         ApplyFilter();
     }
 
@@ -211,6 +223,10 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
+        // Preserve selection intent across refresh
+        var prevMode = SelectedNav?.NavMode;
+        var prevCatId = SelectedNav?.Id;
+
         // Build Nav Items (Home, All, Favorites, Recent) (Design Doc Section 12)
         NavItems.Clear();
         NavItems.Add(new CategoryNavModel { Name = "首页", Icon = "Home", NavMode = "Home", Color = "#3B82F6", Count = rawSoftware.Count });
@@ -256,6 +272,18 @@ public partial class MainViewModel : ObservableObject
 
         TotalSoftwareCount = _allSoftwareCards.Count;
         _searchService.IndexSoftware(rawSoftware);
+
+        // Restore or initialize SelectedNav
+        CategoryNavModel? targetNav = null;
+        if (prevMode == "Category" && prevCatId.HasValue)
+        {
+            targetNav = CustomCategories.FirstOrDefault(c => c.Id == prevCatId.Value);
+        }
+        else if (!string.IsNullOrEmpty(prevMode))
+        {
+            targetNav = NavItems.FirstOrDefault(n => n.NavMode == prevMode);
+        }
+        SelectedNav = targetNav ?? NavItems.FirstOrDefault(n => n.NavMode == "Home") ?? NavItems.FirstOrDefault();
 
         ApplyFilter();
     }

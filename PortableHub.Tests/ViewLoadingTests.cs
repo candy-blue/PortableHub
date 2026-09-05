@@ -70,6 +70,11 @@ public class StaTestFixture : IDisposable
         _dispatcher!.Invoke(action);
     }
 
+    public async Task RunAsync(Action action)
+    {
+        await _dispatcher!.InvokeAsync(action);
+    }
+
     public void Dispose()
     {
         _dispatcher?.InvokeShutdown();
@@ -451,17 +456,25 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
     }
 
     [Fact]
-    public void MainWindow_Sidebar_GeometryAndLayoutVerification()
+    public async Task MainWindow_Sidebar_GeometryAndLayoutVerification()
     {
-        _fixture.Run(() =>
-        {
-            using var env = new TestEnvironment();
-            var provider = CreateServiceProvider(env);
-            var vm = provider.GetRequiredService<MainViewModel>();
-            var settingsService = provider.GetRequiredService<ISettingsService>();
+        using var env = new TestEnvironment();
+        await env.InitializeAsync();
+        var provider = CreateServiceProvider(env);
+        var vm = provider.GetRequiredService<MainViewModel>();
+        var settingsService = provider.GetRequiredService<ISettingsService>();
 
+        // Initialize ViewModel directly
+        await vm.InitializeAsync();
+
+        await _fixture.RunAsync(() =>
+        {
             var window = new MainWindow(vm, settingsService);
             Assert.NotNull(window);
+
+            window.Measure(new Size(1200, 800));
+            window.Arrange(new Rect(0, 0, 1200, 800));
+            window.UpdateLayout();
 
             // Locate SidebarBorder
             var sidebar = window.FindName("SidebarBorder") as System.Windows.Controls.Border;
@@ -473,12 +486,52 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
             vm.ToggleSidebarCommand.Execute(null);
             Assert.True(vm.IsSidebarCollapsed);
 
-            // Locate CategoriesListBox and verify items
+            // Locate NavItemsListBox and CategoriesListBox
+            var navListBox = window.FindName("NavItemsListBox") as System.Windows.Controls.ListBox;
+            Assert.NotNull(navListBox);
             var catListBox = window.FindName("CategoriesListBox") as System.Windows.Controls.ListBox;
             Assert.NotNull(catListBox);
 
-            window.Close();
+            // Initially, vm.SelectedNav is Home (in navItems)
+            Assert.Equal(vm.NavItems[0], vm.SelectedNav);
+            Assert.True(vm.NavItems[0].IsSelected);
+            Assert.Equal(vm.NavItems[0], navListBox.SelectedItem);
+            Assert.Null(catListBox.SelectedItem);
+
+            // Now select a custom category via VM
+            if (vm.CustomCategories.Count > 0)
+            {
+                var targetCat = vm.CustomCategories[0];
+                vm.SelectedNav = targetCat;
+
+                // Assert mutual exclusivity and IsSelected synchronization
+                Assert.Equal(targetCat, vm.SelectedNav);
+                Assert.True(targetCat.IsSelected);
+                Assert.False(vm.NavItems[0].IsSelected);
+                Assert.Equal(targetCat, catListBox.SelectedItem);
+                Assert.Null(navListBox.SelectedItem);
+
+                // Now select back to a NavItem via navListBox
+                navListBox.SelectedItem = vm.NavItems[1]; // 全部软件
+                Assert.Equal(vm.NavItems[1], vm.SelectedNav);
+                Assert.True(vm.NavItems[1].IsSelected);
+                Assert.False(targetCat.IsSelected);
+                Assert.Equal(vm.NavItems[1], navListBox.SelectedItem);
+                Assert.Null(catListBox.SelectedItem);
+            }
         });
+    }
+
+    private static T? FindVisualChild<T>(System.Windows.DependencyObject parent) where T : System.Windows.DependencyObject
+    {
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+            if (child is T typedChild) return typedChild;
+            var result = FindVisualChild<T>(child);
+            if (result != null) return result;
+        }
+        return null;
     }
 
     private class FakeHotkeyService : IHotkeyService
