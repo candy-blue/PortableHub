@@ -16,24 +16,24 @@ public class CardSizeToDimensionConverter : IValueConverter
             {
                 "Width" => 140.0,
                 "Height" => 150.0,
-                "IconSize" => 40.0,
-                "FontSize" => 12.0,
+                "IconSize" => 44.0,
+                "FontSize" => 13.0,
                 _ => 140.0
             },
             "Large" => param switch
             {
                 "Width" => 220.0,
-                "Height" => 220.0,
-                "IconSize" => 64.0,
-                "FontSize" => 15.0,
+                "Height" => 225.0,
+                "IconSize" => 68.0,
+                "FontSize" => 16.0,
                 _ => 220.0
             },
             _ => param switch // Medium
             {
                 "Width" => 170.0,
-                "Height" => 170.0,
-                "IconSize" => 50.0,
-                "FontSize" => 13.0,
+                "Height" => 175.0,
+                "IconSize" => 54.0,
+                "FontSize" => 14.0,
                 _ => 170.0
             }
         };

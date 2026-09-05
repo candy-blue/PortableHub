@@ -12,10 +12,13 @@
         AllowsTransparency="True"
         Background="Transparent"
         ShowInTaskbar="False"
-        Topmost="True"
-        FontFamily="Segoe UI Variable, Microsoft YaHei UI, Segoe UI, sans-serif"
+        FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
         TextOptions.TextFormattingMode="Display"
         TextOptions.TextRenderingMode="ClearType"
+        RenderOptions.BitmapScalingMode="HighQuality"
+        RenderOptions.ClearTypeHint="Enabled"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
         PreviewKeyDown="Window_PreviewKeyDown"
         Deactivated="Window_Deactivated">
 

@@ -17,6 +17,23 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private Point _dragStartPoint;
     private bool _isRealExit;
     private System.Windows.Threading.DispatcherTimer? _statusRefreshTimer;
+    private System.Windows.Threading.DispatcherTimer? _dragWatchdogTimer;
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X;
+        public int Y;
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool GetCursorPos(out POINT lpPoint);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+
+    private const int VK_LBUTTON = 0x01;
+    private const int VK_RBUTTON = 0x02;
 
     public MainWindow(MainViewModel viewModel, ISettingsService settingsService)
     {
@@ -289,31 +306,115 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             e.Effects = DragDropEffects.Copy;
             DropOverlay.Visibility = Visibility.Visible;
             e.Handled = true;
+
+            // Reset watchdog timer (auto-clears overlay if drag is abandoned or dropped outside)
+            if (_dragWatchdogTimer == null)
+            {
+                _dragWatchdogTimer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(250)
+                };
+                _dragWatchdogTimer.Tick += (s, ev) =>
+                {
+                    bool isMouseButtonDown = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0 || (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
+                    bool isCursorInside = false;
+                    if (GetCursorPos(out var pt))
+                    {
+                        try
+                        {
+                            var screenTopLeft = PointToScreen(new Point(0, 0));
+                            var screenBottomRight = PointToScreen(new Point(ActualWidth, ActualHeight));
+                            isCursorInside = new Rect(screenTopLeft, screenBottomRight).Contains(new Point(pt.X, pt.Y));
+                        }
+                        catch { }
+                    }
+
+                    if (!isMouseButtonDown || !isCursorInside)
+                    {
+                        DropOverlay.Visibility = Visibility.Collapsed;
+                        _dragWatchdogTimer.Stop();
+                    }
+                };
+            }
+            _dragWatchdogTimer.Stop();
+            _dragWatchdogTimer.Start();
         }
         else if (e.Data.GetDataPresent(typeof(SoftwareCardViewModel)) || e.Data.GetDataPresent(typeof(CategoryNavModel)))
         {
             DropOverlay.Visibility = Visibility.Collapsed;
+            _dragWatchdogTimer?.Stop();
             e.Effects = DragDropEffects.Move;
         }
         else
         {
             DropOverlay.Visibility = Visibility.Collapsed;
+            _dragWatchdogTimer?.Stop();
             e.Effects = DragDropEffects.None;
         }
     }
 
     private void Window_DragLeave(object sender, DragEventArgs e)
     {
+        // When drag leaves towards taskbar, desktop, or other windows, verify real screen cursor position
+        if (GetCursorPos(out var pt))
+        {
+            try
+            {
+                var screenTopLeft = PointToScreen(new Point(0, 0));
+                var screenBottomRight = PointToScreen(new Point(ActualWidth, ActualHeight));
+                var screenRect = new Rect(screenTopLeft, screenBottomRight);
+
+                if (!screenRect.Contains(new Point(pt.X, pt.Y)))
+                {
+                    DropOverlay.Visibility = Visibility.Collapsed;
+                    _dragWatchdogTimer?.Stop();
+                    return;
+                }
+            }
+            catch
+            {
+                DropOverlay.Visibility = Visibility.Collapsed;
+                _dragWatchdogTimer?.Stop();
+                return;
+            }
+        }
+
+        if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0 && (GetAsyncKeyState(VK_RBUTTON) & 0x8000) == 0)
+        {
+            DropOverlay.Visibility = Visibility.Collapsed;
+            _dragWatchdogTimer?.Stop();
+            return;
+        }
+
         var pos = e.GetPosition(this);
         if (pos.X <= 0 || pos.Y <= 0 || pos.X >= ActualWidth || pos.Y >= ActualHeight)
         {
             DropOverlay.Visibility = Visibility.Collapsed;
+            _dragWatchdogTimer?.Stop();
         }
+    }
+
+    private void Window_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        // If user moves mouse normally without dragging, ensure stuck overlay is dismissed
+        if (DropOverlay.Visibility == Visibility.Visible && e.LeftButton == MouseButtonState.Released)
+        {
+            DropOverlay.Visibility = Visibility.Collapsed;
+            _dragWatchdogTimer?.Stop();
+        }
+    }
+
+    protected override void OnDeactivated(EventArgs e)
+    {
+        base.OnDeactivated(e);
+        DropOverlay.Visibility = Visibility.Collapsed;
+        _dragWatchdogTimer?.Stop();
     }
 
     private async void Window_Drop(object sender, DragEventArgs e)
     {
         DropOverlay.Visibility = Visibility.Collapsed;
+        _dragWatchdogTimer?.Stop();
 
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
@@ -393,8 +494,8 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         {
             _viewModel.SelectedSoftware = card;
 
-            // Double click to launch immediately
-            if (e.ClickCount >= 2 && e.ChangedButton == MouseButton.Left)
+            // Double click to launch immediately (when mode is DoubleClick)
+            if (_viewModel.LaunchClickMode != "SingleClick" && e.ClickCount >= 2 && e.ChangedButton == MouseButton.Left)
             {
                 if (card.LaunchCommand.CanExecute(null))
                 {
@@ -405,6 +506,39 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             }
         }
         _dragStartPoint = e.GetPosition(null);
+    }
+
+    private void Card_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        // Single click to launch immediately (when mode is SingleClick)
+        if (_viewModel.LaunchClickMode == "SingleClick" && sender is FrameworkElement element && element.Tag is SoftwareCardViewModel card)
+        {
+            // Do not trigger if user clicked an inner action button (e.g. Star, More, Play)
+            if (e.OriginalSource is DependencyObject dep && FindVisualParent<System.Windows.Controls.Primitives.ButtonBase>(dep) != null)
+            {
+                return;
+            }
+
+            var currentPos = e.GetPosition(null);
+            var diff = _dragStartPoint - currentPos;
+            if (Math.Abs(diff.X) <= SystemParameters.MinimumHorizontalDragDistance &&
+                Math.Abs(diff.Y) <= SystemParameters.MinimumVerticalDragDistance)
+            {
+                if (card.LaunchCommand.CanExecute(null))
+                {
+                    card.LaunchCommand.Execute(null);
+                    e.Handled = true;
+                }
+            }
+        }
+    }
+
+    private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        var parentObject = System.Windows.Media.VisualTreeHelper.GetParent(child);
+        if (parentObject == null) return null;
+        if (parentObject is T parent) return parent;
+        return FindVisualParent<T>(parentObject);
     }
 
     private void Card_PreviewMouseMove(object sender, MouseEventArgs e)

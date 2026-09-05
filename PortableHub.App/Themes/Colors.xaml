@@ -10,8 +10,8 @@
     <Color x:Key="AppSecondaryBackground">#252525</Color>
     <Color x:Key="AppBorder">#3A3A3A</Color>
     <Color x:Key="AppTextPrimary">#FFFFFF</Color>
-    <Color x:Key="AppTextSecondary">#BDBDBD</Color>
-    <Color x:Key="AppTextTertiary">#707070</Color>
+    <Color x:Key="AppTextSecondary">#D4D4D8</Color>
+    <Color x:Key="AppTextTertiary">#A1A1AA</Color>
     <Color x:Key="AppAccent">#0078D4</Color>
     <Color x:Key="AppAccentHover">#187BD1</Color>
     <Color x:Key="AppDanger">#C42B1C</Color>

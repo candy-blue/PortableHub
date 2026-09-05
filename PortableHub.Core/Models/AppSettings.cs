@@ -20,5 +20,6 @@ public class AppSettings
     public bool IsMaximized { get; set; } = false;
     public string SortBy { get; set; } = "Custom";
     public string ViewMode { get; set; } = "Grid"; // Grid, List
+    public string LaunchClickMode { get; set; } = "DoubleClick"; // DoubleClick, SingleClick
     public bool AutoRelocateMissing { get; set; } = true;
 }

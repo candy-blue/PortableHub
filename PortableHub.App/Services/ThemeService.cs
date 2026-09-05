@@ -50,8 +50,8 @@ public class ThemeService
             secBg = System.Windows.Media.Color.FromRgb(0x25, 0x25, 0x25);
             border = System.Windows.Media.Color.FromRgb(0x3A, 0x3A, 0x3A);
             textPrim = System.Windows.Media.Color.FromRgb(0xFF, 0xFF, 0xFF);
-            textSec = System.Windows.Media.Color.FromRgb(0xBD, 0xBD, 0xBD);
-            textTert = System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x70);
+            textSec = System.Windows.Media.Color.FromRgb(0xD4, 0xD4, 0xD8);
+            textTert = System.Windows.Media.Color.FromRgb(0xA1, 0xA1, 0xAA);
             inputBg = System.Windows.Media.Color.FromRgb(0x1E, 0x1E, 0x1E);
             sidebarBg = System.Windows.Media.Color.FromRgb(0x18, 0x18, 0x18);
         }
@@ -63,9 +63,9 @@ public class ThemeService
             cardHover = System.Windows.Media.Color.FromRgb(0xF5, 0xF5, 0xF5);
             secBg = System.Windows.Media.Color.FromRgb(0xF2, 0xF2, 0xF2);
             border = System.Windows.Media.Color.FromRgb(0xE5, 0xE5, 0xE5);
-            textPrim = System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x1A);
-            textSec = System.Windows.Media.Color.FromRgb(0x61, 0x61, 0x61);
-            textTert = System.Windows.Media.Color.FromRgb(0x8E, 0x8E, 0x8E);
+            textPrim = System.Windows.Media.Color.FromRgb(0x18, 0x18, 0x1B);
+            textSec = System.Windows.Media.Color.FromRgb(0x3F, 0x3F, 0x46);
+            textTert = System.Windows.Media.Color.FromRgb(0x52, 0x52, 0x5B);
             inputBg = System.Windows.Media.Color.FromRgb(0xFF, 0xFF, 0xFF);
             sidebarBg = System.Windows.Media.Color.FromRgb(0xF3, 0xF3, 0xF3);
         }

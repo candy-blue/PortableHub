@@ -88,6 +88,9 @@ public partial class MainViewModel : ObservableObject
     private string _sortBy = "Custom";
 
     [ObservableProperty]
+    private string _launchClickMode = "DoubleClick";
+
+    [ObservableProperty]
     private bool _isSidebarCollapsed;
 
     [ObservableProperty]
@@ -136,6 +139,7 @@ public partial class MainViewModel : ObservableObject
         _cardSize = _settingsService.CurrentSettings.CardSize;
         _viewMode = _settingsService.CurrentSettings.ViewMode;
         _sortBy = _settingsService.CurrentSettings.SortBy;
+        _launchClickMode = _settingsService.CurrentSettings.LaunchClickMode ?? "DoubleClick";
     }
 
     public async Task InitializeAsync()
@@ -629,6 +633,7 @@ public partial class MainViewModel : ObservableObject
             CardSize = _settingsService.CurrentSettings.CardSize;
             ViewMode = _settingsService.CurrentSettings.ViewMode;
             SortBy = _settingsService.CurrentSettings.SortBy;
+            LaunchClickMode = _settingsService.CurrentSettings.LaunchClickMode ?? "DoubleClick";
             await RefreshDataAsync();
         }
     }

@@ -207,5 +207,23 @@ public class PerformanceAndEdgeCaseTests
         Assert.Equal("Tool Favorite", results[0].Name);
         Assert.Equal("Tool Normal", results[1].Name);
     }
+
+    [Fact]
+    public async Task SettingsService_LaunchClickMode_DefaultsToDoubleClick_AndPersistsSuccessfully()
+    {
+        using var env = new TestEnvironment();
+        await env.InitializeAsync();
+
+        var settingsService = new SettingsService(env.TempDirectory);
+        await settingsService.LoadSettingsAsync();
+        Assert.Equal("DoubleClick", settingsService.CurrentSettings.LaunchClickMode);
+
+        settingsService.CurrentSettings.LaunchClickMode = "SingleClick";
+        await settingsService.SaveSettingsAsync();
+
+        var reloadedService = new SettingsService(env.TempDirectory);
+        await reloadedService.LoadSettingsAsync();
+        Assert.Equal("SingleClick", reloadedService.CurrentSettings.LaunchClickMode);
+    }
 }
 

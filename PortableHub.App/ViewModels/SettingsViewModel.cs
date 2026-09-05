@@ -33,6 +33,9 @@ public partial class SettingsViewModel : ObservableObject
     private string _viewMode = "Grid";
 
     [ObservableProperty]
+    private string _launchClickMode = "DoubleClick";
+
+    [ObservableProperty]
     private bool _startWithWindows;
 
     [ObservableProperty]
@@ -93,6 +96,7 @@ public partial class SettingsViewModel : ObservableObject
         Theme = s.Theme;
         CardSize = s.CardSize;
         ViewMode = s.ViewMode;
+        LaunchClickMode = string.IsNullOrEmpty(s.LaunchClickMode) ? "DoubleClick" : s.LaunchClickMode;
         StartWithWindows = _startupService.IsAutoStartEnabled();
         StartMinimizedToTray = s.StartMinimizedToTray;
         MinimizeToTray = s.MinimizeToTray;
@@ -324,6 +328,7 @@ public partial class SettingsViewModel : ObservableObject
         s.Theme = Theme;
         s.CardSize = CardSize;
         s.ViewMode = ViewMode;
+        s.LaunchClickMode = LaunchClickMode;
         s.StartWithWindows = StartWithWindows;
         s.StartMinimizedToTray = StartMinimizedToTray;
         s.MinimizeToTray = MinimizeToTray;

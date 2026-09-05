@@ -8,9 +8,13 @@
         WindowStartupLocation="CenterOwner"
         WindowBackdropType="Mica"
         ExtendsContentIntoTitleBar="True"
-        FontFamily="Segoe UI Variable, Microsoft YaHei UI, Segoe UI, sans-serif"
+        FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
         TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType">
+        TextOptions.TextRenderingMode="ClearType"
+        RenderOptions.BitmapScalingMode="HighQuality"
+        RenderOptions.ClearTypeHint="Enabled"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
 
     <Grid>
         <Grid.RowDefinitions>
