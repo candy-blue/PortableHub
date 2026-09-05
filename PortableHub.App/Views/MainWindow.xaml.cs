@@ -43,6 +43,15 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         await _viewModel.InitializeAsync();
 
+        // Listen for sidebar collapse/expand animation
+        _viewModel.PropertyChanged += (s, ev) =>
+        {
+            if (ev.PropertyName == nameof(MainViewModel.IsSidebarCollapsed))
+            {
+                AnimateSidebar(_viewModel.IsSidebarCollapsed);
+            }
+        };
+
         // Setup low-overhead status refresh timer (every 5 seconds, only when active)
         _statusRefreshTimer = new System.Windows.Threading.DispatcherTimer
         {
@@ -59,6 +68,16 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         // Watch system theme changes for native Mica backdrop
         Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
+    }
+
+    private void AnimateSidebar(bool collapsed)
+    {
+        double targetWidth = collapsed ? 56.0 : 220.0;
+        var anim = new System.Windows.Media.Animation.DoubleAnimation(targetWidth, TimeSpan.FromMilliseconds(160))
+        {
+            EasingFunction = new System.Windows.Media.Animation.QuadraticEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
+        };
+        SidebarBorder.BeginAnimation(WidthProperty, anim);
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -176,6 +195,11 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                 _ = _viewModel.AddSoftwareAsync();
                 e.Handled = true;
             }
+            else if (e.Key == Key.B)
+            {
+                _viewModel.ToggleSidebarCommand.Execute(null);
+                e.Handled = true;
+            }
             else if (e.Key == Key.OemComma)
             {
                 _ = _viewModel.OpenSettingsAsync();
@@ -192,9 +216,10 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         }
         else if (e.Key == Key.Enter)
         {
-            if (_viewModel.SelectedSoftware != null && !TopSearchBox.IsFocused)
+            var target = _viewModel.SelectedSoftware ?? _viewModel.FilteredSoftware.FirstOrDefault();
+            if (target != null && !TopSearchBox.IsFocused)
             {
-                _ = _viewModel.SelectedSoftware.LaunchAsync();
+                _ = target.LaunchAsync();
                 e.Handled = true;
             }
         }
@@ -209,6 +234,49 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         else if (e.Key == Key.F5)
         {
             _ = _viewModel.RefreshAsync();
+            e.Handled = true;
+        }
+    }
+
+    private void TopSearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Down)
+        {
+            if (_viewModel.FilteredSoftware.Count > 0)
+            {
+                int currentIndex = _viewModel.SelectedSoftware != null
+                    ? _viewModel.FilteredSoftware.IndexOf(_viewModel.SelectedSoftware)
+                    : -1;
+                int nextIndex = Math.Min(_viewModel.FilteredSoftware.Count - 1, currentIndex + 1);
+                _viewModel.SelectedSoftware = _viewModel.FilteredSoftware[nextIndex];
+                e.Handled = true;
+            }
+        }
+        else if (e.Key == Key.Up)
+        {
+            if (_viewModel.FilteredSoftware.Count > 0)
+            {
+                int currentIndex = _viewModel.SelectedSoftware != null
+                    ? _viewModel.FilteredSoftware.IndexOf(_viewModel.SelectedSoftware)
+                    : -1;
+                int prevIndex = Math.Max(0, currentIndex - 1);
+                _viewModel.SelectedSoftware = _viewModel.FilteredSoftware[prevIndex];
+                e.Handled = true;
+            }
+        }
+        else if (e.Key == Key.Enter)
+        {
+            var target = _viewModel.SelectedSoftware ?? _viewModel.FilteredSoftware.FirstOrDefault();
+            if (target != null)
+            {
+                _ = target.LaunchAsync();
+                e.Handled = true;
+            }
+        }
+        else if (e.Key == Key.Escape)
+        {
+            TopSearchBox.Text = string.Empty;
+            Keyboard.ClearFocus();
             e.Handled = true;
         }
     }
@@ -268,6 +336,54 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         if (sender is FrameworkElement element && element.Tag is SoftwareCardViewModel card)
         {
             _viewModel.SelectedSoftware = card;
+        }
+    }
+
+    private void CardMoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement btn)
+        {
+            var contextMenu = FindResource("SoftwareItemContextMenu") as ContextMenu;
+            if (contextMenu != null)
+            {
+                contextMenu.PlacementTarget = btn;
+                contextMenu.DataContext = btn.DataContext;
+                contextMenu.IsOpen = true;
+                e.Handled = true;
+            }
+        }
+    }
+
+    private void SoftwareItemContextMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        if (sender is ContextMenu menu)
+        {
+            var card = (menu.DataContext as SoftwareCardViewModel)
+                       ?? ((menu.PlacementTarget as FrameworkElement)?.DataContext as SoftwareCardViewModel);
+            var moveItem = menu.Items.OfType<MenuItem>().FirstOrDefault(m => (m.Header as string) == "移动到分类");
+            if (moveItem != null)
+            {
+                moveItem.Items.Clear();
+                foreach (var cat in _viewModel.CustomCategories)
+                {
+                    if (!cat.Id.HasValue) continue;
+                    var subItem = new MenuItem
+                    {
+                        Header = cat.Name,
+                        IsChecked = card != null && card.CategoryId == cat.Id.Value
+                    };
+                    var catId = cat.Id.Value;
+                    subItem.Click += async (_, _) =>
+                    {
+                        if (card != null)
+                        {
+                            await _viewModel.MoveSoftwareToCategoryAsync(card, catId);
+                        }
+                    };
+                    moveItem.Items.Add(subItem);
+                }
+                moveItem.IsEnabled = moveItem.Items.Count > 0;
+            }
         }
     }
 

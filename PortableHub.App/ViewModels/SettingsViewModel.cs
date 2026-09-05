@@ -30,6 +30,9 @@ public partial class SettingsViewModel : ObservableObject
     private string _cardSize = "Medium";
 
     [ObservableProperty]
+    private string _viewMode = "Grid";
+
+    [ObservableProperty]
     private bool _startWithWindows;
 
     [ObservableProperty]
@@ -89,6 +92,7 @@ public partial class SettingsViewModel : ObservableObject
         var s = _settingsService.CurrentSettings;
         Theme = s.Theme;
         CardSize = s.CardSize;
+        ViewMode = s.ViewMode;
         StartWithWindows = _startupService.IsAutoStartEnabled();
         StartMinimizedToTray = s.StartMinimizedToTray;
         MinimizeToTray = s.MinimizeToTray;
@@ -319,6 +323,7 @@ public partial class SettingsViewModel : ObservableObject
         var s = _settingsService.CurrentSettings;
         s.Theme = Theme;
         s.CardSize = CardSize;
+        s.ViewMode = ViewMode;
         s.StartWithWindows = StartWithWindows;
         s.StartMinimizedToTray = StartMinimizedToTray;
         s.MinimizeToTray = MinimizeToTray;

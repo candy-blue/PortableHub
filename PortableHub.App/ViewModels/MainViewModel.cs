@@ -21,7 +21,8 @@ public class CategoryNavModel : ObservableObject
 
     public string Glyph => NavMode switch
     {
-        "All" => "\uE80F",
+        "Home" => "\uE80F",
+        "All" => "\uE71D",
         "Favorite" => "\uE735",
         "Recent" => "\uEC92",
         _ => "\uE8B7"
@@ -31,7 +32,8 @@ public class CategoryNavModel : ObservableObject
     {
         get
         {
-            if (NavMode == "All") return Wpf.Ui.Controls.SymbolRegular.Home24;
+            if (NavMode == "Home") return Wpf.Ui.Controls.SymbolRegular.Home24;
+            if (NavMode == "All") return Wpf.Ui.Controls.SymbolRegular.Apps24;
             if (NavMode == "Favorite") return Wpf.Ui.Controls.SymbolRegular.Star24;
             if (NavMode == "Recent") return Wpf.Ui.Controls.SymbolRegular.History24;
 
@@ -80,7 +82,13 @@ public partial class MainViewModel : ObservableObject
     private string _cardSize = "Medium";
 
     [ObservableProperty]
+    private string _viewMode = "Grid";
+
+    [ObservableProperty]
     private string _sortBy = "Custom";
+
+    [ObservableProperty]
+    private bool _isSidebarCollapsed;
 
     [ObservableProperty]
     private CategoryNavModel? _selectedNav;
@@ -93,6 +101,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private SoftwareCardViewModel? _selectedSoftware;
+
+    [RelayCommand]
+    public void ToggleSidebar() => IsSidebarCollapsed = !IsSidebarCollapsed;
 
     public ObservableCollection<CategoryNavModel> NavItems { get; } = [];
     public ObservableCollection<CategoryNavModel> CustomCategories { get; } = [];
@@ -123,6 +134,7 @@ public partial class MainViewModel : ObservableObject
         _settingsService = settingsService;
 
         _cardSize = _settingsService.CurrentSettings.CardSize;
+        _viewMode = _settingsService.CurrentSettings.ViewMode;
         _sortBy = _settingsService.CurrentSettings.SortBy;
     }
 
@@ -133,8 +145,8 @@ public partial class MainViewModel : ObservableObject
         {
             await RefreshDataAsync();
 
-            // Set default nav to 'All'
-            SelectedNav = NavItems.FirstOrDefault(n => n.NavMode == "All");
+            // Set default nav to 'Home' (or 'All' fallback)
+            SelectedNav = NavItems.FirstOrDefault(n => n.NavMode == "Home") ?? NavItems.FirstOrDefault(n => n.NavMode == "All");
         }
         finally
         {
@@ -157,6 +169,18 @@ public partial class MainViewModel : ObservableObject
         _settingsService.CurrentSettings.CardSize = value;
         _ = _settingsService.SaveSettingsAsync();
     }
+
+    partial void OnViewModeChanged(string value)
+    {
+        _settingsService.CurrentSettings.ViewMode = value;
+        _ = _settingsService.SaveSettingsAsync();
+    }
+
+    [RelayCommand]
+    public void SetGridView() => ViewMode = "Grid";
+
+    [RelayCommand]
+    public void SetListView() => ViewMode = "List";
 
     partial void OnSortByChanged(string value)
     {
@@ -183,9 +207,10 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
-        // Build Nav Items (All, Favorites, Recent)
+        // Build Nav Items (Home, All, Favorites, Recent) (Design Doc Section 12)
         NavItems.Clear();
-        NavItems.Add(new CategoryNavModel { Name = "全部软件", Icon = "Grid", NavMode = "All", Color = "#3B82F6", Count = rawSoftware.Count });
+        NavItems.Add(new CategoryNavModel { Name = "首页", Icon = "Home", NavMode = "Home", Color = "#3B82F6", Count = rawSoftware.Count });
+        NavItems.Add(new CategoryNavModel { Name = "全部软件", Icon = "Apps", NavMode = "All", Color = "#3B82F6", Count = rawSoftware.Count });
         NavItems.Add(new CategoryNavModel { Name = "我的收藏", Icon = "Star", NavMode = "Favorite", Color = "#F59E0B", Count = rawSoftware.Count(s => s.IsFavorite) });
         NavItems.Add(new CategoryNavModel { Name = "最近使用", Icon = "Clock", NavMode = "Recent", Color = "#10B981", Count = rawSoftware.Count(s => s.LastLaunchedAt.HasValue) });
 
@@ -218,7 +243,9 @@ public partial class MainViewModel : ObservableObject
                 _softwareRepository,
                 OnEditSoftware,
                 OnDeleteSoftware,
-                OnRelocateSoftware
+                OnRelocateSoftware,
+                OnFavoriteChanged,
+                OnSoftwareLaunched
             );
             _allSoftwareCards.Add(card);
         }
@@ -227,6 +254,34 @@ public partial class MainViewModel : ObservableObject
         _searchService.IndexSoftware(rawSoftware);
 
         ApplyFilter();
+    }
+
+    private void OnFavoriteChanged(SoftwareCardViewModel card)
+    {
+        var favNav = NavItems.FirstOrDefault(n => n.NavMode == "Favorite");
+        if (favNav != null)
+        {
+            favNav.Count = _allSoftwareCards.Count(s => s.IsFavorite);
+        }
+
+        if (SelectedNav?.NavMode == "Favorite" || SelectedNav?.NavMode == "Home")
+        {
+            ApplyFilter();
+        }
+    }
+
+    private void OnSoftwareLaunched(SoftwareCardViewModel card)
+    {
+        var recentNav = NavItems.FirstOrDefault(n => n.NavMode == "Recent");
+        if (recentNav != null)
+        {
+            recentNav.Count = _allSoftwareCards.Count(s => s.Model.LastLaunchedAt.HasValue);
+        }
+
+        if (SelectedNav?.NavMode == "Recent" || SelectedNav?.NavMode == "Home" || SortBy == "RecentUsed" || SortBy == "LaunchCount")
+        {
+            ApplyFilter();
+        }
     }
 
     public void ApplyFilter()
@@ -264,21 +319,36 @@ public partial class MainViewModel : ObservableObject
             });
         }
 
-        // Sorting
-        query = SortBy switch
+        // Sorting (Design Doc Section 38: Home view prioritizes favorites & recently launched)
+        if (SelectedNav?.NavMode == "Home" && string.IsNullOrWhiteSpace(SearchText) && SortBy == "Custom")
         {
-            "NameAsc" => query.OrderBy(c => c.Name),
-            "NameDesc" => query.OrderByDescending(c => c.Name),
-            "RecentUsed" => query.OrderByDescending(c => c.Model.LastLaunchedAt ?? DateTime.MinValue),
-            "LaunchCount" => query.OrderByDescending(c => c.LaunchCount),
-            "CreatedAt" => query.OrderByDescending(c => c.Model.CreatedAt),
-            _ => query.OrderBy(c => c.Model.SortOrder).ThenBy(c => c.Id)
-        };
+            query = query
+                .OrderByDescending(c => c.IsFavorite)
+                .ThenByDescending(c => c.Model.LastLaunchedAt ?? DateTime.MinValue)
+                .ThenByDescending(c => c.LaunchCount);
+        }
+        else
+        {
+            query = SortBy switch
+            {
+                "NameAsc" => query.OrderBy(c => c.Name),
+                "NameDesc" => query.OrderByDescending(c => c.Name),
+                "RecentUsed" => query.OrderByDescending(c => c.Model.LastLaunchedAt ?? DateTime.MinValue),
+                "LaunchCount" => query.OrderByDescending(c => c.LaunchCount),
+                "CreatedAt" => query.OrderByDescending(c => c.Model.CreatedAt),
+                _ => query.OrderBy(c => c.Model.SortOrder).ThenBy(c => c.Id)
+            };
+        }
 
         FilteredSoftware.Clear();
         foreach (var item in query)
         {
             FilteredSoftware.Add(item);
+        }
+
+        if (SelectedSoftware == null || !FilteredSoftware.Contains(SelectedSoftware))
+        {
+            SelectedSoftware = FilteredSoftware.FirstOrDefault();
         }
     }
 
@@ -364,8 +434,8 @@ public partial class MainViewModel : ObservableObject
     private async void OnDeleteSoftware(SoftwareCardViewModel card)
     {
         var result = MessageBox.Show(
-            $"确定从 Portable Hub 中移除软件【{card.Name}】吗？\n\n注意：此操作绝不会删除硬盘中的软件本体文件。",
-            "移除软件确认",
+            $"确定从 PortableHub 移除软件【{card.Name}】吗？\n\n注意：此操作仅从应用列表中移除索引，绝不会删除磁盘上的软件本体文件。",
+            "从 PortableHub 移除",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
@@ -557,6 +627,7 @@ public partial class MainViewModel : ObservableObject
         {
             await ShowSettingsDialog();
             CardSize = _settingsService.CurrentSettings.CardSize;
+            ViewMode = _settingsService.CurrentSettings.ViewMode;
             SortBy = _settingsService.CurrentSettings.SortBy;
             await RefreshDataAsync();
         }

@@ -19,5 +19,6 @@ public class AppSettings
     public double? WindowTop { get; set; }
     public bool IsMaximized { get; set; } = false;
     public string SortBy { get; set; } = "Custom";
+    public string ViewMode { get; set; } = "Grid"; // Grid, List
     public bool AutoRelocateMissing { get; set; } = true;
 }

@@ -138,4 +138,42 @@ public static class ShortcutHelper
 
         return null;
     }
+
+    /// <summary>
+    /// Creates a Windows .lnk shortcut on the current user's desktop.
+    /// </summary>
+    public static bool CreateDesktopShortcut(string targetPath, string shortcutName, string? arguments = null, string? workingDir = null, string? iconPath = null)
+    {
+        if (string.IsNullOrWhiteSpace(targetPath) || !File.Exists(targetPath))
+            return false;
+
+        try
+        {
+            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            if (!Directory.Exists(desktop)) return false;
+
+            // Clean invalid file name chars
+            var safeName = string.Join("_", shortcutName.Split(Path.GetInvalidFileNameChars()));
+            var shortcutFile = Path.Combine(desktop, $"{safeName}.lnk");
+
+            var shellType = Type.GetTypeFromProgID("WScript.Shell");
+            if (shellType == null) return false;
+
+            dynamic? shell = Activator.CreateInstance(shellType);
+            if (shell == null) return false;
+
+            dynamic shortcut = shell.CreateShortcut(shortcutFile);
+            shortcut.TargetPath = targetPath;
+            if (!string.IsNullOrWhiteSpace(arguments)) shortcut.Arguments = arguments;
+            if (!string.IsNullOrWhiteSpace(workingDir)) shortcut.WorkingDirectory = workingDir;
+            if (!string.IsNullOrWhiteSpace(iconPath) && File.Exists(iconPath)) shortcut.IconLocation = iconPath;
+            shortcut.Save();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
+

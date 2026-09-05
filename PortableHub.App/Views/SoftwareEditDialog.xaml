@@ -39,7 +39,7 @@
 
                     <!-- Icon Preview & Selector -->
                     <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="0,0,16,0">
-                        <Border Width="64" Height="64" CornerRadius="10" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                        <Border Width="64" Height="64" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
                                 BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
                             <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" 
                                    Width="48" Height="48" Stretch="Uniform" />

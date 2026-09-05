@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
-        Title="快速启动" 
-        Height="480" Width="680"
+        Width="680"
+        SizeToContent="Height"
+        MinHeight="180"
+        MaxHeight="500"
         WindowStartupLocation="Manual"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -17,13 +19,18 @@
         PreviewKeyDown="Window_PreviewKeyDown"
         Deactivated="Window_Deactivated">
 
-    <Border Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" 
+    <Border x:Name="RootBorder" 
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" 
             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" 
             BorderThickness="1" 
             CornerRadius="12"
-            Margin="10">
+            Margin="10"
+            RenderTransformOrigin="0.5,0.5">
+        <Border.RenderTransform>
+            <ScaleTransform x:Name="RootScale" ScaleX="1" ScaleY="1" />
+        </Border.RenderTransform>
         <Border.Effect>
-            <DropShadowEffect BlurRadius="28" ShadowDepth="6" Opacity="0.35" Color="#000000" />
+            <DropShadowEffect BlurRadius="28" ShadowDepth="6" Opacity="0.30" Color="#000000" />
         </Border.Effect>
 
         <Grid Margin="18">
@@ -52,7 +59,9 @@
                      SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}"
                      Background="Transparent"
                      BorderThickness="0"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                     MaxHeight="360"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />

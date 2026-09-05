@@ -57,9 +57,10 @@ public class SearchService : ISearchService
         {
             if (string.IsNullOrWhiteSpace(query))
             {
-                // Return most recently used / frequently used first
+                // Return favorites first, then recently used / frequently used
                 return _indexedList
-                    .OrderByDescending(s => s.LastLaunchedAt ?? DateTime.MinValue)
+                    .OrderByDescending(s => s.IsFavorite)
+                    .ThenByDescending(s => s.LastLaunchedAt ?? DateTime.MinValue)
                     .ThenByDescending(s => s.LaunchCount)
                     .Take(maxResults)
                     .ToList();
@@ -105,22 +106,48 @@ public class SearchService : ISearchService
 
     private static int CalculateScore(Software s, string cleanQuery)
     {
+        int score = 0;
         var name = s.Name.ToLowerInvariant();
+
         if (name == cleanQuery)
-            return 1000;
-        if (name.StartsWith(cleanQuery, StringComparison.OrdinalIgnoreCase))
-            return 800;
-        if (name.Contains(cleanQuery, StringComparison.OrdinalIgnoreCase))
-            return 500;
+            score += 1000;
+        else if (name.StartsWith(cleanQuery, StringComparison.OrdinalIgnoreCase))
+            score += 800;
+        else if (name.Contains(cleanQuery, StringComparison.OrdinalIgnoreCase))
+            score += 500;
+        else
+            score += 100;
 
         var tags = (s.Tags ?? string.Empty).ToLowerInvariant();
         if (tags.Contains(cleanQuery, StringComparison.OrdinalIgnoreCase))
-            return 300;
+            score += 300;
 
         var cat = s.CategoryName.ToLowerInvariant();
         if (cat.Contains(cleanQuery, StringComparison.OrdinalIgnoreCase))
-            return 200;
+            score += 200;
 
-        return 100;
+        var desc = (s.Description ?? string.Empty).ToLowerInvariant();
+        if (desc.Contains(cleanQuery, StringComparison.OrdinalIgnoreCase))
+            score += 200;
+
+        var path = s.ExePath.ToLowerInvariant();
+        if (path.Contains(cleanQuery, StringComparison.OrdinalIgnoreCase))
+            score += 100;
+
+        if (s.IsFavorite)
+            score += 100;
+
+        if (s.LastLaunchedAt.HasValue)
+        {
+            var span = DateTime.UtcNow - s.LastLaunchedAt.Value;
+            if (span.TotalDays < 7)
+                score += 150;
+            else if (span.TotalDays < 30)
+                score += 80;
+        }
+
+        score += Math.Min(s.LaunchCount * 5, 100);
+
+        return score;
     }
 }

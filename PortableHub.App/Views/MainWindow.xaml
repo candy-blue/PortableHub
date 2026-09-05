@@ -20,361 +20,600 @@
         StateChanged="Window_StateChanged"
         Closing="Window_Closing">
 
+    <Window.Resources>
+        <!-- Reusable Software Item Context Menu (Design Doc Section 21) -->
+        <ContextMenu x:Key="SoftwareItemContextMenu" Opened="SoftwareItemContextMenu_Opened">
+            <MenuItem Header="启动" FontWeight="Bold" Command="{Binding LaunchCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Play24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="以管理员身份运行" Command="{Binding LaunchAsAdminCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Shield24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator />
+            <MenuItem Header="收藏" Command="{Binding ToggleFavoriteCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Star24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="打开所在文件夹" Command="{Binding OpenFolderCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="FolderOpen24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="复制软件路径" Command="{Binding CopyPathCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Copy24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="创建桌面快捷方式" Command="{Binding CreateDesktopShortcutCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="ArrowDownload24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator />
+            <MenuItem x:Name="MoveToCategoryMenuItem" Header="移动到分类">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Folder24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="重新定位 EXE" Command="{Binding RelocateCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Search24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="编辑配置" Command="{Binding EditCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Edit24" FontSize="16" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator />
+            <MenuItem Header="从 PortableHub 中移除" Command="{Binding DeleteCommand}">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Delete24" FontSize="16" Foreground="{DynamicResource BrushDanger}" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Official WPF-UI TitleBar with native Windows 11 Snap Layouts & Controls -->
-        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="Portable Hub" Height="48">
+        <!-- Clean Fluent TitleBar (Design Doc Section 132) -->
+        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="Portable Hub" Height="44">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="AppGeneric24" FontSize="18" />
+                <ui:SymbolIcon Symbol="AppGeneric24" FontSize="18" Margin="0,0,6,0" />
             </ui:TitleBar.Icon>
-            <ui:TitleBar.CenterContent>
-                <ui:TextBox x:Name="TopSearchBox"
-                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                            PlaceholderText="搜索软件、分类、标签... (Ctrl+F)"
-                            Icon="{ui:SymbolIcon Search24}"
-                            ClearButtonEnabled="True"
-                            Width="360"
-                            Height="34"
-                            Margin="12,0" />
-            </ui:TitleBar.CenterContent>
-            <ui:TitleBar.TrailingContent>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
-                    <!-- Sort Selection -->
-                    <ComboBox SelectedValue="{Binding SortBy, Mode=TwoWay}" SelectedValuePath="Tag" Width="148" Height="34" Margin="0,0,8,0" VerticalAlignment="Center" VerticalContentAlignment="Center" ToolTip="排序方式">
-                        <ComboBoxItem Content="自定义" Tag="Custom" IsSelected="True" />
-                        <ComboBoxItem Content="名称 A-Z" Tag="NameAsc" />
-                        <ComboBoxItem Content="名称 Z-A" Tag="NameDesc" />
-                        <ComboBoxItem Content="最近使用" Tag="RecentUsed" />
-                        <ComboBoxItem Content="启动次数" Tag="LaunchCount" />
-                        <ComboBoxItem Content="添加时间" Tag="CreatedAt" />
-                    </ComboBox>
-
-                    <!-- Card Size Selection -->
-                    <ComboBox SelectedValue="{Binding CardSize, Mode=TwoWay}" SelectedValuePath="Tag" Width="95" Height="34" Margin="0,0,10,0" VerticalAlignment="Center" VerticalContentAlignment="Center" ToolTip="卡片大小">
-                        <ComboBoxItem Content="小" Tag="Small" />
-                        <ComboBoxItem Content="中" Tag="Medium" IsSelected="True" />
-                        <ComboBoxItem Content="大" Tag="Large" />
-                    </ComboBox>
-
-                    <!-- Primary Actions with explicit icon and text vertical centering -->
-                    <ui:Button Appearance="Primary" Command="{Binding AddSoftwareCommand}" Height="34" Padding="14,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,6,0" AutomationProperties.Name="添加软件">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:SymbolIcon Symbol="Add24" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="添加软件" VerticalAlignment="Center" FontSize="13" />
-                        </StackPanel>
-                    </ui:Button>
-                    <ui:Button Appearance="Secondary" Command="{Binding OpenScannerCommand}" Height="34" Padding="12,0" MinWidth="74" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,6,0" ToolTip="扫描目录自动导入便携软件" AutomationProperties.Name="扫描">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:SymbolIcon Symbol="Search24" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="扫描" VerticalAlignment="Center" FontSize="13" />
-                        </StackPanel>
-                    </ui:Button>
-                    <ui:Button Appearance="Secondary" Command="{Binding OpenSettingsCommand}" Height="34" Padding="12,0" MinWidth="74" VerticalAlignment="Center" VerticalContentAlignment="Center" ToolTip="系统设置" AutomationProperties.Name="设置">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:SymbolIcon Symbol="Settings24" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="设置" VerticalAlignment="Center" FontSize="13" />
-                        </StackPanel>
-                    </ui:Button>
-                </StackPanel>
-            </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
         <!-- Main Workspace (Sidebar + Software Area) -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Left Sidebar Navigation -->
-            <Border Grid.Column="0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0" Padding="10,12">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <!-- Primary Navigation Items -->
-                        <ListBox ItemsSource="{Binding NavItems}" 
-                                 SelectedItem="{Binding SelectedNav, Mode=TwoWay}"
-                                 Background="Transparent" BorderThickness="0">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0,2" />
-                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <Grid Height="38">
-                                                    <Border x:Name="NavBorder" CornerRadius="6" Background="Transparent" Padding="10,0" Cursor="Hand">
-                                                        <ContentPresenter VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <Border x:Name="SelectionPill" Width="3" Height="16" CornerRadius="1.5"
-                                                            Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
-                                                </Grid>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="NavBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
-                                                        <Setter TargetName="SelectionPill" Property="Visibility" Value="Visible" />
-                                                    </Trigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="NavBorder" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="4,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="16" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center" />
-                                        <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="8,1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Count}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </Border>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+            <!-- Left Sidebar Navigation (Design Doc Section 12 & 14) -->
+            <Border x:Name="SidebarBorder" Grid.Column="0" Width="220" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0" Padding="8,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="6,12" Height="1" />
+                    <!-- Sidebar Header with Collapse Toggle Button (Design Doc Section 14) -->
+                    <Grid Grid.Row="0" Margin="4,0,4,8">
+                        <TextBlock Text="导航" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="6,0,0,0"
+                                   Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                        <ui:Button Appearance="Transparent" Command="{Binding ToggleSidebarCommand}" 
+                                   Width="32" Height="32" Padding="0" 
+                                   HorizontalAlignment="Right" ToolTip="展开/折叠导航栏 (Ctrl+B)">
+                            <ui:SymbolIcon Symbol="Navigation24" FontSize="16" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </ui:Button>
+                    </Grid>
 
-                        <!-- Category Header with Add Button -->
-                        <Grid Margin="8,0,8,6">
-                            <TextBlock Text="分类" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                            <ui:Button Appearance="Transparent" Command="{Binding AddCategoryCommand}" 
-                                       Icon="{ui:SymbolIcon Add24}" Width="26" Height="26" Padding="0" 
-                                       HorizontalAlignment="Right" ToolTip="新建分类" />
-                        </Grid>
+                    <!-- Nav Items & Custom Categories -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <!-- Primary Nav (首页, 全部软件, 收藏, 最近使用) -->
+                            <ListBox ItemsSource="{Binding NavItems}" 
+                                     SelectedItem="{Binding SelectedNav, Mode=TwoWay}"
+                                     Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0,2" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="ToolTip" Value="{Binding Name}" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Grid Height="36">
+                                                        <Border x:Name="NavBorder" CornerRadius="6" Background="Transparent" Padding="10,0" Cursor="Hand">
+                                                            <ContentPresenter VerticalAlignment="Center" />
+                                                        </Border>
+                                                        <Border x:Name="SelectionPill" Width="3" Height="16" CornerRadius="1.5"
+                                                                Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="NavBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                                            <Setter TargetName="SelectionPill" Property="Visibility" Value="Visible" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="NavBorder" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="2,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="22" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="15" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                       Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center"
+                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding Count}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
 
-                        <!-- Custom Categories List -->
-                        <ListBox x:Name="CategoriesListBox"
-                                 ItemsSource="{Binding CustomCategories}"
-                                 SelectedItem="{Binding SelectedNav, Mode=TwoWay}"
-                                 Background="Transparent" BorderThickness="0"
-                                 AllowDrop="True"
-                                 PreviewDragOver="Category_PreviewDragOver"
-                                 Drop="Category_Drop">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0,2" />
-                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <Grid Height="36">
-                                                    <Border x:Name="CatBorder" CornerRadius="6" Background="Transparent" Padding="10,0" Cursor="Hand">
-                                                        <ContentPresenter VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <Border x:Name="CatPill" Width="3" Height="16" CornerRadius="1.5"
-                                                            Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
-                                                </Grid>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="CatBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
-                                                        <Setter TargetName="CatPill" Property="Visibility" Value="Visible" />
-                                                    </Trigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="CatBorder" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="4,0" Background="Transparent"
-                                          Tag="{Binding}"
-                                          PreviewMouseLeftButtonDown="CategoryItem_PreviewMouseLeftButtonDown"
-                                          PreviewMouseMove="CategoryItem_PreviewMouseMove"
-                                          DragOver="CategoryItem_DragOver"
-                                          Drop="CategoryItem_Drop"
-                                          AllowDrop="True">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.ContextMenu>
-                                            <ContextMenu>
-                                                <MenuItem Header="编辑分类" Command="{Binding DataContext.EditCategoryCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
-                                                <MenuItem Header="删除分类" Command="{Binding DataContext.DeleteCategoryCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
-                                            </ContextMenu>
-                                        </Grid.ContextMenu>
+                            <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,10" Height="1" />
 
-                                        <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="15" 
-                                                       Foreground="{Binding Color, Converter={StaticResource ColorHexToBrushConverter}}" 
-                                                       Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <!-- Category Header with Add Button -->
+                            <Grid Margin="6,0,6,6" Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                <TextBlock Text="分类" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                <ui:Button Appearance="Transparent" Command="{Binding AddCategoryCommand}" 
+                                           Icon="{ui:SymbolIcon Add24}" Width="24" Height="24" Padding="0" 
+                                           HorizontalAlignment="Right" ToolTip="新建分类" />
+                            </Grid>
 
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <!-- Custom Categories List -->
+                            <ListBox x:Name="CategoriesListBox"
+                                     ItemsSource="{Binding CustomCategories}"
+                                     SelectedItem="{Binding SelectedNav, Mode=TwoWay}"
+                                     Background="Transparent" BorderThickness="0"
+                                     AllowDrop="True"
+                                     PreviewDragOver="Category_PreviewDragOver"
+                                     Drop="Category_Drop">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0,2" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="ToolTip" Value="{Binding Name}" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Grid Height="34">
+                                                        <Border x:Name="CatBorder" CornerRadius="6" Background="Transparent" Padding="10,0" Cursor="Hand">
+                                                            <ContentPresenter VerticalAlignment="Center" />
+                                                        </Border>
+                                                        <Border x:Name="CatPill" Width="3" Height="16" CornerRadius="1.5"
+                                                                Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="CatBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                                            <Setter TargetName="CatPill" Property="Visibility" Value="Visible" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="CatBorder" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="2,0" Background="Transparent"
+                                              Tag="{Binding}"
+                                              PreviewMouseLeftButtonDown="CategoryItem_PreviewMouseLeftButtonDown"
+                                              PreviewMouseMove="CategoryItem_PreviewMouseMove"
+                                              DragOver="CategoryItem_DragOver"
+                                              Drop="CategoryItem_Drop"
+                                              AllowDrop="True">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="编辑分类" Command="{Binding DataContext.EditCategoryCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                                                    <MenuItem Header="删除分类" Command="{Binding DataContext.DeleteCategoryCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                                                </ContextMenu>
+                                            </Grid.ContextMenu>
 
-                                        <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="8,1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Count}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </Border>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                            <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="15" 
+                                                           Foreground="{Binding Color, Converter={StaticResource ColorHexToBrushConverter}}" 
+                                                           Margin="0,0,8,0" VerticalAlignment="Center" />
+
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                                       Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+
+                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center"
+                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding Count}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Bottom Nav Operations (Design Doc Section 12 & 14) -->
+                    <StackPanel Grid.Row="2" Margin="0,4,0,0">
+                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
+                        
+                        <ui:Button Appearance="Transparent" Command="{Binding AddSoftwareCommand}" 
+                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" 
+                                   Height="36" Padding="10,0" Margin="0,1" Cursor="Hand" ToolTip="添加便携软件 (Ctrl+N)">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="Add24" FontSize="16" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="添加软件" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                           Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            </StackPanel>
+                        </ui:Button>
+
+                        <ui:Button Appearance="Transparent" Command="{Binding OpenScannerCommand}" 
+                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" 
+                                   Height="36" Padding="10,0" Margin="0,1" Cursor="Hand" ToolTip="扫描目录发现便携软件">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="Search24" FontSize="16" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="扫描目录" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                           Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            </StackPanel>
+                        </ui:Button>
+
+                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
+
+                        <ui:Button Appearance="Transparent" Command="{Binding OpenSettingsCommand}" 
+                                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" 
+                                   Height="36" Padding="10,0" Margin="0,1" Cursor="Hand" ToolTip="系统设置 (Ctrl+,)">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="Settings24" FontSize="16" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="系统设置" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"
+                                           Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                            </StackPanel>
+                        </ui:Button>
                     </StackPanel>
-                </ScrollViewer>
+                </Grid>
             </Border>
 
-            <!-- Center Software Area -->
+            <!-- Center Software Main Area (Header -> Toolbar -> Content) (Design Doc Section 15) -->
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- Section Info Bar -->
-                <Border Grid.Row="0" Padding="24,14,24,6">
+                <!-- Section Info & Action Toolbar Bar -->
+                <Border Grid.Row="0" Padding="24,14,24,12" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                     <Grid>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding SelectedNav.Name, FallbackValue='全部软件'}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                            <TextBlock Text="{Binding FilteredSoftware.Count, StringFormat='({0})'}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Title & Count -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SelectedNav.Name, FallbackValue='全部软件'}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="{Binding FilteredSoftware.Count, StringFormat='共 {0} 个应用'}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Toolbar: Search + Sort + View Mode Switch + Add -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- SearchBox (Ctrl+F) (Design Doc Section 28 & 31) -->
+                            <ui:TextBox x:Name="TopSearchBox"
+                                        Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                        PreviewKeyDown="TopSearchBox_PreviewKeyDown"
+                                        PlaceholderText="搜索软件、分类... (Ctrl+F)"
+                                        Icon="{ui:SymbolIcon Search24}"
+                                        ClearButtonEnabled="True"
+                                        Width="230"
+                                        Height="34"
+                                        Margin="0,0,8,0"
+                                        VerticalContentAlignment="Center" />
+
+                            <!-- Sort Selection -->
+                            <ComboBox SelectedValue="{Binding SortBy, Mode=TwoWay}" SelectedValuePath="Tag" Width="120" Height="34" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="排序方式">
+                                <ComboBoxItem Content="自定义排序" Tag="Custom" />
+                                <ComboBoxItem Content="名称 (A-Z)" Tag="NameAsc" />
+                                <ComboBoxItem Content="名称 (Z-A)" Tag="NameDesc" />
+                                <ComboBoxItem Content="最近使用" Tag="RecentUsed" />
+                                <ComboBoxItem Content="启动次数" Tag="LaunchCount" />
+                                <ComboBoxItem Content="添加时间" Tag="CreatedAt" />
+                            </ComboBox>
+
+                            <!-- View Mode Switch: Grid / List (Design Doc Section 44) -->
+                            <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="2" Margin="0,0,8,0" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Command="{Binding SetGridViewCommand}" Width="30" Height="28" Padding="0" Cursor="Hand" ToolTip="网格卡片视图" FocusVisualStyle="{x:Null}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="p" CornerRadius="4" Background="Transparent">
+                                                    <ui:SymbolIcon Symbol="Grid24" FontSize="15" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding ViewMode}" Value="Grid">
+                                                        <Setter TargetName="p" Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="p" Property="Opacity" Value="0.8" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                    <Button Command="{Binding SetListViewCommand}" Width="30" Height="28" Padding="0" Cursor="Hand" ToolTip="列表视图" FocusVisualStyle="{x:Null}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="p" CornerRadius="4" Background="Transparent">
+                                                    <ui:SymbolIcon Symbol="TextBulletListSquare24" FontSize="15" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding ViewMode}" Value="List">
+                                                        <Setter TargetName="p" Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="p" Property="Opacity" Value="0.8" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Primary Add Button -->
+                            <ui:Button Appearance="Primary" Command="{Binding AddSoftwareCommand}" Height="34" Padding="12,0" VerticalAlignment="Center" ToolTip="添加便携软件 (Ctrl+N)">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <ui:SymbolIcon Symbol="Add24" FontSize="15" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                    <TextBlock Text="添加" VerticalAlignment="Center" FontSize="13" />
+                                </StackPanel>
+                            </ui:Button>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- Empty State -->
+                <!-- Empty State (Design Doc Section 39) -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Visibility="{Binding FilteredSoftware.Count, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
-                    <Border Width="64" Height="64" CornerRadius="32" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,16">
-                        <ui:SymbolIcon Symbol="Folder24" FontSize="30" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                    <Border Width="68" Height="68" CornerRadius="34" Background="{DynamicResource SubtleFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <ui:SymbolIcon Symbol="Folder24" FontSize="32" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBlock Text="暂无匹配的便携软件" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
-                    <TextBlock Text="您可以直接将 .exe 拖入此窗口，或点击上方【添加软件】/【扫描】" 
-                               FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,6,0,16" />
-                    <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Add24}" Content="添加便携软件" Command="{Binding AddSoftwareCommand}" HorizontalAlignment="Center" Padding="16,8" />
+                    <TextBlock Text="还没有软件" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="将 Portable 软件拖到这里，或点击下方按钮添加" 
+                               FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,8,0,18" />
+                    <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Add24}" Content="添加软件" Command="{Binding AddSoftwareCommand}" HorizontalAlignment="Center" Padding="18,8" FontSize="13" />
                 </StackPanel>
 
-                <!-- Software Cards Panel using WPF-UI CardAction -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16,4,16,20">
-                    <ItemsControl x:Name="SoftwareCardsControl" ItemsSource="{Binding FilteredSoftware}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <!-- Official WPF-UI CardAction with Windows 11 Depth & Hover Micro-Animation -->
-                                <ui:CardAction Width="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=Width}"
-                                               Height="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=Height}"
-                                               IsChevronVisible="False"
-                                               Margin="6"
-                                               Padding="12,10"
-                                               Focusable="True"
-                                               Tag="{Binding}"
-                                               GotFocus="Card_GotFocus"
-                                               PreviewMouseLeftButtonDown="Card_PreviewMouseLeftButtonDown"
-                                               PreviewMouseMove="Card_PreviewMouseMove"
-                                               Drop="Card_Drop"
-                                               AllowDrop="True">
-                                    <ui:CardAction.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="启动" FontWeight="Bold" Command="{Binding LaunchCommand}" />
-                                            <MenuItem Header="以管理员身份运行" Command="{Binding LaunchAsAdminCommand}" />
-                                            <Separator />
-                                            <MenuItem Header="收藏" Command="{Binding ToggleFavoriteCommand}" />
-                                            <MenuItem Header="打开所在文件夹" Command="{Binding OpenFolderCommand}" />
-                                            <MenuItem Header="复制软件路径" Command="{Binding CopyPathCommand}" />
-                                            <Separator />
-                                            <MenuItem Header="重新定位 EXE" Command="{Binding RelocateCommand}" />
-                                            <MenuItem Header="编辑配置" Command="{Binding EditCommand}" />
-                                            <MenuItem Header="从管理器移除" Command="{Binding DeleteCommand}" />
-                                        </ContextMenu>
-                                    </ui:CardAction.ContextMenu>
+                <!-- Software Content Area (Grid Mode & List Mode) -->
+                <Grid Grid.Row="1" Visibility="{Binding FilteredSoftware.Count, Converter={StaticResource NullToVisibilityConverter}}">
+                    <!-- 1. Grid View (Design Doc Sections 16, 17, 18) -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="18,10,18,20"
+                                  Visibility="{Binding ViewMode, Converter={StaticResource ComparisonToVisibilityConverter}, ConverterParameter=Grid}">
+                        <ItemsControl x:Name="SoftwareCardsControl" ItemsSource="{Binding FilteredSoftware}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Fluent CardAction with unified CornerRadius 8 and hover micro-animations (Design Doc Section 16 & 18) -->
+                                    <ui:CardAction x:Name="CardActionContainer"
+                                                   Width="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=Width}"
+                                                   Height="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=Height}"
+                                                   IsChevronVisible="False"
+                                                   Margin="6"
+                                                   Padding="12,10"
+                                                   Focusable="True"
+                                                   Tag="{Binding}"
+                                                   GotFocus="Card_GotFocus"
+                                                   PreviewMouseLeftButtonDown="Card_PreviewMouseLeftButtonDown"
+                                                   PreviewMouseMove="Card_PreviewMouseMove"
+                                                   Drop="Card_Drop"
+                                                   AllowDrop="True"
+                                                   ContextMenu="{StaticResource SoftwareItemContextMenu}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="24" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
 
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="*" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
+                                            <!-- Top Status Row: Running / Missing Indicator + Favorite + More ⋮ Button -->
+                                            <Grid Grid.Row="0">
+                                                <!-- Running Green Dot -->
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                            Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                            ToolTip="运行中">
+                                                    <Ellipse Width="7" Height="7" Fill="#107C41" />
+                                                </StackPanel>
 
-                                        <!-- Top Status Row: Running Indicator + Missing Warning + Favorite Star -->
-                                        <Grid Grid.Row="0">
-                                            <!-- Running Green Dot -->
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                                        Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        ToolTip="运行中">
-                                                <Ellipse Width="7" Height="7" Fill="#107C41" />
-                                            </StackPanel>
+                                                <!-- Missing Warning -->
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                            Visibility="{Binding IsMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <ui:SymbolIcon Symbol="Warning24" FontSize="12" Foreground="#C42B1C" Margin="0,0,3,0" />
+                                                    <TextBlock Text="失效" FontSize="10" Foreground="#C42B1C" FontWeight="Bold" />
+                                                </StackPanel>
 
-                                            <!-- Missing Warning -->
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                                        Visibility="{Binding IsMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <ui:SymbolIcon Symbol="Warning24" FontSize="12" Foreground="#C42B1C" Margin="0,0,3,0" />
-                                                <TextBlock Text="失效" FontSize="10" Foreground="#C42B1C" FontWeight="Bold" />
-                                            </StackPanel>
+                                                <!-- Right: Star & More Menu Buttons (Design Doc Section 18: Hover reveals ⋮ and non-favorited star) -->
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                    <!-- Favorite Star Button -->
+                                                    <ui:Button x:Name="CardFavBtn"
+                                                               Appearance="Transparent" 
+                                                               Command="{Binding ToggleFavoriteCommand}"
+                                                               Padding="2" Width="22" Height="22"
+                                                               Opacity="0"
+                                                               ToolTip="收藏/取消收藏">
+                                                        <ui:SymbolIcon Symbol="Star24" Filled="{Binding IsFavorite}" FontSize="13" Foreground="#F59E0B" />
+                                                    </ui:Button>
 
-                                            <!-- Favorite Star Button (Fluent Vector Star) -->
-                                            <ui:Button Appearance="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center" 
-                                                       Command="{Binding ToggleFavoriteCommand}"
-                                                       Padding="2" Width="26" Height="26"
-                                                       ToolTip="收藏">
-                                                <ui:SymbolIcon Symbol="Star24" Filled="{Binding IsFavorite}" FontSize="15" Foreground="#F59E0B" />
-                                            </ui:Button>
+                                                    <!-- More ⋮ Button (Design Doc Section 18) -->
+                                                    <ui:Button x:Name="CardMoreBtn"
+                                                               Appearance="Transparent"
+                                                               Click="CardMoreButton_Click"
+                                                               Padding="2" Width="22" Height="22" Margin="2,0,0,0"
+                                                               Opacity="0"
+                                                               ToolTip="更多操作">
+                                                        <ui:SymbolIcon Symbol="MoreVertical24" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                    </ui:Button>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!-- Center Software Icon -->
+                                            <Border Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" 
+                                                       Width="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=IconSize}"
+                                                       Height="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=IconSize}"
+                                                       Stretch="Uniform" />
+                                            </Border>
+
+                                            <!-- Software Name -->
+                                            <TextBlock Grid.Row="2" Text="{Binding Name}" 
+                                                       FontWeight="SemiBold" 
+                                                       FontSize="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=FontSize}"
+                                                       HorizontalAlignment="Center" 
+                                                       TextAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Margin="0,4,0,4"
+                                                       ToolTip="{Binding Name}" />
+
+                                            <!-- Bottom Info: Category Badge -->
+                                            <Border Grid.Row="3" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2">
+                                                <TextBlock Text="{Binding CategoryName}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                            </Border>
                                         </Grid>
+                                    </ui:CardAction>
+                                    <DataTemplate.Triggers>
+                                        <Trigger SourceName="CardActionContainer" Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="CardFavBtn" Property="Opacity" Value="1" />
+                                            <Setter TargetName="CardMoreBtn" Property="Opacity" Value="1" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                            <Setter TargetName="CardFavBtn" Property="Opacity" Value="1" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
 
-                                        <!-- Center Software Icon -->
-                                        <Border Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" 
-                                                   Width="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=IconSize}"
-                                                   Height="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=IconSize}"
-                                                   Stretch="Uniform" />
-                                        </Border>
-
-                                        <!-- Software Name -->
-                                        <TextBlock Grid.Row="2" Text="{Binding Name}" 
-                                                   FontWeight="SemiBold" 
-                                                   FontSize="{Binding DataContext.CardSize, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource CardSizeToDimensionConverter}, ConverterParameter=FontSize}"
-                                                   HorizontalAlignment="Center" 
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Margin="0,4,0,4"
-                                                   ToolTip="{Binding Name}" />
-
-                                        <!-- Bottom Info: Category Badge & Play Button -->
-                                        <Grid Grid.Row="3" Margin="0,2,0,0">
+                    <!-- 2. List View (Design Doc Sections 44 & 45) -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="20,10,20,20"
+                                  Visibility="{Binding ViewMode, Converter={StaticResource ComparisonToVisibilityConverter}, ConverterParameter=List}">
+                        <ItemsControl x:Name="SoftwareListControl" ItemsSource="{Binding FilteredSoftware}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" 
+                                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                            Margin="0,0,0,6" Padding="12,8" Cursor="Hand"
+                                            Tag="{Binding}"
+                                            GotFocus="Card_GotFocus"
+                                            PreviewMouseLeftButtonDown="Card_PreviewMouseLeftButtonDown"
+                                            PreviewMouseMove="Card_PreviewMouseMove"
+                                            Drop="Card_Drop"
+                                            AllowDrop="True"
+                                            ContextMenu="{StaticResource SoftwareItemContextMenu}">
+                                        <Grid>
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Border Grid.Column="0" HorizontalAlignment="Left" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding CategoryName}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                            <!-- Software Icon (32x32) -->
+                                            <Border Grid.Column="0" Width="38" Height="38" CornerRadius="6" 
+                                                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" 
+                                                    Margin="0,0,14,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" 
+                                                       Width="28" Height="28" Stretch="Uniform" />
                                             </Border>
 
-                                            <ui:Button Grid.Column="1" Appearance="Transparent" Command="{Binding LaunchCommand}"
-                                                       Padding="4,2" Width="28" Height="24"
-                                                       ToolTip="启动 (或双击卡片)">
-                                                <ui:SymbolIcon Symbol="Play24" FontSize="12" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
-                                            </ui:Button>
+                                            <!-- Name & Path / Description -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CategoryName}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                    </Border>
+                                                    <!-- Running Green Dot in List -->
+                                                    <Ellipse Width="6" Height="6" Fill="#107C41" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                             Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="运行中" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding ExePath}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+                                                           TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
+                                            </StackPanel>
+
+                                            <!-- Last Used Status -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="16,0,16,0" MinWidth="90">
+                                                <TextBlock Text="最近使用" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{Binding LastLaunchedDisplay}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,1,0,0" />
+                                            </StackPanel>
+
+                                            <!-- Launch Count -->
+                                            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,20,0" MinWidth="60">
+                                                <TextBlock Text="启动次数" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="{Binding LaunchCount, StringFormat='{}{0} 次'}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,1,0,0" />
+                                            </StackPanel>
+
+                                            <!-- Quick Action Buttons -->
+                                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <!-- Launch Button -->
+                                                <ui:Button Appearance="Transparent" Command="{Binding LaunchCommand}" 
+                                                           Padding="4" Width="28" Height="28" ToolTip="启动 (或双击此行)">
+                                                    <ui:SymbolIcon Symbol="Play24" FontSize="14" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                                                </ui:Button>
+                                                <!-- Favorite Button -->
+                                                <ui:Button Appearance="Transparent" Command="{Binding ToggleFavoriteCommand}" 
+                                                           Padding="4" Width="28" Height="28" Margin="4,0,0,0" ToolTip="收藏/取消收藏">
+                                                    <ui:SymbolIcon Symbol="Star24" Filled="{Binding IsFavorite}" FontSize="14" Foreground="#F59E0B" />
+                                                </ui:Button>
+                                                <!-- More Button -->
+                                                <ui:Button Appearance="Transparent" Click="CardMoreButton_Click" 
+                                                           Padding="4" Width="28" Height="28" Margin="4,0,0,0" ToolTip="更多操作">
+                                                    <ui:SymbolIcon Symbol="MoreVertical24" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                </ui:Button>
+                                            </StackPanel>
                                         </Grid>
-                                    </Grid>
-                                </ui:CardAction>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
             </Grid>
         </Grid>
 
-        <!-- Visual Drag & Drop Overlay -->
+        <!-- Visual Drag & Drop Overlay (Design Doc Section 23) -->
         <Grid x:Name="DropOverlay" Grid.Row="0" Grid.RowSpan="2" 
               Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" Opacity="0.94" 
               Visibility="Collapsed" IsHitTestVisible="False">

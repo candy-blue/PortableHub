@@ -46,6 +46,20 @@ public partial class QuickLauncherWindow : Window
         SetForegroundWindow(helper.Handle);
         BringWindowToTop(helper.Handle);
 
+        // Smooth Fluent 2 entrance animation (Design Doc Section 34: 120~160ms)
+        RootBorder.Opacity = 0;
+        RootScale.ScaleX = 0.98;
+        RootScale.ScaleY = 0.98;
+
+        var animDuration = TimeSpan.FromMilliseconds(140);
+        var ease = new System.Windows.Media.Animation.QuadraticEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
+        var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0, 1, animDuration) { EasingFunction = ease };
+        var scaleIn = new System.Windows.Media.Animation.DoubleAnimation(0.98, 1.0, animDuration) { EasingFunction = ease };
+
+        RootBorder.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+        RootScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleXProperty, scaleIn);
+        RootScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleYProperty, scaleIn);
+
         SearchBox.Focus();
         SearchBox.SelectAll();
 
@@ -63,26 +77,29 @@ public partial class QuickLauncherWindow : Window
             var screen = System.Windows.Forms.Screen.FromPoint(cursorPos);
             var workingArea = screen.WorkingArea;
 
-            var source = PresentationSource.FromVisual(this);
-            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
-            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+            var helper = new System.Windows.Interop.WindowInteropHelper(this);
+            helper.EnsureHandle();
 
-            if (dpiX <= 0) dpiX = 1.0;
-            if (dpiY <= 0) dpiY = 1.0;
+            var dpi = System.Windows.Media.VisualTreeHelper.GetDpi(this);
+            double dpiX = dpi.DpiScaleX > 0 ? dpi.DpiScaleX : 1.0;
+            double dpiY = dpi.DpiScaleY > 0 ? dpi.DpiScaleY : 1.0;
 
             double screenLeftDip = workingArea.Left / dpiX;
             double screenTopDip = workingArea.Top / dpiY;
             double screenWidthDip = workingArea.Width / dpiX;
             double screenHeightDip = workingArea.Height / dpiY;
 
-            Left = screenLeftDip + (screenWidthDip - Width) / 2.0;
-            Top = screenTopDip + (screenHeightDip - Height) / 2.0;
+            double winWidth = ActualWidth > 0 ? ActualWidth : Width;
+            double winHeight = ActualHeight > 0 ? ActualHeight : (double.IsNaN(Height) ? 350 : Height);
+
+            Left = screenLeftDip + (screenWidthDip - winWidth) / 2.0;
+            Top = screenTopDip + (screenHeightDip - winHeight) / 2.5;
         }
         catch
         {
             // Fallback to center screen if any calculation issue
             Left = (SystemParameters.PrimaryScreenWidth - Width) / 2.0;
-            Top = (SystemParameters.PrimaryScreenHeight - Height) / 2.0;
+            Top = (SystemParameters.PrimaryScreenHeight - (double.IsNaN(Height) ? 350 : Height)) / 2.5;
         }
     }
 

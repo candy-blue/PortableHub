@@ -130,4 +130,82 @@ public class PerformanceAndEdgeCaseTests
 
         Assert.Equal("Ctrl+Alt+Space", settingsService.CurrentSettings.GlobalHotkey);
     }
+
+    [Fact]
+    public void ComparisonToVisibilityConverter_ShouldWorkCorrectly()
+    {
+        var converter = new PortableHub.App.Converters.ComparisonToVisibilityConverter();
+
+        Assert.Equal(System.Windows.Visibility.Visible, converter.Convert("Grid", typeof(System.Windows.Visibility), "Grid", System.Globalization.CultureInfo.InvariantCulture));
+        Assert.Equal(System.Windows.Visibility.Visible, converter.Convert("grid", typeof(System.Windows.Visibility), "GRID", System.Globalization.CultureInfo.InvariantCulture));
+        Assert.Equal(System.Windows.Visibility.Collapsed, converter.Convert("Grid", typeof(System.Windows.Visibility), "List", System.Globalization.CultureInfo.InvariantCulture));
+        Assert.Equal(System.Windows.Visibility.Collapsed, converter.Convert(null, typeof(System.Windows.Visibility), "Grid", System.Globalization.CultureInfo.InvariantCulture));
+        Assert.Equal(System.Windows.Visibility.Collapsed, converter.Convert("Grid", typeof(System.Windows.Visibility), null, System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
+    public void ShortcutHelper_CreateDesktopShortcut_WithInvalidPath_ReturnsFalse()
+    {
+        var result = PortableHub.Infrastructure.Windows.ShortcutHelper.CreateDesktopShortcut("C:\\NonExistent_12345.exe", "TestApp");
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task SettingsService_ShouldPreserveViewMode()
+    {
+        using var env = new TestEnvironment();
+        var settingsService = new SettingsService(env.TempDirectory);
+        await settingsService.LoadSettingsAsync();
+        Assert.Equal("Grid", settingsService.CurrentSettings.ViewMode);
+
+        settingsService.CurrentSettings.ViewMode = "List";
+        await settingsService.SaveSettingsAsync();
+
+        var reloadedService = new SettingsService(env.TempDirectory);
+        await reloadedService.LoadSettingsAsync();
+        Assert.Equal("List", reloadedService.CurrentSettings.ViewMode);
+    }
+
+    [Fact]
+    public void SearchQuickLauncher_EmptyQuery_PrioritizesFavoritesAndRecentLaunches()
+    {
+        var searchService = new SearchService();
+        var now = DateTime.UtcNow;
+
+        var items = new List<Software>
+        {
+            new Software { Id = 1, Name = "Alpha", CategoryName = "Default", ExePath = "C:\\a.exe", IsFavorite = false, LastLaunchedAt = null, LaunchCount = 0 },
+            new Software { Id = 2, Name = "Beta Fav", CategoryName = "Default", ExePath = "C:\\b.exe", IsFavorite = true, LastLaunchedAt = null, LaunchCount = 0 },
+            new Software { Id = 3, Name = "Gamma Recent", CategoryName = "Default", ExePath = "C:\\c.exe", IsFavorite = false, LastLaunchedAt = now, LaunchCount = 5 }
+        };
+
+        searchService.IndexSoftware(items);
+        var results = searchService.SearchQuickLauncher(string.Empty, 10);
+
+        Assert.Equal(3, results.Count);
+        Assert.Equal("Beta Fav", results[0].Name);
+        Assert.Equal("Gamma Recent", results[1].Name);
+        Assert.Equal("Alpha", results[2].Name);
+    }
+
+    [Fact]
+    public void SearchQuickLauncher_WithQuery_FavoredAndRecentItemsScoreHigher()
+    {
+        var searchService = new SearchService();
+        var now = DateTime.UtcNow;
+
+        var items = new List<Software>
+        {
+            new Software { Id = 1, Name = "Tool Normal", CategoryName = "Default", ExePath = "C:\\t1.exe", IsFavorite = false, LastLaunchedAt = null, LaunchCount = 0 },
+            new Software { Id = 2, Name = "Tool Favorite", CategoryName = "Default", ExePath = "C:\\t2.exe", IsFavorite = true, LastLaunchedAt = now, LaunchCount = 10 }
+        };
+
+        searchService.IndexSoftware(items);
+        var results = searchService.SearchQuickLauncher("Tool", 10);
+
+        Assert.Equal(2, results.Count);
+        Assert.Equal("Tool Favorite", results[0].Name);
+        Assert.Equal("Tool Normal", results[1].Name);
+    }
 }
+

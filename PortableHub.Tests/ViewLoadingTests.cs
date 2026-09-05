@@ -33,6 +33,17 @@ public class StaTestFixture : IDisposable
                 var app = new Application();
                 app.Resources.MergedDictionaries.Add(new Wpf.Ui.Markup.ThemesDictionary { Theme = Wpf.Ui.Appearance.ApplicationTheme.Dark });
                 app.Resources.MergedDictionaries.Add(new Wpf.Ui.Markup.ControlsDictionary());
+                try
+                {
+                    app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/PortableHub.App;component/Themes/Colors.xaml", UriKind.Absolute) });
+                    app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/PortableHub.App;component/Themes/Brushes.xaml", UriKind.Absolute) });
+                    app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/PortableHub.App;component/Themes/Typography.xaml", UriKind.Absolute) });
+                    app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/PortableHub.App;component/Themes/Controls.xaml", UriKind.Absolute) });
+                }
+                catch
+                {
+                    // If pack URI cannot be resolved in test runner domain
+                }
                 app.Resources.Add("ComparisonConverter", new ComparisonConverter());
                 app.Resources.Add("StringToImageSourceConverter", new StringToImageSourceConverter());
                 app.Resources.Add("CardSizeToDimensionConverter", new CardSizeToDimensionConverter());
@@ -41,6 +52,7 @@ public class StaTestFixture : IDisposable
                 app.Resources.Add("InverseBooleanToVisibilityConverter", new InverseBooleanToVisibilityConverter());
                 app.Resources.Add("NullToVisibilityConverter", new NullToVisibilityConverter());
                 app.Resources.Add("BooleanToVisibilityConverter", new BooleanToVisibilityConverter());
+                app.Resources.Add("ComparisonToVisibilityConverter", new ComparisonToVisibilityConverter());
             }
             _tcs.SetResult(Dispatcher.CurrentDispatcher);
             Dispatcher.Run();
@@ -192,6 +204,57 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
         Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "FolderOpen24"));
         Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "Save24"));
         Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "ArrowSync24"));
+        Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "Apps24"));
+        Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "Grid24"));
+        Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "MoreVertical24"));
+        Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "TextBulletListSquare24"));
+        Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "Copy24"));
+        Assert.True(Enum.IsDefined(typeof(Wpf.Ui.Controls.SymbolRegular), "Delete24"));
+    }
+
+    [Fact]
+    public void ThemeService_UpdateDynamicThemeColors_SetsBothColorsAndBrushes()
+    {
+        _fixture.Run(() =>
+        {
+            ThemeService.UpdateDynamicThemeColors(true);
+            Assert.True(Application.Current.Resources.Contains("AppBackground"));
+            Assert.True(Application.Current.Resources.Contains("BrushBackground"));
+            Assert.IsType<System.Windows.Media.Color>(Application.Current.Resources["AppBackground"]);
+            Assert.IsType<System.Windows.Media.SolidColorBrush>(Application.Current.Resources["BrushBackground"]);
+
+            ThemeService.UpdateDynamicThemeColors(false);
+            Assert.True(Application.Current.Resources.Contains("AppBackground"));
+            Assert.True(Application.Current.Resources.Contains("BrushBackground"));
+        });
+    }
+
+    [Fact]
+    public void MainViewModel_ToggleSidebar_TogglesState()
+    {
+        _fixture.Run(() =>
+        {
+            using var env = new TestEnvironment();
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<MainViewModel>();
+
+            Assert.False(vm.IsSidebarCollapsed);
+            vm.ToggleSidebarCommand.Execute(null);
+            Assert.True(vm.IsSidebarCollapsed);
+            vm.ToggleSidebarCommand.Execute(null);
+            Assert.False(vm.IsSidebarCollapsed);
+        });
+    }
+
+    [Fact]
+    public void CategoryNavModel_HomeMode_HasCorrectGlyphAndSymbol()
+    {
+        var home = new CategoryNavModel { Name = "首页", Icon = "Home", NavMode = "Home", Count = 5 };
+        Assert.Equal("Home", home.NavMode);
+        Assert.Equal("首页", home.Name);
+        Assert.Equal(5, home.Count);
+        Assert.Equal(Wpf.Ui.Controls.SymbolRegular.Home24, home.Symbol);
+        Assert.Equal("\uE80F", home.Glyph);
     }
 
     private class FakeHotkeyService : IHotkeyService

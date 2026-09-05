@@ -31,7 +31,7 @@ public class CardSizeToDimensionConverter : IValueConverter
             _ => param switch // Medium
             {
                 "Width" => 170.0,
-                "Height" => 180.0,
+                "Height" => 170.0,
                 "IconSize" => 50.0,
                 "FontSize" => 13.0,
                 _ => 170.0

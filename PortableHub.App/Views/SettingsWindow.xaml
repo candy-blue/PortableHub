@@ -77,6 +77,24 @@
                                     </StackPanel>
                                 </Grid>
                             </ui:Card>
+
+                            <!-- Default View Mode Card (Design Doc Section 47) -->
+                            <ui:Card Margin="0,12,0,0" Padding="16,14">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="默认视图模式" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="软件列表首选呈现方式（网格卡片或紧凑列表）" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <RadioButton Content="网格卡片 (推荐)" IsChecked="{Binding ViewMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=Grid}" GroupName="ViewModeGroup" />
+                                        <RadioButton Content="紧凑列表" IsChecked="{Binding ViewMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=List}" GroupName="ViewModeGroup" Margin="16,0,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </ui:Card>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>

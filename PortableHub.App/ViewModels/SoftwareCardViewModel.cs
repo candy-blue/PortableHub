@@ -15,6 +15,8 @@ public partial class SoftwareCardViewModel : ObservableObject
     private readonly Action<SoftwareCardViewModel> _onEdit;
     private readonly Action<SoftwareCardViewModel> _onDelete;
     private readonly Action<SoftwareCardViewModel> _onRelocate;
+    private readonly Action<SoftwareCardViewModel>? _onFavoriteChanged;
+    private readonly Action<SoftwareCardViewModel>? _onLaunched;
 
     public Software Model { get; }
 
@@ -60,7 +62,9 @@ public partial class SoftwareCardViewModel : ObservableObject
         ISoftwareRepository softwareRepository,
         Action<SoftwareCardViewModel> onEdit,
         Action<SoftwareCardViewModel> onDelete,
-        Action<SoftwareCardViewModel> onRelocate)
+        Action<SoftwareCardViewModel> onRelocate,
+        Action<SoftwareCardViewModel>? onFavoriteChanged = null,
+        Action<SoftwareCardViewModel>? onLaunched = null)
     {
         Model = model;
         _launchService = launchService;
@@ -68,6 +72,8 @@ public partial class SoftwareCardViewModel : ObservableObject
         _onEdit = onEdit;
         _onDelete = onDelete;
         _onRelocate = onRelocate;
+        _onFavoriteChanged = onFavoriteChanged;
+        _onLaunched = onLaunched;
 
         _isFavorite = model.IsFavorite;
         _iconPath = model.IconPath;
@@ -100,6 +106,7 @@ public partial class SoftwareCardViewModel : ObservableObject
         else
         {
             RefreshState();
+            _onLaunched?.Invoke(this);
         }
     }
 
@@ -124,6 +131,7 @@ public partial class SoftwareCardViewModel : ObservableObject
         else
         {
             RefreshState();
+            _onLaunched?.Invoke(this);
         }
     }
 
@@ -133,6 +141,7 @@ public partial class SoftwareCardViewModel : ObservableObject
         IsFavorite = !IsFavorite;
         Model.IsFavorite = IsFavorite;
         await _softwareRepository.UpdateFavoriteAsync(Model.Id, IsFavorite);
+        _onFavoriteChanged?.Invoke(this);
     }
 
     [RelayCommand]
@@ -165,6 +174,36 @@ public partial class SoftwareCardViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void CreateDesktopShortcut()
+    {
+        if (string.IsNullOrWhiteSpace(Model.ExePath) || !File.Exists(Model.ExePath))
+        {
+            MessageBox.Show("软件路径不存在，无法创建快捷方式。", "Portable Hub", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var workingDir = !string.IsNullOrWhiteSpace(Model.WorkingDirectory) 
+            ? Model.WorkingDirectory 
+            : Path.GetDirectoryName(Model.ExePath);
+
+        var success = PortableHub.Infrastructure.Windows.ShortcutHelper.CreateDesktopShortcut(
+            Model.ExePath, 
+            Model.Name, 
+            Model.Arguments, 
+            workingDir, 
+            Model.IconPath);
+
+        if (success)
+        {
+            MessageBox.Show($"已在桌面创建【{Model.Name}】的快捷方式。", "Portable Hub", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else
+        {
+            MessageBox.Show("创建桌面快捷方式失败。", "Portable Hub", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
     public void Edit() => _onEdit(this);
 
     [RelayCommand]
@@ -173,3 +212,4 @@ public partial class SoftwareCardViewModel : ObservableObject
     [RelayCommand]
     public void Relocate() => _onRelocate(this);
 }
+

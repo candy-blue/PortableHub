@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Fluent Brushes dynamically referencing color tokens -->
+    <SolidColorBrush x:Key="BrushBackground" Color="{DynamicResource AppBackground}" />
+    <SolidColorBrush x:Key="BrushSurface" Color="{DynamicResource AppSurface}" />
+    <SolidColorBrush x:Key="BrushCard" Color="{DynamicResource AppCard}" />
+    <SolidColorBrush x:Key="BrushCardHover" Color="{DynamicResource AppCardHover}" />
+    <SolidColorBrush x:Key="BrushSecondaryBackground" Color="{DynamicResource AppSecondaryBackground}" />
+    <SolidColorBrush x:Key="BrushBorder" Color="{DynamicResource AppBorder}" />
+    <SolidColorBrush x:Key="BrushTextPrimary" Color="{DynamicResource AppTextPrimary}" />
+    <SolidColorBrush x:Key="BrushTextSecondary" Color="{DynamicResource AppTextSecondary}" />
+    <SolidColorBrush x:Key="BrushTextTertiary" Color="{DynamicResource AppTextTertiary}" />
+    <SolidColorBrush x:Key="BrushAccent" Color="{DynamicResource AppAccent}" />
+    <SolidColorBrush x:Key="BrushAccentHover" Color="{DynamicResource AppAccentHover}" />
+    <SolidColorBrush x:Key="BrushDanger" Color="{DynamicResource AppDanger}" />
+    <SolidColorBrush x:Key="BrushSuccess" Color="{DynamicResource AppSuccess}" />
+    <SolidColorBrush x:Key="BrushInputBg" Color="{DynamicResource AppInputBg}" />
+    <SolidColorBrush x:Key="BrushSidebarBg" Color="{DynamicResource AppSidebarBg}" />
+    <SolidColorBrush x:Key="BrushBadgeBg" Color="{DynamicResource AppBadgeBg}" />
+
+</ResourceDictionary>
