@@ -64,7 +64,7 @@
                                IsEnabled="{Binding IsScanning, Converter={StaticResource InverseBooleanConverter}}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Play24" FontSize="20" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="开始扫描" Foreground="#FFFFFF" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="14" />
+                            <TextBlock Text="开始扫描" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
                     </ui:Button>
 

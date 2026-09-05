@@ -90,9 +90,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private void AnimateSidebar(bool collapsed)
     {
         double targetWidth = collapsed ? 56.0 : 224.0;
-        var anim = new System.Windows.Media.Animation.DoubleAnimation(targetWidth, TimeSpan.FromMilliseconds(160))
+        var anim = new System.Windows.Media.Animation.DoubleAnimation(targetWidth, TimeSpan.FromMilliseconds(180))
         {
-            EasingFunction = new System.Windows.Media.Animation.QuadraticEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
+            EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
         };
         SidebarBorder.BeginAnimation(WidthProperty, anim);
     }

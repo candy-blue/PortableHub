@@ -47,6 +47,12 @@
 
     <!-- Fluent 2 Primary Accent Button (Height 36, Padding 12,0, FontSize 14, CornerRadius 6) -->
     <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+        <Style.Resources>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+        </Style.Resources>
         <Setter Property="Background" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
         <Setter Property="Foreground" Value="#FFFFFF" />
         <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
@@ -83,6 +89,12 @@
 
     <!-- Fluent 2 ui:Button Style - Ensures Primary buttons always render crisp white text and icons across light and dark modes -->
     <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+        <Style.Resources>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}" />
+                <Setter Property="FontWeight" Value="{Binding Path=FontWeight, RelativeSource={RelativeSource AncestorType={x:Type ui:Button}}}" />
+            </Style>
+        </Style.Resources>
         <Style.Triggers>
             <Trigger Property="Appearance" Value="Primary">
                 <Setter Property="Foreground" Value="#FFFFFF" />

@@ -104,8 +104,9 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Left Sidebar Navigation (Design Doc Section 12 & 14) -->
-            <Border x:Name="SidebarBorder" Grid.Column="0" Width="224" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0" Padding="8,10">
+            <!-- Left Sidebar Navigation (Design Doc Section 12 & 14 - Fully Refactored Fluent Sidebar) -->
+            <Border x:Name="SidebarBorder" Grid.Column="0" Width="224" ClipToBounds="True"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0" Padding="8,8">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -113,23 +114,24 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!-- Sidebar Header with Collapse Toggle Button (Design Doc Section 14) -->
-                    <Grid Grid.Row="0" Margin="0,0,0,8" Height="40">
+                    <!-- Sidebar Header with Fixed-Left Collapse Toggle Button (28px Center Spine) -->
+                    <Grid Grid.Row="0" Margin="0,0,0,6" Height="40">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="导航" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="10,0,0,0"
-                                   Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                        <ui:Button Grid.Column="1" Appearance="Transparent" Command="{Binding ToggleSidebarCommand}" 
+                        <ui:Button Grid.Column="0" Appearance="Transparent" Command="{Binding ToggleSidebarCommand}" 
                                    Width="40" Height="40" Padding="0" 
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="展开/折叠导航栏 (Ctrl+B)">
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="展开/折叠侧边栏 (Ctrl+B)">
                             <ui:SymbolIcon Symbol="Navigation24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </ui:Button>
+                        <TextBlock Grid.Column="1" Text="导航" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="8,0,0,0"
+                                   TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                                   Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                     </Grid>
 
-                    <!-- Nav Items & Custom Categories -->
-                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                    <!-- Nav Items & Custom Categories (Single Outer ScrollViewer, Zero Nested ScrollViewers) -->
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" Focusable="False">
                         <ScrollViewer.Style>
                             <Style TargetType="ScrollViewer">
                                 <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
@@ -144,22 +146,39 @@
                             <!-- Primary Nav (首页, 全部软件, 收藏, 最近使用) -->
                             <ListBox ItemsSource="{Binding NavItems}" 
                                      SelectedItem="{Binding SelectedNav, Mode=TwoWay}"
-                                     Background="Transparent" BorderThickness="0">
+                                     Background="Transparent" BorderThickness="0" Padding="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                <ListBox.Template>
+                                    <ControlTemplate TargetType="ListBox">
+                                        <Border Background="{TemplateBinding Background}" BorderThickness="0" Padding="0">
+                                            <ItemsPresenter />
+                                        </Border>
+                                    </ControlTemplate>
+                                </ListBox.Template>
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="Padding" Value="0" />
-                                        <Setter Property="Margin" Value="0,2" />
+                                        <Setter Property="Margin" Value="0,1" />
+                                        <Setter Property="Height" Value="40" />
                                         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                        <Setter Property="ToolTip" Value="{Binding Name}" />
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <TextBlock>
+                                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                                    <Run Text=" (" /><Run Text="{Binding Count, Mode=OneWay}" /><Run Text=")" />
+                                                </TextBlock>
+                                            </Setter.Value>
+                                        </Setter>
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListBoxItem">
-                                                    <Grid Height="40">
-                                                        <Border x:Name="NavBorder" CornerRadius="6" Background="Transparent" Cursor="Hand">
+                                                    <Grid Height="40" ClipToBounds="True">
+                                                        <Border x:Name="NavBorder" CornerRadius="6" Background="Transparent" Cursor="Hand" SnapsToDevicePixels="True">
                                                             <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" />
                                                         </Border>
                                                         <Border x:Name="SelectionPill" Width="3" Height="18" CornerRadius="1.5"
-                                                                Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
+                                                                Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="Collapsed" />
                                                     </Grid>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsSelected" Value="True">
@@ -177,14 +196,15 @@
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Height="40">
+                                        <Grid Height="40" ClipToBounds="True">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="40" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,4,0" VerticalAlignment="Center"
+                                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                                                        Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                                             <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0"
                                                     Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
@@ -195,10 +215,10 @@
                                 </ListBox.ItemTemplate>
                             </ListBox>
 
-                            <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,8" Height="1" />
+                            <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
 
                             <!-- Category Header with Add Button -->
-                            <Grid Margin="10,0,6,6" Height="28" Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <Grid Margin="10,2,6,4" Height="28" Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                 <TextBlock Text="分类" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                                 <ui:Button Appearance="Transparent" Command="{Binding AddCategoryCommand}" 
                                            Icon="{ui:SymbolIcon Add24, FontSize=16}" Width="24" Height="24" Padding="0" 
@@ -209,25 +229,42 @@
                             <ListBox x:Name="CategoriesListBox"
                                      ItemsSource="{Binding CustomCategories}"
                                      SelectedItem="{Binding SelectedNav, Mode=TwoWay}"
-                                     Background="Transparent" BorderThickness="0"
+                                     Background="Transparent" BorderThickness="0" Padding="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      AllowDrop="True"
                                      PreviewDragOver="Category_PreviewDragOver"
                                      Drop="Category_Drop">
+                                <ListBox.Template>
+                                    <ControlTemplate TargetType="ListBox">
+                                        <Border Background="{TemplateBinding Background}" BorderThickness="0" Padding="0">
+                                            <ItemsPresenter />
+                                        </Border>
+                                    </ControlTemplate>
+                                </ListBox.Template>
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="Padding" Value="0" />
-                                        <Setter Property="Margin" Value="0,2" />
+                                        <Setter Property="Margin" Value="0,1" />
+                                        <Setter Property="Height" Value="40" />
                                         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                        <Setter Property="ToolTip" Value="{Binding Name}" />
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <TextBlock>
+                                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                                    <Run Text=" (" /><Run Text="{Binding Count, Mode=OneWay}" /><Run Text=")" />
+                                                </TextBlock>
+                                            </Setter.Value>
+                                        </Setter>
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListBoxItem">
-                                                    <Grid Height="40">
-                                                        <Border x:Name="CatBorder" CornerRadius="6" Background="Transparent" Cursor="Hand">
+                                                    <Grid Height="40" ClipToBounds="True">
+                                                        <Border x:Name="CatBorder" CornerRadius="6" Background="Transparent" Cursor="Hand" SnapsToDevicePixels="True">
                                                             <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" />
                                                         </Border>
                                                         <Border x:Name="CatPill" Width="3" Height="18" CornerRadius="1.5"
-                                                                Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" Visibility="Collapsed" />
+                                                                Background="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="Collapsed" />
                                                     </Grid>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsSelected" Value="True">
@@ -245,7 +282,7 @@
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Height="40" Background="Transparent"
+                                        <Grid Height="40" Background="Transparent" ClipToBounds="True"
                                               Tag="{Binding}"
                                               PreviewMouseLeftButtonDown="CategoryItem_PreviewMouseLeftButtonDown"
                                               PreviewMouseMove="CategoryItem_PreviewMouseMove"
@@ -268,7 +305,8 @@
                                                            Foreground="{Binding Color, Converter={StaticResource ColorHexToBrushConverter}}" 
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,4,0" VerticalAlignment="Center"
+                                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                                                        Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 
                                             <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0"
@@ -282,20 +320,21 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Bottom Nav Operations (Design Doc Section 12 & 14) -->
+                    <!-- Bottom Nav Operations (Design Doc Section 12 & 14 - Unified 40px Center Slot) -->
                     <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
+                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,4" Height="1" />
                         
                         <ui:Button Appearance="Transparent" Command="{Binding AddSoftwareCommand}" 
                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
                                    Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="添加便携软件 (Ctrl+N)">
-                            <Grid Height="40">
+                            <Grid Height="40" ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Grid.Column="0" Symbol="Add24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="添加软件" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
+                                <TextBlock Grid.Column="1" Text="添加软件" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center"
+                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                                            Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                             </Grid>
                         </ui:Button>
@@ -303,29 +342,31 @@
                         <ui:Button Appearance="Transparent" Command="{Binding OpenScannerCommand}" 
                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
                                    Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="扫描目录发现便携软件">
-                            <Grid Height="40">
+                            <Grid Height="40" ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Grid.Column="0" Symbol="Search24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="扫描目录" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
+                                <TextBlock Grid.Column="1" Text="扫描目录" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center"
+                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                                            Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                             </Grid>
                         </ui:Button>
 
-                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
+                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,4" Height="1" />
 
                         <ui:Button Appearance="Transparent" Command="{Binding OpenSettingsCommand}" 
                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
                                    Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="系统设置 (Ctrl+,)">
-                            <Grid Height="40">
+                            <Grid Height="40" ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Grid.Column="0" Symbol="Settings24" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="系统设置" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"
+                                <TextBlock Grid.Column="1" Text="系统设置" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center"
+                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                                            Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                             </Grid>
                         </ui:Button>
@@ -425,7 +466,7 @@
                             <ui:Button Appearance="Primary" Foreground="#FFFFFF" FontWeight="SemiBold" Command="{Binding AddSoftwareCommand}" Height="36" Padding="14,0" VerticalAlignment="Center" ToolTip="添加便携软件 (Ctrl+N)">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <ui:SymbolIcon Symbol="Add24" FontSize="20" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                    <TextBlock Text="添加" Foreground="#FFFFFF" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="14" />
+                                    <TextBlock Text="添加软件" Foreground="#FFFFFF" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="14" />
                                 </StackPanel>
                             </ui:Button>
                         </StackPanel>

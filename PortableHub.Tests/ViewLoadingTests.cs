@@ -406,12 +406,22 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
         var softwareDialogXaml = File.ReadAllText(Path.Combine(appDir, "Views", "SoftwareEditDialog.xaml"));
         var scannerDialogXaml = File.ReadAllText(Path.Combine(appDir, "Views", "ScannerDialog.xaml"));
         var settingsXaml = File.ReadAllText(Path.Combine(appDir, "Views", "SettingsWindow.xaml"));
+        var typoXaml = File.ReadAllText(Path.Combine(appDir, "Themes", "Typography.xaml"));
+        var controlsXaml = File.ReadAllText(Path.Combine(appDir, "Themes", "Controls.xaml"));
 
         Assert.Contains("Foreground=\"#FFFFFF\"", mainWindowXaml);
         Assert.Contains("Foreground=\"#FFFFFF\"", categoryDialogXaml);
         Assert.Contains("Foreground=\"#FFFFFF\"", softwareDialogXaml);
         Assert.Contains("Foreground=\"#FFFFFF\"", scannerDialogXaml);
         Assert.Contains("Foreground=\"#FFFFFF\"", settingsXaml);
+
+        // Verify Typography.xaml does not pollute default TextBlock style with hardcoded dark foreground
+        Assert.DoesNotContain("<Setter Property=\"Foreground\" Value=\"{DynamicResource TextFillColorPrimaryBrush}\" />\r\n        <Setter Property=\"FontFamily\"", typoXaml);
+        Assert.DoesNotContain("<Setter Property=\"Foreground\" Value=\"{DynamicResource TextFillColorPrimaryBrush}\" />\n        <Setter Property=\"FontFamily\"", typoXaml);
+
+        // Verify Controls.xaml ensures child TextBlock gets white foreground in PrimaryButton and ui:Button
+        Assert.Contains("<Setter Property=\"Foreground\" Value=\"#FFFFFF\" />", controlsXaml);
+        Assert.Contains("<Setter Property=\"FontWeight\" Value=\"SemiBold\" />", controlsXaml);
     }
 
     [Fact]
@@ -420,13 +430,55 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
         var appDir = GetAppDirectory();
         var mainWindowXaml = File.ReadAllText(Path.Combine(appDir, "Views", "MainWindow.xaml"));
 
+        // Verify SidebarBorder has ClipToBounds="True" to prevent overflow bleeding during animation
+        Assert.Contains("x:Name=\"SidebarBorder\"", mainWindowXaml);
+        Assert.Contains("ClipToBounds=\"True\"", mainWindowXaml);
+
+        // Verify Header toggle button is placed in Column 0 (40px fixed slot) so it never jumps horizontally
+        Assert.Contains("<ui:Button Grid.Column=\"0\" Appearance=\"Transparent\" Command=\"{Binding ToggleSidebarCommand}\"", mainWindowXaml);
+
         // Verify ScrollViewer hides scrollbar when collapsed
         Assert.Contains("DataTrigger Binding=\"{Binding IsSidebarCollapsed}\" Value=\"True\"", mainWindowXaml);
         Assert.Contains("Setter Property=\"VerticalScrollBarVisibility\" Value=\"Hidden\"", mainWindowXaml);
 
+        // Verify nested ListBoxes strip their internal ScrollViewer via custom ControlTemplate
+        Assert.Contains("<ControlTemplate TargetType=\"ListBox\">", mainWindowXaml);
+        Assert.Contains("<ItemsPresenter />", mainWindowXaml);
+
         // Verify centered 40px icon columns for sidebar items
         Assert.Contains("<ColumnDefinition Width=\"40\" />", mainWindowXaml);
         Assert.Contains("HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\"", mainWindowXaml);
+    }
+
+    [Fact]
+    public void MainWindow_Sidebar_GeometryAndLayoutVerification()
+    {
+        _fixture.Run(() =>
+        {
+            using var env = new TestEnvironment();
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<MainViewModel>();
+            var settingsService = provider.GetRequiredService<ISettingsService>();
+
+            var window = new MainWindow(vm, settingsService);
+            Assert.NotNull(window);
+
+            // Locate SidebarBorder
+            var sidebar = window.FindName("SidebarBorder") as System.Windows.Controls.Border;
+            Assert.NotNull(sidebar);
+            Assert.True(sidebar.ClipToBounds);
+            Assert.Equal(224.0, sidebar.Width);
+
+            // Verify toggle command
+            vm.ToggleSidebarCommand.Execute(null);
+            Assert.True(vm.IsSidebarCollapsed);
+
+            // Locate CategoriesListBox and verify items
+            var catListBox = window.FindName("CategoriesListBox") as System.Windows.Controls.ListBox;
+            Assert.NotNull(catListBox);
+
+            window.Close();
+        });
     }
 
     private class FakeHotkeyService : IHotkeyService
