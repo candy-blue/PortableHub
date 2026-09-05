@@ -1,0 +1,35 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Fluent 2 Spacing System (Multiples of 4: 4, 8, 12, 16, 20, 24, 32, 40, 48) -->
+    <!-- Double Spacing Tokens -->
+    <sys:Double x:Key="SpaceXS">4</sys:Double>
+    <sys:Double x:Key="SpaceSM">8</sys:Double>
+    <sys:Double x:Key="SpaceMD">12</sys:Double>
+    <sys:Double x:Key="SpaceLG">16</sys:Double>
+    <sys:Double x:Key="SpaceXL">24</sys:Double>
+    <sys:Double x:Key="Space2XL">32</sys:Double>
+    <sys:Double x:Key="Space3XL">40</sys:Double>
+    <sys:Double x:Key="Space4XL">48</sys:Double>
+
+    <!-- Thickness Spacing Tokens -->
+    <Thickness x:Key="ThicknessSpaceXS">4</Thickness>
+    <Thickness x:Key="ThicknessSpaceSM">8</Thickness>
+    <Thickness x:Key="ThicknessSpaceMD">12</Thickness>
+    <Thickness x:Key="ThicknessSpaceLG">16</Thickness>
+    <Thickness x:Key="ThicknessSpaceXL">24</Thickness>
+    <Thickness x:Key="ThicknessSpace2XL">32</Thickness>
+    <Thickness x:Key="ThicknessSpace3XL">40</Thickness>
+    <Thickness x:Key="ThicknessSpace4XL">48</Thickness>
+
+    <!-- Backward Compatibility Aliases -->
+    <Thickness x:Key="SpacingTiny">4</Thickness>
+    <Thickness x:Key="SpacingSmall">8</Thickness>
+    <Thickness x:Key="SpacingMedium">12</Thickness>
+    <Thickness x:Key="SpacingBase">16</Thickness>
+    <Thickness x:Key="SpacingLarge">20</Thickness>
+    <Thickness x:Key="SpacingXLarge">24</Thickness>
+    <Thickness x:Key="SpacingHuge">32</Thickness>
+
+</ResourceDictionary>

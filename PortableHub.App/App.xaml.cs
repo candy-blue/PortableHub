@@ -81,10 +81,14 @@ public partial class App : System.Windows.Application
             _serviceProvider = services.BuildServiceProvider();
             LogStartup("Service provider built.");
 
-            // 4. Load Settings & Apply Theme
+            // 4. Load Settings & Apply Theme & Language
             var settingsService = _serviceProvider.GetRequiredService<ISettingsService>();
             await settingsService.LoadSettingsAsync();
-            LogStartup($"Settings loaded. Theme={settingsService.CurrentSettings.Theme}");
+            LogStartup($"Settings loaded. Theme={settingsService.CurrentSettings.Theme}, Lang={settingsService.CurrentSettings.Language}");
+
+            var locService = _serviceProvider.GetRequiredService<ILocalizationService>();
+            locService.SetLanguage(settingsService.CurrentSettings.Language);
+            LogStartup("Language applied.");
 
             var themeService = _serviceProvider.GetRequiredService<ThemeService>();
             themeService.ApplyTheme(settingsService.CurrentSettings.Theme);
@@ -230,6 +234,8 @@ public partial class App : System.Windows.Application
 
         services.AddSingleton<ThemeService>();
         services.AddSingleton<TrayService>();
+        services.AddSingleton<ILocalizationService, LocalizationService>();
+        services.AddSingleton<IUpdateService, GithubUpdateService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
@@ -285,16 +291,22 @@ public partial class App : System.Windows.Application
         return Task.CompletedTask;
     }
 
-    private Task ShowSettingsDialogAsync()
+    private async Task ShowSettingsDialogAsync()
     {
         var settingsVm = _serviceProvider!.GetRequiredService<SettingsViewModel>();
-        var dialog = new SettingsWindow(settingsVm)
+        await settingsVm.InitializeAsync();
+        var dialog = new SettingsWindow(settingsVm);
+        if (_mainWindow != null && _mainWindow.IsVisible && _mainWindow.WindowState != WindowState.Minimized)
         {
-            Owner = _mainWindow
-        };
+            dialog.Owner = _mainWindow;
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        }
+        else
+        {
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
 
         dialog.ShowDialog();
-        return Task.CompletedTask;
     }
 
     protected override void OnExit(ExitEventArgs e)

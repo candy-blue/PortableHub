@@ -10,7 +10,7 @@ using PortableHub.Core.Interfaces;
 
 namespace PortableHub.App.Views;
 
-public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
+public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
     private readonly ISettingsService _settingsService;
@@ -56,6 +56,11 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             else if (ev.PropertyName == nameof(MainViewModel.SelectedNav))
             {
                 SyncNavSelection();
+                AnimateContentEntrance();
+            }
+            else if (ev.PropertyName == nameof(MainViewModel.ViewMode))
+            {
+                AnimateContentEntrance();
             }
         };
 
@@ -93,9 +98,6 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             }
         };
         _statusRefreshTimer.Start();
-
-        // Watch system theme changes for native Mica backdrop
-        Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
     }
 
     private bool _isSyncingNav;
@@ -173,6 +175,39 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
         };
         SidebarBorder.BeginAnimation(WidthProperty, anim);
+    }
+
+    private void AnimateContentEntrance()
+    {
+        if (SoftwareContentHost == null) return;
+
+        try
+        {
+            var duration = TimeSpan.FromMilliseconds(150);
+            var ease = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
+
+            var fadeAnim = new System.Windows.Media.Animation.DoubleAnimation(0.35, 1.0, duration)
+            {
+                EasingFunction = ease
+            };
+            var slideAnim = new System.Windows.Media.Animation.DoubleAnimation(10.0, 0.0, duration)
+            {
+                EasingFunction = ease
+            };
+
+            if (SoftwareContentHost.RenderTransform is not System.Windows.Media.TranslateTransform tt || tt.IsFrozen)
+            {
+                tt = new System.Windows.Media.TranslateTransform(0, 0);
+                SoftwareContentHost.RenderTransform = tt;
+            }
+
+            SoftwareContentHost.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
+            tt.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, slideAnim);
+        }
+        catch
+        {
+            // Defensive: ignore animation errors during high-frequency navigation
+        }
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -566,10 +601,36 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         }
     }
 
+    private static void AnimateCardScale(FrameworkElement? element, double targetScale, double durationMs)
+    {
+        if (element == null) return;
+
+        try
+        {
+            if (element.RenderTransform is not System.Windows.Media.ScaleTransform st || st.IsFrozen)
+            {
+                st = new System.Windows.Media.ScaleTransform(1.0, 1.0);
+                element.RenderTransform = st;
+            }
+
+            var anim = new System.Windows.Media.Animation.DoubleAnimation(targetScale, TimeSpan.FromMilliseconds(durationMs))
+            {
+                EasingFunction = new System.Windows.Media.Animation.QuadraticEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+            };
+            st.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleXProperty, anim);
+            st.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleYProperty, anim);
+        }
+        catch
+        {
+            // Defensive: ensure scale animation never crashes on frozen/disposed elements
+        }
+    }
+
     private void Card_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement element && element.Tag is SoftwareCardViewModel card)
         {
+            AnimateCardScale(element, 0.965, 70);
             _viewModel.SelectedSoftware = card;
 
             // Double click to launch immediately (when mode is DoubleClick)
@@ -588,6 +649,11 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void Card_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (sender is FrameworkElement el)
+        {
+            AnimateCardScale(el, 1.0, 110);
+        }
+
         // Single click to launch immediately (when mode is SingleClick)
         if (_viewModel.LaunchClickMode == "SingleClick" && sender is FrameworkElement element && element.Tag is SoftwareCardViewModel card)
         {
@@ -608,6 +674,14 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                     e.Handled = true;
                 }
             }
+        }
+    }
+
+    private void Card_MouseLeave(object sender, MouseEventArgs e)
+    {
+        if (sender is FrameworkElement element)
+        {
+            AnimateCardScale(element, 1.0, 110);
         }
     }
 
@@ -793,6 +867,63 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                 e.Handled = true;
             }
         }
+    }
+    #endregion
+
+    #region Category ContextMenu and Selection
+    private void CategoryItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement element)
+        {
+            var catItem = (element.Tag as CategoryNavModel) ?? (element.DataContext as CategoryNavModel);
+            if (catItem != null)
+            {
+                CategoriesListBox.SelectedItem = catItem;
+            }
+        }
+    }
+
+    private async void EditCategoryMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        var category = GetCategoryFromMenuItem(sender);
+        if (category != null)
+        {
+            await _viewModel.EditCategoryAsync(category);
+        }
+    }
+
+    private async void DeleteCategoryMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        var category = GetCategoryFromMenuItem(sender);
+        if (category != null)
+        {
+            await _viewModel.DeleteCategoryAsync(category);
+        }
+    }
+
+    private CategoryNavModel? GetCategoryFromMenuItem(object? sender)
+    {
+        if (sender is MenuItem menuItem)
+        {
+            if (menuItem.DataContext is CategoryNavModel c1) return c1;
+            if (menuItem.CommandParameter is CategoryNavModel c2) return c2;
+            if (menuItem.Tag is CategoryNavModel c3) return c3;
+
+            // Resolve ContextMenu placement target
+            DependencyObject? current = menuItem;
+            while (current != null && current is not System.Windows.Controls.ContextMenu)
+            {
+                current = LogicalTreeHelper.GetParent(current) ?? System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+
+            if (current is System.Windows.Controls.ContextMenu cm && cm.PlacementTarget is FrameworkElement fe)
+            {
+                if (fe.Tag is CategoryNavModel c4) return c4;
+                if (fe.DataContext is CategoryNavModel c5) return c5;
+            }
+        }
+
+        return CategoriesListBox.SelectedItem as CategoryNavModel ?? _viewModel.SelectedNav;
     }
     #endregion
 }

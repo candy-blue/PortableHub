@@ -17,7 +17,7 @@ public class CardSizeToDimensionConverter : IValueConverter
                 "Width" => 140.0,
                 "Height" => 150.0,
                 "IconSize" => 44.0,
-                "FontSize" => 13.0,
+                "FontSize" => 14.0,
                 _ => 140.0
             },
             "Large" => param switch

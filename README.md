@@ -53,10 +53,11 @@
 
 ```text
 PortableHub
-├── PortableHub.App            # WPF 前端应用（基于 lepoco/wpfui 官方 WinUI 3 控件库）
+├── PortableHub.App            # WPF 前端应用（基于 iNKORE.UI.WPF.Modern 官方 Fluent 2 控件库）
 │   ├── Views                 # 视图层 (MainWindow, QuickLauncher, Scanner, Settings)
 │   ├── ViewModels            # MVVM 视图模型（CommunityToolkit.Mvvm）
 │   ├── Converters            # XAML 值转换器
+│   ├── Helpers               # 辅助工具（SymbolHelper 等）
 │   └── Services              # 前端专有服务 (Theme, Tray, SingleInstance)
 ├── PortableHub.Core           # 核心领域模型与接口定义
 │   ├── Models                # Software, Category, RootDirectory, AppSettings
@@ -66,7 +67,7 @@ PortableHub
 │   ├── Repositories          # Dapper 高性能仓储实现
 │   ├── Services              # 软件启动、图标缓存、备份、热键与托盘服务
 │   └── Windows               # Windows 原生 Win32 API 交互与快捷方式解析
-└── PortableHub.Tests          # 自动化单元测试套件（61 项全量覆盖）
+└── PortableHub.Tests          # 自动化单元测试与 UI 测试套件（83+ 项全量覆盖）
 ```
 
 ---

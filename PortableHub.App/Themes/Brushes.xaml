@@ -20,4 +20,23 @@
     <SolidColorBrush x:Key="BrushSidebarBg" Color="{DynamicResource AppSidebarBg}" />
     <SolidColorBrush x:Key="BrushBadgeBg" Color="{DynamicResource AppBadgeBg}" />
 
+    <!-- Design Token Brush Aliases (Section 16: AppSurfaceBrush, AppPrimaryTextBrush, etc.) -->
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="{DynamicResource AppBackground}" />
+    <SolidColorBrush x:Key="AppSurfaceBrush" Color="{DynamicResource AppSurface}" />
+    <SolidColorBrush x:Key="AppCardBrush" Color="{DynamicResource AppCard}" />
+    <SolidColorBrush x:Key="AppCardHoverBrush" Color="{DynamicResource AppCardHover}" />
+    <SolidColorBrush x:Key="AppSecondaryBackgroundBrush" Color="{DynamicResource AppSecondaryBackground}" />
+    <SolidColorBrush x:Key="AppBorderBrush" Color="{DynamicResource AppBorder}" />
+    <SolidColorBrush x:Key="AppControlBorderBrush" Color="{DynamicResource AppControlBorder}" />
+    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="{DynamicResource AppControlBorder}" />
+    <SolidColorBrush x:Key="AppPrimaryTextBrush" Color="{DynamicResource AppTextPrimary}" />
+    <SolidColorBrush x:Key="AppSecondaryTextBrush" Color="{DynamicResource AppTextSecondary}" />
+    <SolidColorBrush x:Key="AppTertiaryTextBrush" Color="{DynamicResource AppTextTertiary}" />
+    <SolidColorBrush x:Key="AppAccentBrush" Color="{DynamicResource AppAccent}" />
+    <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush" Color="{DynamicResource AppAccent}" />
+    <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="{DynamicResource AppAccentHover}" />
+    <SolidColorBrush x:Key="AppDangerBrush" Color="{DynamicResource AppDanger}" />
+    <SolidColorBrush x:Key="AppSuccessBrush" Color="{DynamicResource AppSuccess}" />
+    <SolidColorBrush x:Key="AppFavoriteBrush" Color="{DynamicResource AppFavorite}" />
+    <SolidColorBrush x:Key="SystemFillColorSuccessBrush" Color="{DynamicResource AppSuccess}" />
 </ResourceDictionary>

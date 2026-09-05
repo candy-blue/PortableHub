@@ -1,0 +1,111 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Application & General -->
+    <sys:String x:Key="Loc_AppName">Portable Hub</sys:String>
+    <sys:String x:Key="Loc_AppTagline">Lightweight, modern unified launcher and manager for Windows portable apps</sys:String>
+    <sys:String x:Key="Loc_Btn_Cancel">Cancel</sys:String>
+    <sys:String x:Key="Loc_Btn_Save">Save</sys:String>
+    <sys:String x:Key="Loc_Btn_Confirm">OK</sys:String>
+    <sys:String x:Key="Loc_Btn_Apply">Apply</sys:String>
+    <sys:String x:Key="Loc_Btn_Delete">Delete</sys:String>
+    <sys:String x:Key="Loc_Btn_Edit">Edit</sys:String>
+    <sys:String x:Key="Loc_Btn_Browse">Browse...</sys:String>
+    <sys:String x:Key="Loc_Btn_Refresh">Refresh</sys:String>
+    <sys:String x:Key="Loc_Btn_Add">Add</sys:String>
+    <sys:String x:Key="Loc_Tip_Prompt">Prompt</sys:String>
+    <sys:String x:Key="Loc_Tip_Success">Success</sys:String>
+
+    <!-- Sidebar Navigation -->
+    <sys:String x:Key="Loc_Nav_Title">Navigation</sys:String>
+    <sys:String x:Key="Loc_Nav_Home">Home</sys:String>
+    <sys:String x:Key="Loc_Nav_All">All Software</sys:String>
+    <sys:String x:Key="Loc_Nav_Favorites">Favorites</sys:String>
+    <sys:String x:Key="Loc_Nav_Recent">Recent</sys:String>
+    <sys:String x:Key="Loc_Nav_CategoriesHeader">Categories</sys:String>
+    <sys:String x:Key="Loc_Nav_AddCategory">New Category</sys:String>
+    <sys:String x:Key="Loc_Nav_ScanSoftware">Scan Software</sys:String>
+    <sys:String x:Key="Loc_Nav_AddSoftware">Add Software</sys:String>
+    <sys:String x:Key="Loc_Nav_Settings">Settings</sys:String>
+
+    <!-- Toolbar & Search -->
+    <sys:String x:Key="Loc_Search_Placeholder">Search by name, pinyin, or category...</sys:String>
+    <sys:String x:Key="Loc_Sort_Custom">Custom Order</sys:String>
+    <sys:String x:Key="Loc_Sort_NameAZ">Name (A-Z)</sys:String>
+    <sys:String x:Key="Loc_Sort_NameZA">Name (Z-A)</sys:String>
+    <sys:String x:Key="Loc_Sort_RecentLaunch">Most Recent</sys:String>
+    <sys:String x:Key="Loc_Sort_RecentAdd">Recently Added</sys:String>
+    <sys:String x:Key="Loc_Sort_LaunchCount">Launch Count</sys:String>
+    <sys:String x:Key="Loc_View_Grid">Grid View</sys:String>
+    <sys:String x:Key="Loc_View_List">List View</sys:String>
+
+    <!-- Context Menus & Software Operations -->
+    <sys:String x:Key="Loc_Action_Launch">Launch</sys:String>
+    <sys:String x:Key="Loc_Action_LaunchAdmin">Run as Administrator</sys:String>
+    <sys:String x:Key="Loc_Action_ToggleFavorite">Toggle Favorite</sys:String>
+    <sys:String x:Key="Loc_Action_OpenFolder">Open Containing Folder</sys:String>
+    <sys:String x:Key="Loc_Action_CopyPath">Copy Executable Path</sys:String>
+    <sys:String x:Key="Loc_Action_CreateShortcut">Create Desktop Shortcut</sys:String>
+    <sys:String x:Key="Loc_Action_MoveToCategory">Move to Category</sys:String>
+    <sys:String x:Key="Loc_Action_RelocateExe">Relocate EXE</sys:String>
+    <sys:String x:Key="Loc_Action_EditSoftware">Edit Properties...</sys:String>
+    <sys:String x:Key="Loc_Action_DeleteSoftware">Remove from List</sys:String>
+    <sys:String x:Key="Loc_Action_EditCategory">Edit Category</sys:String>
+    <sys:String x:Key="Loc_Action_DeleteCategory">Delete Category</sys:String>
+    <sys:String x:Key="Loc_Action_More">More Actions</sys:String>
+    <sys:String x:Key="Loc_Status_Running">Running</sys:String>
+    <sys:String x:Key="Loc_Status_Invalid">Invalid</sys:String>
+
+    <!-- Empty State & Drag Drop -->
+    <sys:String x:Key="Loc_Empty_NoSoftware">No software yet</sys:String>
+    <sys:String x:Key="Loc_Empty_DragHint">Drag portable apps here, or click the button below to add</sys:String>
+    <sys:String x:Key="Loc_Drag_Title">Drop here to add to software list</sys:String>
+    <sys:String x:Key="Loc_Drag_Subtitle">Supports .exe programs, .lnk shortcuts, batch files, and software folders</sys:String>
+
+    <!-- Settings Navigation -->
+    <sys:String x:Key="Loc_Settings_Title">Settings</sys:String>
+    <sys:String x:Key="Loc_Settings_Appearance">Appearance</sys:String>
+    <sys:String x:Key="Loc_Settings_Startup">Startup &amp; Tray</sys:String>
+    <sys:String x:Key="Loc_Settings_Hotkeys">Hotkeys</sys:String>
+    <sys:String x:Key="Loc_Settings_Data">Data &amp; Backup</sys:String>
+    <sys:String x:Key="Loc_Settings_Roots">Root Directories</sys:String>
+    <sys:String x:Key="Loc_Settings_Diagnostics">About &amp; Updates</sys:String>
+
+    <!-- Settings Content: Appearance -->
+    <sys:String x:Key="Loc_Settings_ThemeTitle">Application Theme</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeDesc">Choose color mode and backdrop effect for Portable Hub</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeSystem">System</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeLight">Light</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeDark">Dark</sys:String>
+    <sys:String x:Key="Loc_Settings_LanguageTitle">Display Language</sys:String>
+    <sys:String x:Key="Loc_Settings_LanguageDesc">Change software display language with instant live preview</sys:String>
+    <sys:String x:Key="Loc_Settings_CardSizeTitle">Software Card Size</sys:String>
+    <sys:String x:Key="Loc_Settings_CardSizeDesc">Adjust density and layout of app cards</sys:String>
+    <sys:String x:Key="Loc_Settings_CardSmall">Compact (Small)</sys:String>
+    <sys:String x:Key="Loc_Settings_CardMedium">Standard (Medium)</sys:String>
+    <sys:String x:Key="Loc_Settings_CardLarge">Comfortable (Large)</sys:String>
+    <sys:String x:Key="Loc_Settings_LaunchModeTitle">Launch Interaction</sys:String>
+    <sys:String x:Key="Loc_Settings_LaunchModeDesc">Choose mouse click action to launch apps</sys:String>
+    <sys:String x:Key="Loc_Settings_DoubleClick">Double Click</sys:String>
+    <sys:String x:Key="Loc_Settings_SingleClick">Single Click</sys:String>
+
+    <!-- Settings Content: Updates & About -->
+    <sys:String x:Key="Loc_Updates_Title">Updates &amp; About</sys:String>
+    <sys:String x:Key="Loc_Updates_CurrentVersion">Current Version</sys:String>
+    <sys:String x:Key="Loc_Updates_CheckBtn">Check for Updates</sys:String>
+    <sys:String x:Key="Loc_Updates_Checking">Checking for updates...</sys:String>
+    <sys:String x:Key="Loc_Updates_Latest">✓ You are up to date</sys:String>
+    <sys:String x:Key="Loc_Updates_Found">New Version Available</sys:String>
+    <sys:String x:Key="Loc_Updates_DownloadBtn">Download Update</sys:String>
+    <sys:String x:Key="Loc_Updates_Failed">Failed to check for updates. Please try again later or visit GitHub.</sys:String>
+    <sys:String x:Key="Loc_About_Repo">GitHub Repository</sys:String>
+
+    <!-- Category Dialog -->
+    <sys:String x:Key="Loc_CatDialog_Title">Category Manager</sys:String>
+    <sys:String x:Key="Loc_CatDialog_NameLabel">Category Name *</sys:String>
+    <sys:String x:Key="Loc_CatDialog_NamePlaceholder">e.g., Development, Utilities, Media...</sys:String>
+    <sys:String x:Key="Loc_CatDialog_IconLabel">Category Icon</sys:String>
+    <sys:String x:Key="Loc_CatDialog_ColorLabel">Accent Color</sys:String>
+    <sys:String x:Key="Loc_CatDialog_PickColorBtn">Advanced Palette...</sys:String>
+</ResourceDictionary>

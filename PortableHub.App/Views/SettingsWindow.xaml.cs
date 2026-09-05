@@ -1,22 +1,80 @@
 using System.Windows;
 using System.Windows.Input;
+using TextBox = System.Windows.Controls.TextBox;
 using PortableHub.App.Services;
 using PortableHub.App.ViewModels;
 
 namespace PortableHub.App.Views;
 
-public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
+public partial class SettingsWindow : Window
 {
+    private readonly SettingsViewModel _viewModel;
+    private bool _isClosing;
+
     public SettingsWindow(SettingsViewModel viewModel)
     {
         InitializeComponent();
+        _viewModel = viewModel;
         DataContext = viewModel;
         Loaded += async (s, e) =>
         {
             await viewModel.InitializeAsync();
-            Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
         };
-        viewModel.RequestClose += (s, e) => Close();
+        viewModel.RequestClose += (s, e) =>
+        {
+            SafeClose();
+        };
+        Closing += (s, e) =>
+        {
+            _isClosing = true;
+            _viewModel.RollbackThemePreview();
+        };
+
+        SettingsNavListBox.SelectionChanged += (s, e) =>
+        {
+            AnimateTabContentEntrance();
+        };
+    }
+
+    private void AnimateTabContentEntrance()
+    {
+        if (SettingsTabControl == null) return;
+
+        try
+        {
+            var duration = TimeSpan.FromMilliseconds(140);
+            var ease = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
+
+            var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0.4, 1.0, duration) { EasingFunction = ease };
+            var slideIn = new System.Windows.Media.Animation.DoubleAnimation(8.0, 0.0, duration) { EasingFunction = ease };
+
+            if (SettingsTabControl.RenderTransform is not System.Windows.Media.TranslateTransform tt || tt.IsFrozen)
+            {
+                tt = new System.Windows.Media.TranslateTransform(0, 0);
+                SettingsTabControl.RenderTransform = tt;
+            }
+
+            SettingsTabControl.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+            tt.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, slideIn);
+        }
+        catch
+        {
+            // Defensive: ignore animation errors during high-frequency tab switching
+        }
+    }
+
+    private void SafeClose()
+    {
+        if (_isClosing) return;
+        _isClosing = true;
+        try
+        {
+            Close();
+        }
+        catch (InvalidOperationException)
+        {
+            // Ignore if window is already closing or closed
+        }
     }
 
     private void HotkeyInputBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -61,15 +119,15 @@ public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
             _ => key.ToString()
         };
 
-        if (modifiers.Count > 0)
+        if (modifiers.Count > 0 || (key >= Key.F1 && key <= Key.F24))
         {
             e.Handled = true;
-            var combo = string.Join("+", modifiers) + "+" + keyName;
+            var combo = modifiers.Count > 0 ? string.Join("+", modifiers) + "+" + keyName : keyName;
             if (DataContext is SettingsViewModel vm)
             {
                 vm.GlobalHotkey = combo;
             }
-            if (sender is Wpf.Ui.Controls.TextBox tb)
+            if (sender is TextBox tb)
             {
                 tb.Text = combo;
                 tb.CaretIndex = combo.Length;
@@ -100,7 +158,7 @@ public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
             {
                 vm.GlobalHotkey = combo;
             }
-            if (sender is Wpf.Ui.Controls.TextBox tb)
+            if (sender is TextBox tb)
             {
                 tb.Text = combo;
                 tb.CaretIndex = combo.Length;

@@ -6,13 +6,19 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using PortableHub.Core.Interfaces;
 using PortableHub.Core.Models;
+using PortableHub.App.Services;
 
 namespace PortableHub.App.ViewModels;
 
 public class CategoryNavModel : ObservableObject
 {
     public int? Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    private string _name = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
     public string Icon { get; set; } = string.Empty;
     public string Color { get; set; } = "#3B82F6";
     public string NavMode { get; set; } = "Category"; // All, Favorite, Recent, Category
@@ -28,24 +34,16 @@ public class CategoryNavModel : ObservableObject
         _ => "\uE8B7"
     };
 
-    public Wpf.Ui.Controls.SymbolRegular Symbol
+    public iNKORE.UI.WPF.Modern.Controls.Symbol Symbol
     {
         get
         {
-            if (NavMode == "Home") return Wpf.Ui.Controls.SymbolRegular.Home24;
-            if (NavMode == "All") return Wpf.Ui.Controls.SymbolRegular.Apps24;
-            if (NavMode == "Favorite") return Wpf.Ui.Controls.SymbolRegular.Star24;
-            if (NavMode == "Recent") return Wpf.Ui.Controls.SymbolRegular.History24;
+            if (NavMode == "Home") return iNKORE.UI.WPF.Modern.Controls.Symbol.Home;
+            if (NavMode == "All") return iNKORE.UI.WPF.Modern.Controls.Symbol.AllApps;
+            if (NavMode == "Favorite") return iNKORE.UI.WPF.Modern.Controls.Symbol.Favorite;
+            if (NavMode == "Recent") return iNKORE.UI.WPF.Modern.Controls.Symbol.Clock;
 
-            if (!string.IsNullOrWhiteSpace(Icon))
-            {
-                if (Enum.TryParse<Wpf.Ui.Controls.SymbolRegular>(Icon, true, out var exact))
-                    return exact;
-                if (Enum.TryParse<Wpf.Ui.Controls.SymbolRegular>(Icon + "24", true, out var with24))
-                    return with24;
-            }
-
-            return Wpf.Ui.Controls.SymbolRegular.Tag24;
+            return Helpers.SymbolHelper.ResolveSymbol(Icon, iNKORE.UI.WPF.Modern.Controls.Symbol.Folder);
         }
     }
 
@@ -75,6 +73,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IFileScannerService _scannerService;
     private readonly IPathRepairService _pathRepairService;
     private readonly ISettingsService _settingsService;
+    private readonly ILocalizationService _localizationService;
 
     // View interaction callbacks
     public Func<Software, Task<bool>>? ShowSoftwareEditDialog { get; set; }
@@ -131,7 +130,8 @@ public partial class MainViewModel : ObservableObject
         ISearchService searchService,
         IFileScannerService scannerService,
         IPathRepairService pathRepairService,
-        ISettingsService settingsService)
+        ISettingsService settingsService,
+        ILocalizationService? localizationService = null)
     {
         _softwareRepository = softwareRepository;
         _categoryRepository = categoryRepository;
@@ -142,6 +142,9 @@ public partial class MainViewModel : ObservableObject
         _scannerService = scannerService;
         _pathRepairService = pathRepairService;
         _settingsService = settingsService;
+        _localizationService = localizationService ?? LocalizationService.Instance;
+
+        _localizationService.LanguageChanged += (s, e) => UpdateNavNames();
 
         _cardSize = _settingsService.CurrentSettings.CardSize;
         _viewMode = _settingsService.CurrentSettings.ViewMode;
@@ -229,10 +232,10 @@ public partial class MainViewModel : ObservableObject
 
         // Build Nav Items (Home, All, Favorites, Recent) (Design Doc Section 12)
         NavItems.Clear();
-        NavItems.Add(new CategoryNavModel { Name = "首页", Icon = "Home", NavMode = "Home", Color = "#3B82F6", Count = rawSoftware.Count });
-        NavItems.Add(new CategoryNavModel { Name = "全部软件", Icon = "Apps", NavMode = "All", Color = "#3B82F6", Count = rawSoftware.Count });
-        NavItems.Add(new CategoryNavModel { Name = "我的收藏", Icon = "Star", NavMode = "Favorite", Color = "#F59E0B", Count = rawSoftware.Count(s => s.IsFavorite) });
-        NavItems.Add(new CategoryNavModel { Name = "最近使用", Icon = "Clock", NavMode = "Recent", Color = "#10B981", Count = rawSoftware.Count(s => s.LastLaunchedAt.HasValue) });
+        NavItems.Add(new CategoryNavModel { Name = _localizationService.GetString("Loc_Nav_Home", "首页"), Icon = "Home", NavMode = "Home", Color = "#3B82F6", Count = rawSoftware.Count });
+        NavItems.Add(new CategoryNavModel { Name = _localizationService.GetString("Loc_Nav_All", "全部软件"), Icon = "Apps", NavMode = "All", Color = "#3B82F6", Count = rawSoftware.Count });
+        NavItems.Add(new CategoryNavModel { Name = _localizationService.GetString("Loc_Nav_Favorites", "我的收藏"), Icon = "Star", NavMode = "Favorite", Color = "#F59E0B", Count = rawSoftware.Count(s => s.IsFavorite) });
+        NavItems.Add(new CategoryNavModel { Name = _localizationService.GetString("Loc_Nav_Recent", "最近使用"), Icon = "Clock", NavMode = "Recent", Color = "#10B981", Count = rawSoftware.Count(s => s.LastLaunchedAt.HasValue) });
 
         // Custom categories
         CustomCategories.Clear();
@@ -465,13 +468,13 @@ public partial class MainViewModel : ObservableObject
 
     private async void OnDeleteSoftware(SoftwareCardViewModel card)
     {
-        var result = MessageBox.Show(
+        var result = Views.ModernDialog.ShowConfirm(
             $"确定从 PortableHub 移除软件【{card.Name}】吗？\n\n注意：此操作仅从应用列表中移除索引，绝不会删除磁盘上的软件本体文件。",
-            "从 PortableHub 移除",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
+            "移除软件",
+            isDestructive: true,
+            confirmText: "移除");
 
-        if (result == MessageBoxResult.Yes)
+        if (result)
         {
             await _softwareRepository.DeleteAsync(card.Id);
             await RefreshDataAsync();
@@ -550,17 +553,16 @@ public partial class MainViewModel : ObservableObject
 
         if (fallback == null)
         {
-            MessageBox.Show("至少需要保留一个分类。", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            Views.ModernDialog.ShowAlert("至少需要保留一个分类。", "提示");
             return;
         }
 
-        var result = MessageBox.Show(
+        var result = Views.ModernDialog.ShowConfirm(
             $"确定删除分类【{navItem.Name}】吗？\n该分类下的软件将被自动移动到【{fallback.Name}】。",
             "删除分类确认",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
+            isDestructive: true);
 
-        if (result == MessageBoxResult.Yes)
+        if (result)
         {
             await _categoryRepository.DeleteAsync(navItem.Id.Value, fallback.Id);
             await RefreshDataAsync();
@@ -676,4 +678,16 @@ public partial class MainViewModel : ObservableObject
             card.RefreshState();
         }
     }
+
+    private void UpdateNavNames()
+    {
+        if (NavItems.Count >= 4)
+        {
+            NavItems[0].Name = _localizationService.GetString("Loc_Nav_Home", "首页");
+            NavItems[1].Name = _localizationService.GetString("Loc_Nav_All", "全部软件");
+            NavItems[2].Name = _localizationService.GetString("Loc_Nav_Favorites", "我的收藏");
+            NavItems[3].Name = _localizationService.GetString("Loc_Nav_Recent", "最近使用");
+        }
+    }
 }
+

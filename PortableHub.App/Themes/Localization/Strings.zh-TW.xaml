@@ -1,0 +1,111 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Application & General -->
+    <sys:String x:Key="Loc_AppName">Portable Hub</sys:String>
+    <sys:String x:Key="Loc_AppTagline">輕量、現代的 Windows 便攜軟體啟動與統一管理中心</sys:String>
+    <sys:String x:Key="Loc_Btn_Cancel">取消</sys:String>
+    <sys:String x:Key="Loc_Btn_Save">儲存</sys:String>
+    <sys:String x:Key="Loc_Btn_Confirm">確定</sys:String>
+    <sys:String x:Key="Loc_Btn_Apply">套用</sys:String>
+    <sys:String x:Key="Loc_Btn_Delete">刪除</sys:String>
+    <sys:String x:Key="Loc_Btn_Edit">編輯</sys:String>
+    <sys:String x:Key="Loc_Btn_Browse">瀏覽...</sys:String>
+    <sys:String x:Key="Loc_Btn_Refresh">重新整理</sys:String>
+    <sys:String x:Key="Loc_Btn_Add">新增</sys:String>
+    <sys:String x:Key="Loc_Tip_Prompt">提示</sys:String>
+    <sys:String x:Key="Loc_Tip_Success">操作成功</sys:String>
+
+    <!-- Sidebar Navigation -->
+    <sys:String x:Key="Loc_Nav_Title">導覽</sys:String>
+    <sys:String x:Key="Loc_Nav_Home">首頁</sys:String>
+    <sys:String x:Key="Loc_Nav_All">全部軟體</sys:String>
+    <sys:String x:Key="Loc_Nav_Favorites">我的收藏</sys:String>
+    <sys:String x:Key="Loc_Nav_Recent">最近使用</sys:String>
+    <sys:String x:Key="Loc_Nav_CategoriesHeader">分類管理</sys:String>
+    <sys:String x:Key="Loc_Nav_AddCategory">新增分類</sys:String>
+    <sys:String x:Key="Loc_Nav_ScanSoftware">掃描軟體</sys:String>
+    <sys:String x:Key="Loc_Nav_AddSoftware">新增軟體</sys:String>
+    <sys:String x:Key="Loc_Nav_Settings">系統設定</sys:String>
+
+    <!-- Toolbar & Search -->
+    <sys:String x:Key="Loc_Search_Placeholder">搜尋軟體名稱、拼音或分類...</sys:String>
+    <sys:String x:Key="Loc_Sort_Custom">自訂排序</sys:String>
+    <sys:String x:Key="Loc_Sort_NameAZ">名稱 (A-Z)</sys:String>
+    <sys:String x:Key="Loc_Sort_NameZA">名稱 (Z-A)</sys:String>
+    <sys:String x:Key="Loc_Sort_RecentLaunch">最近使用</sys:String>
+    <sys:String x:Key="Loc_Sort_RecentAdd">最近新增</sys:String>
+    <sys:String x:Key="Loc_Sort_LaunchCount">啟動次數</sys:String>
+    <sys:String x:Key="Loc_View_Grid">網格檢視</sys:String>
+    <sys:String x:Key="Loc_View_List">清單檢視</sys:String>
+
+    <!-- Context Menus & Software Operations -->
+    <sys:String x:Key="Loc_Action_Launch">立即啟動</sys:String>
+    <sys:String x:Key="Loc_Action_LaunchAdmin">以系統管理員身分執行</sys:String>
+    <sys:String x:Key="Loc_Action_ToggleFavorite">收藏 / 取消收藏</sys:String>
+    <sys:String x:Key="Loc_Action_OpenFolder">開啟所在目錄</sys:String>
+    <sys:String x:Key="Loc_Action_CopyPath">複製執行檔路徑</sys:String>
+    <sys:String x:Key="Loc_Action_CreateShortcut">建立桌面捷徑</sys:String>
+    <sys:String x:Key="Loc_Action_MoveToCategory">移動至分類</sys:String>
+    <sys:String x:Key="Loc_Action_RelocateExe">重新定位 EXE</sys:String>
+    <sys:String x:Key="Loc_Action_EditSoftware">編輯軟體屬性...</sys:String>
+    <sys:String x:Key="Loc_Action_DeleteSoftware">從清單中移除</sys:String>
+    <sys:String x:Key="Loc_Action_EditCategory">編輯分類</sys:String>
+    <sys:String x:Key="Loc_Action_DeleteCategory">刪除分類</sys:String>
+    <sys:String x:Key="Loc_Action_More">更多操作</sys:String>
+    <sys:String x:Key="Loc_Status_Running">執行中</sys:String>
+    <sys:String x:Key="Loc_Status_Invalid">失效</sys:String>
+
+    <!-- Empty State & Drag Drop -->
+    <sys:String x:Key="Loc_Empty_NoSoftware">尚無軟體</sys:String>
+    <sys:String x:Key="Loc_Empty_DragHint">將 Portable 軟體拖曳至此，或點擊下方按鈕新增</sys:String>
+    <sys:String x:Key="Loc_Drag_Title">放開滑鼠即可新增至便攜軟體清單</sys:String>
+    <sys:String x:Key="Loc_Drag_Subtitle">支援 .exe 程式、.lnk 捷徑、批次檔及軟體資料夾</sys:String>
+
+    <!-- Settings Navigation -->
+    <sys:String x:Key="Loc_Settings_Title">系統設定</sys:String>
+    <sys:String x:Key="Loc_Settings_Appearance">外觀與個人化</sys:String>
+    <sys:String x:Key="Loc_Settings_Startup">啟動與系統匣</sys:String>
+    <sys:String x:Key="Loc_Settings_Hotkeys">全域快速鍵</sys:String>
+    <sys:String x:Key="Loc_Settings_Data">資料與備份</sys:String>
+    <sys:String x:Key="Loc_Settings_Roots">根目錄管理</sys:String>
+    <sys:String x:Key="Loc_Settings_Diagnostics">遷移與關於</sys:String>
+
+    <!-- Settings Content: Appearance -->
+    <sys:String x:Key="Loc_Settings_ThemeTitle">應用程式主題</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeDesc">選擇 Portable Hub 介面色彩模式與 Mica 材質</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeSystem">隨系統設定</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeLight">淺色模式</sys:String>
+    <sys:String x:Key="Loc_Settings_ThemeDark">深色模式</sys:String>
+    <sys:String x:Key="Loc_Settings_LanguageTitle">介面語言 (Language)</sys:String>
+    <sys:String x:Key="Loc_Settings_LanguageDesc">切換軟體顯示語言，介面即時生效</sys:String>
+    <sys:String x:Key="Loc_Settings_CardSizeTitle">軟體卡片尺寸</sys:String>
+    <sys:String x:Key="Loc_Settings_CardSizeDesc">調整主介面軟體卡片的顯示密度</sys:String>
+    <sys:String x:Key="Loc_Settings_CardSmall">緊湊 (小)</sys:String>
+    <sys:String x:Key="Loc_Settings_CardMedium">標準 (中)</sys:String>
+    <sys:String x:Key="Loc_Settings_CardLarge">舒適 (大)</sys:String>
+    <sys:String x:Key="Loc_Settings_LaunchModeTitle">軟體啟動觸發方式</sys:String>
+    <sys:String x:Key="Loc_Settings_LaunchModeDesc">選擇在主面板卡片上啟動程式的滑鼠互動方式</sys:String>
+    <sys:String x:Key="Loc_Settings_DoubleClick">按兩下啟動</sys:String>
+    <sys:String x:Key="Loc_Settings_SingleClick">按一下啟動</sys:String>
+
+    <!-- Settings Content: Updates & About -->
+    <sys:String x:Key="Loc_Updates_Title">軟體更新與關於</sys:String>
+    <sys:String x:Key="Loc_Updates_CurrentVersion">目前版本</sys:String>
+    <sys:String x:Key="Loc_Updates_CheckBtn">檢查更新</sys:String>
+    <sys:String x:Key="Loc_Updates_Checking">正在檢查更新...</sys:String>
+    <sys:String x:Key="Loc_Updates_Latest">✓ 目前已是最新版本</sys:String>
+    <sys:String x:Key="Loc_Updates_Found">發現新版本</sys:String>
+    <sys:String x:Key="Loc_Updates_DownloadBtn">前往下載更新</sys:String>
+    <sys:String x:Key="Loc_Updates_Failed">檢查更新失敗，請稍後再試或造訪 GitHub 存放庫</sys:String>
+    <sys:String x:Key="Loc_About_Repo">開源存放庫</sys:String>
+
+    <!-- Category Dialog -->
+    <sys:String x:Key="Loc_CatDialog_Title">分類管理</sys:String>
+    <sys:String x:Key="Loc_CatDialog_NameLabel">分類名稱 *</sys:String>
+    <sys:String x:Key="Loc_CatDialog_NamePlaceholder">請輸入分類名稱，例如：常用工具、開發必備...</sys:String>
+    <sys:String x:Key="Loc_CatDialog_IconLabel">分類圖示</sys:String>
+    <sys:String x:Key="Loc_CatDialog_ColorLabel">分類主題色</sys:String>
+    <sys:String x:Key="Loc_CatDialog_PickColorBtn">高級調色盤...</sys:String>
+</ResourceDictionary>

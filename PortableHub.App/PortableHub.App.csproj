@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
-    <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -19,6 +19,9 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <!-- Single-file compression (reduces 172MB self-contained executable to ~68MB) -->
+    <EnableCompressionInSingleFile Condition="'$(SelfContained)' == 'true'">true</EnableCompressionInSingleFile>
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

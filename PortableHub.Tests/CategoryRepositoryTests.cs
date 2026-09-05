@@ -107,11 +107,11 @@ public class CategoryRepositoryTests
         };
 
         // Select an icon option
-        var codeOption = vm.AvailableIconOptions.First(o => o.Key == "Code24");
-        vm.SelectIconOptionCommand.Execute(codeOption);
+        var repairOption = vm.AvailableIconOptions.First(o => o.Symbol == iNKORE.UI.WPF.Modern.Controls.Symbol.Repair);
+        vm.SelectIconOptionCommand.Execute(repairOption);
 
-        Assert.Equal("Code24", vm.Icon);
-        Assert.Equal(Wpf.Ui.Controls.SymbolRegular.Code24, vm.SelectedSymbol);
+        Assert.Equal("Repair", vm.Icon);
+        Assert.Equal(iNKORE.UI.WPF.Modern.Controls.Symbol.Repair, vm.SelectedSymbol);
 
         // Select a color
         vm.SelectColorCommand.Execute("#EC4899");
@@ -126,6 +126,6 @@ public class CategoryRepositoryTests
         Assert.NotNull(vm.ResultCategory);
         Assert.Equal("常用开发", vm.ResultCategory.Name);
         Assert.Equal("#EC4899", vm.ResultCategory.Color);
-        Assert.Equal("Code24", vm.ResultCategory.Icon);
+        Assert.Equal("Repair", vm.ResultCategory.Icon);
     }
 }

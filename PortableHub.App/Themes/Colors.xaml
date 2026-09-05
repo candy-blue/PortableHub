@@ -10,6 +10,7 @@
     <Color x:Key="AppCardHover">#333333</Color>
     <Color x:Key="AppSecondaryBackground">#252525</Color>
     <Color x:Key="AppBorder">#3A3A3A</Color>
+    <Color x:Key="AppControlBorder">#707070</Color>
     <Color x:Key="AppTextPrimary">#FFFFFF</Color>
     <Color x:Key="AppTextSecondary">#D4D4D8</Color>
     <Color x:Key="AppTextTertiary">#A1A1AA</Color>
@@ -31,17 +32,20 @@
     <sys:Double x:Key="IconSizeSmall">16</sys:Double>
     <sys:Double x:Key="IconSizeDefault">20</sys:Double>
     <sys:Double x:Key="IconSizeLarge">24</sys:Double>
+    <sys:Double x:Key="IconSizeCard">32</sys:Double>
+    <sys:Double x:Key="IconSizeCardLarge">48</sys:Double>
+    <sys:Double x:Key="IconSizeHero">64</sys:Double>
 
     <!-- Standard Text Size Tokens -->
     <sys:Double x:Key="TextSizeBody">14</sys:Double>
     <sys:Double x:Key="TextSizeSecondary">13</sys:Double>
     <sys:Double x:Key="TextSizeCaption">12</sys:Double>
-    <sys:Double x:Key="TextSizeTiny">11</sys:Double>
+    <sys:Double x:Key="TextSizeTiny">12</sys:Double>
 
-    <!-- Standard Corner Radii (Design Doc: Window 10, Dialog 12, Card 8, SearchBox 8, Button 6, IconButton 6, ComboBox 6, Badge 4, ContextMenu 8) -->
+    <!-- Standard Corner Radii (Design Doc Section 17: Window System, Dialog 12, Card 10~12, SearchBox 6~8, Button 6~8, IconButton 6~8, ComboBox 6~8, Badge 4, ContextMenu 8) -->
     <CornerRadius x:Key="CornerRadiusWindow">10</CornerRadius>
     <CornerRadius x:Key="CornerRadiusDialog">12</CornerRadius>
-    <CornerRadius x:Key="CornerRadiusCard">8</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusCard">10</CornerRadius>
     <CornerRadius x:Key="CornerRadiusSearchBox">8</CornerRadius>
     <CornerRadius x:Key="CornerRadiusContextMenu">8</CornerRadius>
     <CornerRadius x:Key="CornerRadiusButton">6</CornerRadius>
@@ -49,7 +53,7 @@
     <CornerRadius x:Key="CornerRadiusComboBox">6</CornerRadius>
     <CornerRadius x:Key="CornerRadiusBadge">4</CornerRadius>
 
-    <!-- Standard Spacing System (Design Doc Section 91: 4/8/12/16/20/24/32) -->
+    <!-- Standard Spacing System (Design Doc Section 11: 4/8/12/16/20/24/32) -->
     <Thickness x:Key="SpacingTiny">4</Thickness>
     <Thickness x:Key="SpacingSmall">8</Thickness>
     <Thickness x:Key="SpacingMedium">12</Thickness>

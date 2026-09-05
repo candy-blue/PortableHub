@@ -2,10 +2,21 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- AppFontFamily Single Source of Truth -->
-    <FontFamily x:Key="AppFontFamily">Segoe UI Variable Text, Microsoft YaHei UI, Segoe UI</FontFamily>
+    <!-- AppFontFamily Single Source of Truth (Section 8.1) -->
+    <FontFamily x:Key="AppFontFamily">Segoe UI Variable, Microsoft YaHei UI, Segoe UI</FontFamily>
 
-    <!-- Standard Integer Font Scale Tokens (Display 28, Heading 20, Section 16, BodyStrong 14, Body 14, Secondary 13, Caption 12, Tiny 11) -->
+    <!-- Standard Integer Font Scale Tokens (Section 9: Display 28, TitleLG 24, Title 20, TitleSM 18, Subtitle 16, BodyLG 15, Body 14, BodySM 13, BodyXS 12) -->
+    <sys:Double x:Key="Display">28</sys:Double>
+    <sys:Double x:Key="TitleLG">24</sys:Double>
+    <sys:Double x:Key="Title">20</sys:Double>
+    <sys:Double x:Key="TitleSM">18</sys:Double>
+    <sys:Double x:Key="Subtitle">16</sys:Double>
+    <sys:Double x:Key="BodyLG">15</sys:Double>
+    <sys:Double x:Key="Body">14</sys:Double>
+    <sys:Double x:Key="BodySM">13</sys:Double>
+    <sys:Double x:Key="BodyXS">12</sys:Double>
+
+    <!-- Backward Compatible Font Scale Aliases -->
     <sys:Double x:Key="FontSizeDisplay">28</sys:Double>
     <sys:Double x:Key="FontSizeHeading">20</sys:Double>
     <sys:Double x:Key="FontSizeDialogTitle">18</sys:Double>
@@ -14,9 +25,9 @@
     <sys:Double x:Key="FontSizeBody">14</sys:Double>
     <sys:Double x:Key="FontSizeSecondary">13</sys:Double>
     <sys:Double x:Key="FontSizeCaption">12</sys:Double>
-    <sys:Double x:Key="FontSizeTiny">11</sys:Double>
+    <sys:Double x:Key="FontSizeTiny">12</sys:Double>
 
-    <!-- Global Default Typography (Microsoft YaHei UI, Segoe UI Variable Text) -->
+    <!-- Global Default Typography (Clean inherited foreground for accent buttons) -->
     <Style TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
@@ -27,7 +38,7 @@
     <!-- Display Title Style (28pt, SemiBold) -->
     <Style x:Key="DisplayTitleStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeDisplay}" />
+        <Setter Property="FontSize" Value="{StaticResource Display}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
@@ -37,20 +48,21 @@
     <!-- Page Title Style (20pt, SemiBold) -->
     <Style x:Key="PageTitleStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeHeading}" />
+        <Setter Property="FontSize" Value="{StaticResource Title}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <!-- Heading Title Style (Alias to PageTitleStyle) -->
+    <!-- Page Title Text Style (Section 31 Alias) -->
+    <Style x:Key="PageTitleTextStyle" TargetType="TextBlock" BasedOn="{StaticResource PageTitleStyle}" />
     <Style x:Key="HeadingTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource PageTitleStyle}" />
 
     <!-- Dialog Title Style (18pt, SemiBold) -->
     <Style x:Key="DialogTitleStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeDialogTitle}" />
+        <Setter Property="FontSize" Value="{StaticResource TitleSM}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
@@ -60,7 +72,7 @@
     <!-- Section Title Style (16pt, SemiBold) -->
     <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSection}" />
+        <Setter Property="FontSize" Value="{StaticResource Subtitle}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
@@ -70,17 +82,20 @@
     <!-- Body Strong Style (14pt, SemiBold) -->
     <Style x:Key="BodyStrongTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBodyStrong}" />
+        <Setter Property="FontSize" Value="{StaticResource Body}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
+    <!-- Strong Text Style (Section 31 Alias) -->
+    <Style x:Key="StrongTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextStyle}" />
+
     <!-- Body Text Style (14pt, Normal) -->
     <Style x:Key="BodyTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="FontSize" Value="{StaticResource Body}" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
@@ -90,7 +105,7 @@
     <!-- Secondary Text Style (13pt, Normal, Secondary Text Brush) -->
     <Style x:Key="SecondaryTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSecondary}" />
+        <Setter Property="FontSize" Value="{StaticResource BodySM}" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
@@ -100,30 +115,14 @@
     <!-- Caption Text Style (12pt, Normal, Tertiary Text Brush) -->
     <Style x:Key="CaptionTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}" />
+        <Setter Property="FontSize" Value="{StaticResource BodyXS}" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <!-- Tiny Text Style (11pt, Normal, Tertiary Text Brush) -->
-    <Style x:Key="TinyTextStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}" />
-        <Setter Property="FontWeight" Value="Normal" />
-        <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}" />
-        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
-    </Style>
-
-    <!-- Segoe Fluent Icons Style -->
-    <Style x:Key="FluentIcon" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets, Segoe UI Symbol" />
-        <Setter Property="TextAlignment" Value="Center" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
-    </Style>
+    <!-- Tiny Text Style (12pt, Normal, Tertiary Text Brush) -->
+    <Style x:Key="TinyTextStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextStyle}" />
 
 </ResourceDictionary>
