@@ -4,6 +4,7 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
         Title="Portable Hub" 
+        Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="760" Width="1200"
         MinHeight="600" MinWidth="920"
         WindowStartupLocation="CenterScreen"
@@ -93,7 +94,7 @@
         <!-- Clean Fluent TitleBar (Design Doc Section 132) -->
         <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="Portable Hub" Height="44">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="AppGeneric24" FontSize="18" Margin="0,0,6,0" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 

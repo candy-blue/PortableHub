@@ -4,6 +4,7 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
         Title="系统设置" 
+        Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="680" Width="820"
         MinHeight="550" MinWidth="700"
         WindowStartupLocation="CenterOwner"
@@ -27,7 +28,7 @@
         <!-- Official WPF-UI TitleBar -->
         <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="系统设置 - Portable Hub" Height="44">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="Settings24" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
@@ -376,6 +377,21 @@
                                     <TextBlock Text="查看 Serilog 运行日志与软件启动诊断信息" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,12" />
                                     <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24}" Content="打开日志文件夹" Command="{Binding OpenLogsDirectoryCommand}" HorizontalAlignment="Left" Height="34" />
                                 </StackPanel>
+                            </ui:Card>
+
+                            <ui:Card Margin="0,12,0,0" Padding="16,14">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="48" Height="48" Margin="0,0,16,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Portable Hub" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="轻量、现代的 Windows 便携软件启动与统一管理中心" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                                        <TextBlock Text="开源仓库：https://github.com/candy-blue/PortableHub" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </Grid>
                             </ui:Card>
                         </StackPanel>
                     </ScrollViewer>

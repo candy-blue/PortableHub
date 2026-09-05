@@ -12,6 +12,7 @@
         AllowsTransparency="True"
         Background="Transparent"
         ShowInTaskbar="False"
+        Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
         TextOptions.TextFormattingMode="Display"
         TextOptions.TextRenderingMode="ClearType"

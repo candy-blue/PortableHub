@@ -4,6 +4,7 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
         Title="扫描发现便携软件" 
+        Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="620" Width="800"
         WindowStartupLocation="CenterOwner"
         WindowBackdropType="Mica"
@@ -26,7 +27,7 @@
         <!-- TitleBar -->
         <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="扫描发现便携软件 - Portable Hub" Height="44">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="Search24" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 

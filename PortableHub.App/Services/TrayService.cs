@@ -141,6 +141,40 @@ public class TrayService : IDisposable
 
     private static Icon CreateDefaultTrayIcon()
     {
+        try
+        {
+            var iconUri = new Uri("pack://application:,,,/PortableHub.App;component/Assets/app.ico", UriKind.RelativeOrAbsolute);
+            var streamResourceInfo = System.Windows.Application.GetResourceStream(iconUri);
+            if (streamResourceInfo != null)
+            {
+                using (streamResourceInfo.Stream)
+                {
+                    return new Icon(streamResourceInfo.Stream, 16, 16);
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to process extraction or manual drawing
+        }
+
+        try
+        {
+            var procPath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(procPath) && System.IO.File.Exists(procPath))
+            {
+                var assoc = Icon.ExtractAssociatedIcon(procPath!);
+                if (assoc != null)
+                {
+                    return assoc;
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to generated icon
+        }
+
         using var bmp = new Bitmap(16, 16);
         using var g = Graphics.FromImage(bmp);
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;

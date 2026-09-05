@@ -225,5 +225,30 @@ public class PerformanceAndEdgeCaseTests
         await reloadedService.LoadSettingsAsync();
         Assert.Equal("SingleClick", reloadedService.CurrentSettings.LaunchClickMode);
     }
+
+    [Fact]
+    public void ApplicationIconAndAssets_ExistAndCanBeLoaded()
+    {
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        // Check relative to solution root
+        var projectDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "PortableHub.App"));
+        var icoPath = Path.Combine(projectDir, "Assets", "app.ico");
+        var pngPath = Path.Combine(projectDir, "Assets", "app.png");
+
+        Assert.True(File.Exists(icoPath), $"app.ico should exist at {icoPath}");
+        Assert.True(File.Exists(pngPath), $"app.png should exist at {pngPath}");
+
+        using (var icon = new System.Drawing.Icon(icoPath))
+        {
+            Assert.NotNull(icon);
+            Assert.True(icon.Width > 0 && icon.Height > 0);
+        }
+
+        using (var bmp = new System.Drawing.Bitmap(pngPath))
+        {
+            Assert.NotNull(bmp);
+            Assert.True(bmp.Width >= 256 && bmp.Height >= 256);
+        }
+    }
 }
 

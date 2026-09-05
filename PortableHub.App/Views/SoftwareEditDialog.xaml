@@ -4,6 +4,7 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
         Title="软件配置"
+        Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="650" Width="540"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
@@ -27,7 +28,7 @@
         <!-- TitleBar -->
         <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="软件配置 - Portable Hub" Height="40" ShowMaximize="False">
             <ui:TitleBar.Icon>
-                <ui:SymbolIcon Symbol="AppGeneric24" FontSize="16" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
