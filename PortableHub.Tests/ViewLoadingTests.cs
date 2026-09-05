@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -220,12 +222,17 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
             ThemeService.UpdateDynamicThemeColors(true);
             Assert.True(Application.Current.Resources.Contains("AppBackground"));
             Assert.True(Application.Current.Resources.Contains("BrushBackground"));
+            Assert.True(Application.Current.Resources.Contains("AppFavorite"));
+            Assert.True(Application.Current.Resources.Contains("BrushFavorite"));
             Assert.IsType<System.Windows.Media.Color>(Application.Current.Resources["AppBackground"]);
             Assert.IsType<System.Windows.Media.SolidColorBrush>(Application.Current.Resources["BrushBackground"]);
+            Assert.IsType<System.Windows.Media.SolidColorBrush>(Application.Current.Resources["BrushFavorite"]);
 
             ThemeService.UpdateDynamicThemeColors(false);
             Assert.True(Application.Current.Resources.Contains("AppBackground"));
             Assert.True(Application.Current.Resources.Contains("BrushBackground"));
+            Assert.True(Application.Current.Resources.Contains("AppFavorite"));
+            Assert.True(Application.Current.Resources.Contains("BrushFavorite"));
         });
     }
 
@@ -255,6 +262,122 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
         Assert.Equal(5, home.Count);
         Assert.Equal(Wpf.Ui.Controls.SymbolRegular.Home24, home.Symbol);
         Assert.Equal("\uE80F", home.Glyph);
+    }
+
+    private static string GetAppDirectory()
+    {
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var appDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "PortableHub.App"));
+        if (!Directory.Exists(appDir))
+        {
+            appDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "PortableHub.App"));
+        }
+        return appDir;
+    }
+
+    [Fact]
+    public void Verify_NoFractionalFontSizes_AcrossAllXamlFiles()
+    {
+        var appDir = GetAppDirectory();
+        Assert.True(Directory.Exists(appDir), $"PortableHub.App directory not found at {appDir}");
+        var xamlFiles = Directory.GetFiles(appDir, "*.xaml", SearchOption.AllDirectories);
+        Assert.NotEmpty(xamlFiles);
+
+        var regex = new Regex(@"FontSize\s*=\s*""\d+\.\d+""", RegexOptions.IgnoreCase);
+        foreach (var file in xamlFiles)
+        {
+            var content = File.ReadAllText(file);
+            var match = regex.Match(content);
+            Assert.False(match.Success, $"Fractional font size found in {Path.GetFileName(file)}: '{match.Value}'");
+        }
+    }
+
+    [Fact]
+    public void Verify_NoForcedClearType_AcrossAllXamlFiles()
+    {
+        var appDir = GetAppDirectory();
+        var xamlFiles = Directory.GetFiles(appDir, "*.xaml", SearchOption.AllDirectories);
+        Assert.NotEmpty(xamlFiles);
+
+        foreach (var file in xamlFiles)
+        {
+            var content = File.ReadAllText(file);
+            Assert.DoesNotContain("ClearType", content, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
+    public void Verify_DesignTokensAndTypography_Integrity()
+    {
+        var appDir = GetAppDirectory();
+        var colorsXaml = File.ReadAllText(Path.Combine(appDir, "Themes", "Colors.xaml"));
+        var typoXaml = File.ReadAllText(Path.Combine(appDir, "Themes", "Typography.xaml"));
+        var brushesXaml = File.ReadAllText(Path.Combine(appDir, "Themes", "Brushes.xaml"));
+
+        // Colors tokens
+        Assert.Contains("ControlHeightSmall", colorsXaml);
+        Assert.Contains("ControlHeightDefault", colorsXaml);
+        Assert.Contains("ControlHeightLarge", colorsXaml);
+        Assert.Contains("IconSizeSmall", colorsXaml);
+        Assert.Contains("IconSizeDefault", colorsXaml);
+        Assert.Contains("IconSizeLarge", colorsXaml);
+        Assert.Contains("CornerRadiusWindow", colorsXaml);
+        Assert.Contains("CornerRadiusDialog", colorsXaml);
+        Assert.Contains("CornerRadiusCard", colorsXaml);
+        Assert.Contains("CornerRadiusSearchBox", colorsXaml);
+        Assert.Contains("CornerRadiusButton", colorsXaml);
+        Assert.Contains("CornerRadiusIconButton", colorsXaml);
+        Assert.Contains("CornerRadiusComboBox", colorsXaml);
+        Assert.Contains("CornerRadiusBadge", colorsXaml);
+        Assert.Contains("CornerRadiusContextMenu", colorsXaml);
+        Assert.Contains("AppFavorite", colorsXaml);
+
+        // Brushes tokens
+        Assert.Contains("BrushFavorite", brushesXaml);
+
+        // Typography scale
+        Assert.Contains("AppFontFamily", typoXaml);
+        Assert.Contains("FontSizeDisplay", typoXaml);
+        Assert.Contains("FontSizeHeading", typoXaml);
+        Assert.Contains("FontSizeDialogTitle", typoXaml);
+        Assert.Contains("FontSizeSection", typoXaml);
+        Assert.Contains("FontSizeBodyStrong", typoXaml);
+        Assert.Contains("FontSizeBody", typoXaml);
+        Assert.Contains("FontSizeSecondary", typoXaml);
+        Assert.Contains("FontSizeCaption", typoXaml);
+        Assert.Contains("FontSizeTiny", typoXaml);
+    }
+
+    [Fact]
+    public void Verify_DialogMetrics_WindowCornerPreference()
+    {
+        var appDir = GetAppDirectory();
+        var dialogFiles = new[]
+        {
+            "CategoryEditDialog.xaml",
+            "SoftwareEditDialog.xaml",
+            "ScannerDialog.xaml",
+            "SettingsWindow.xaml",
+            "MainWindow.xaml"
+        };
+
+        foreach (var name in dialogFiles)
+        {
+            var content = File.ReadAllText(Path.Combine(appDir, "Views", name));
+            Assert.Contains("WindowCornerPreference=\"Round\"", content);
+            Assert.Contains("UseLayoutRounding=\"True\"", content);
+            Assert.Contains("SnapsToDevicePixels=\"True\"", content);
+        }
+
+        // Dialog TitleBars have Height 44 and FontSize 18
+        var dialogTitles = new[] { "CategoryEditDialog.xaml", "SoftwareEditDialog.xaml", "ScannerDialog.xaml" };
+        foreach (var name in dialogTitles)
+        {
+            var content = File.ReadAllText(Path.Combine(appDir, "Views", name));
+            Assert.Contains("Height=\"44\"", content);
+            Assert.Contains("FontSize=\"18\"", content);
+            Assert.Contains("FontWeight=\"SemiBold\"", content);
+        }
     }
 
     private class FakeHotkeyService : IHotkeyService

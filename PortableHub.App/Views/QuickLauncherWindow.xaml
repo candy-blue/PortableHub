@@ -13,11 +13,9 @@
         Background="Transparent"
         ShowInTaskbar="False"
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
-        FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
+        FontFamily="{StaticResource AppFontFamily}"
         TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType"
         RenderOptions.BitmapScalingMode="HighQuality"
-        RenderOptions.ClearTypeHint="Enabled"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         PreviewKeyDown="Window_PreviewKeyDown"
@@ -27,7 +25,7 @@
             Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" 
             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" 
             BorderThickness="1" 
-            CornerRadius="12"
+            CornerRadius="{DynamicResource CornerRadiusDialog}"
             Margin="10"
             RenderTransformOrigin="0.5,0.5">
         <Border.RenderTransform>
@@ -49,10 +47,11 @@
                 <ui:TextBox x:Name="SearchBox"
                             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
                             PlaceholderText="输入软件名称、分类或标签..."
-                            Icon="{ui:SymbolIcon Search24}"
+                            Icon="{ui:SymbolIcon Search24, FontSize=20}"
                             ClearButtonEnabled="True"
-                            FontSize="15"
-                            Height="46"
+                            FontSize="16"
+                            Height="48"
+                            Padding="12,0"
                             VerticalContentAlignment="Center" />
             </Grid>
 
@@ -75,8 +74,8 @@
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
-                                    <Border x:Name="ItemBorder" CornerRadius="8" Background="{TemplateBinding Background}" Padding="10,8" BorderThickness="1" BorderBrush="Transparent">
-                                        <ContentPresenter />
+                                    <Border x:Name="ItemBorder" CornerRadius="8" Background="{TemplateBinding Background}" MinHeight="60" Padding="10,8" BorderThickness="1" BorderBrush="Transparent">
+                                        <ContentPresenter VerticalAlignment="Center" />
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
@@ -102,9 +101,11 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Icon -->
-                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" Margin="0,0,12,0">
-                                <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" Width="28" Height="28" Stretch="Uniform" />
+                            <!-- Icon (40x40 container, 32x32 icon) -->
+                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" Margin="0,0,12,0">
+                                <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" Width="32" Height="32" Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       SnapsToDevicePixels="True" />
                             </Border>
 
                             <!-- Name & Category -->
@@ -112,19 +113,19 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                     <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,1" Margin="8,0,0,0">
-                                        <TextBlock Text="{Binding CategoryName}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{Binding CategoryName}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                     </Border>
                                 </StackPanel>
-                                <TextBlock Text="{Binding ExePath}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+                                <TextBlock Text="{Binding ExePath}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" 
                                            TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
                             </StackPanel>
 
                             <!-- Launch Hint -->
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
-                                    <TextBlock Text="Enter" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,6,0">
+                                    <TextBlock Text="Enter" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </Border>
-                                <TextBlock Text="启动" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="启动" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
@@ -134,25 +135,25 @@
             <!-- Bottom shortcuts info bar with WinUI 3 keycap badges -->
             <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,8,0,0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,4,0">
+                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
                         <TextBlock Text="↑ ↓" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="切换" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
+                    <TextBlock Text="切换" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
 
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,4,0">
-                        <TextBlock Text="Enter" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
+                        <TextBlock Text="Enter" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="启动" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
+                    <TextBlock Text="启动" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
 
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,4,0">
-                        <TextBlock Text="Ctrl + 1..9" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
+                        <TextBlock Text="Ctrl + 1..9" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="直达" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
+                    <TextBlock Text="直达" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
 
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,4,0">
-                        <TextBlock Text="Esc" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
+                        <TextBlock Text="Esc" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="关闭" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="关闭" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
         </Grid>

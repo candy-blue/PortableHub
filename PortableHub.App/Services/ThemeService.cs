@@ -93,6 +93,10 @@ public class ThemeService
         res["BrushTextTertiary"] = new System.Windows.Media.SolidColorBrush(textTert);
         res["BrushInputBg"] = new System.Windows.Media.SolidColorBrush(inputBg);
         res["BrushSidebarBg"] = new System.Windows.Media.SolidColorBrush(sidebarBg);
+
+        var favColor = System.Windows.Media.Color.FromRgb(0xF5, 0x9E, 0x0B);
+        res["AppFavorite"] = favColor;
+        res["BrushFavorite"] = new System.Windows.Media.SolidColorBrush(favColor);
     }
 
     public static bool IsWindowsInDarkMode()

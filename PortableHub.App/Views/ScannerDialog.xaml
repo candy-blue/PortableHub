@@ -7,13 +7,12 @@
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="620" Width="800"
         WindowStartupLocation="CenterOwner"
+        WindowCornerPreference="Round"
         WindowBackdropType="Mica"
         ExtendsContentIntoTitleBar="True"
-        FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
+        FontFamily="{StaticResource AppFontFamily}"
         TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType"
         RenderOptions.BitmapScalingMode="HighQuality"
-        RenderOptions.ClearTypeHint="Enabled"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
 
@@ -25,9 +24,9 @@
         </Grid.RowDefinitions>
 
         <!-- TitleBar -->
-        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="扫描发现便携软件 - Portable Hub" Height="44">
+        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="扫描发现便携软件 - Portable Hub" Height="44" FontSize="18" FontWeight="SemiBold" ShowMaximize="False">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
@@ -56,16 +55,16 @@
                     <ui:Button Grid.Row="0" Grid.Column="1" Appearance="Secondary" 
                                Command="{Binding BrowseDirectoryCommand}" Margin="8,0,0,0" Height="36" Padding="12,0" VerticalContentAlignment="Center">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:SymbolIcon Symbol="FolderOpen24" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="浏览目录..." VerticalAlignment="Center" FontSize="13" />
+                            <ui:SymbolIcon Symbol="FolderOpen24" FontSize="20" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="浏览目录..." VerticalAlignment="Center" FontSize="14" />
                         </StackPanel>
                     </ui:Button>
                     <ui:Button Grid.Row="0" Grid.Column="2" Appearance="Primary" 
                                Command="{Binding StartScanCommand}" Margin="8,0,0,0" Height="36" Padding="14,0" VerticalContentAlignment="Center"
                                IsEnabled="{Binding IsScanning, Converter={StaticResource InverseBooleanConverter}}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:SymbolIcon Symbol="Play24" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="开始扫描" VerticalAlignment="Center" FontSize="13" />
+                            <ui:SymbolIcon Symbol="Play24" FontSize="20" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="开始扫描" VerticalAlignment="Center" FontSize="14" />
                         </StackPanel>
                     </ui:Button>
 
@@ -101,7 +100,7 @@
                                                 <TextBlock Text="{Binding DeducedCategory}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             </Border>
                                         </StackPanel>
-                                        <TextBlock Text="{Binding ExePath}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+                                        <TextBlock Text="{Binding ExePath}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
                                                    TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
                                     </StackPanel>
 
@@ -119,13 +118,13 @@
         <Border Grid.Row="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="20,12">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <ui:Button Appearance="Secondary" Content="全选" Command="{Binding SelectAllCommand}" Padding="12,5" Margin="0,0,8,0" />
-                    <ui:Button Appearance="Secondary" Content="全不选" Command="{Binding UnselectAllCommand}" Padding="12,5" />
+                    <ui:Button Appearance="Secondary" Content="全选" Command="{Binding SelectAllCommand}" Height="36" Padding="14,0" Margin="0,0,8,0" FontSize="14" />
+                    <ui:Button Appearance="Secondary" Content="全不选" Command="{Binding UnselectAllCommand}" Height="36" Padding="14,0" FontSize="14" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelScanCommand}" Width="80" Margin="0,0,10,0" />
-                    <ui:Button Appearance="Primary" Content="添加选中软件" Command="{Binding AddSelectedCommand}" Width="120" />
+                    <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelScanCommand}" Width="80" Height="36" Margin="0,0,8,0" FontSize="14" />
+                    <ui:Button Appearance="Primary" Content="添加选中软件" Command="{Binding AddSelectedCommand}" Height="36" Padding="16,0" FontSize="14" />
                 </StackPanel>
             </Grid>
         </Border>

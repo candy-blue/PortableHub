@@ -8,13 +8,12 @@
         Height="680" Width="820"
         MinHeight="550" MinWidth="700"
         WindowStartupLocation="CenterOwner"
+        WindowCornerPreference="Round"
         WindowBackdropType="Mica"
         ExtendsContentIntoTitleBar="True"
-        FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
+        FontFamily="{StaticResource AppFontFamily}"
         TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType"
         RenderOptions.BitmapScalingMode="HighQuality"
-        RenderOptions.ClearTypeHint="Enabled"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
 
@@ -28,7 +27,7 @@
         <!-- Official WPF-UI TitleBar -->
         <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="系统设置 - Portable Hub" Height="44">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
@@ -36,7 +35,7 @@
         <Grid Grid.Row="1" Margin="24,10,24,10">
             <TabControl Background="Transparent" BorderThickness="0">
                 <!-- 1. 外观 -->
-                <TabItem FontSize="13" Padding="14,8">
+                <TabItem FontSize="14" Padding="14,8">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Color24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -123,7 +122,7 @@
                 </TabItem>
 
                 <!-- 2. 启动与托盘 -->
-                <TabItem FontSize="13" Padding="14,8">
+                <TabItem FontSize="14" Padding="14,8">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="WindowApps24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -153,7 +152,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="启动后自动最小化到系统托盘" FontWeight="Medium" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="启动后自动最小化到系统托盘" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                             <TextBlock Text="开机静默常驻通知区，不主动弹出主窗口" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
                                         <ui:ToggleSwitch Grid.Column="1" IsChecked="{Binding StartMinimizedToTray}" />
@@ -182,7 +181,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="最小化时隐藏任务栏图标" FontWeight="Medium" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="最小化时隐藏任务栏图标" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                             <TextBlock Text="主窗口最小化后彻底隐藏任务栏，仅显示托盘小图标" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
                                         <ui:ToggleSwitch Grid.Column="1" IsChecked="{Binding MinimizeToTray}" />
@@ -194,7 +193,7 @@
                 </TabItem>
 
                 <!-- 3. 快捷键 -->
-                <TabItem FontSize="13" Padding="14,8">
+                <TabItem FontSize="14" Padding="14,8">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Keyboard24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -215,7 +214,7 @@
                                         </Grid.ColumnDefinitions>
                                         <ui:TextBox x:Name="HotkeyInputBox" 
                                                     Text="{Binding GlobalHotkey, UpdateSourceTrigger=PropertyChanged}" 
-                                                    Height="34" 
+                                                    Height="36" 
                                                     VerticalContentAlignment="Center"
                                                     PreviewKeyDown="HotkeyInputBox_PreviewKeyDown"
                                                     PreviewMouseDown="HotkeyInputBox_PreviewMouseDown"
@@ -232,7 +231,7 @@
                 </TabItem>
 
                 <!-- 4. 数据与备份 -->
-                <TabItem FontSize="13" Padding="14,8">
+                <TabItem FontSize="14" Padding="14,8">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Database24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -251,8 +250,8 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <ui:TextBox Text="{Binding DataDirectory, Mode=OneWay}" IsReadOnly="True" Height="34" VerticalContentAlignment="Center" />
-                                        <ui:Button Grid.Column="1" Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24}" Content="打开目录" Command="{Binding OpenDataDirectoryCommand}" Margin="8,0,0,0" Height="34" />
+                                        <ui:TextBox Text="{Binding DataDirectory, Mode=OneWay}" IsReadOnly="True" Height="36" VerticalContentAlignment="Center" />
+                                        <ui:Button Grid.Column="1" Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24}" Content="打开目录" Command="{Binding OpenDataDirectoryCommand}" Margin="8,0,0,0" Height="36" />
                                     </Grid>
                                 </StackPanel>
                             </ui:Card>
@@ -272,7 +271,7 @@
                                             <ColumnDefinition Width="80" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="备份周期:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        <ComboBox Grid.Column="1" SelectedValue="{Binding BackupFrequency, Mode=TwoWay}" SelectedValuePath="Tag" Height="34">
+                                        <ComboBox Grid.Column="1" SelectedValue="{Binding BackupFrequency, Mode=TwoWay}" SelectedValuePath="Tag" Height="36">
                                             <ComboBoxItem Content="每周 (推荐)" Tag="Weekly" />
                                             <ComboBoxItem Content="每天" Tag="Daily" />
                                             <ComboBoxItem Content="每月" Tag="Monthly" />
@@ -280,12 +279,12 @@
                                         </ComboBox>
 
                                         <TextBlock Grid.Column="3" Text="最多保留份数:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        <ui:TextBox Grid.Column="4" Text="{Binding MaxBackupCount, UpdateSourceTrigger=PropertyChanged}" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <ui:TextBox Grid.Column="4" Text="{Binding MaxBackupCount, UpdateSourceTrigger=PropertyChanged}" Height="36" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </Grid>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon ArrowDownload24}" Content="立即创建备份" Command="{Binding CreateBackupCommand}" Height="34" />
-                                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon History24}" Content="从备份文件恢复..." Command="{Binding RestoreBackupCommand}" Margin="10,0,0,0" Height="34" />
+                                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon ArrowDownload24, FontSize=20}" Content="立即创建备份" Command="{Binding CreateBackupCommand}" Height="36" />
+                                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon History24, FontSize=20}" Content="从备份文件恢复..." Command="{Binding RestoreBackupCommand}" Margin="8,0,0,0" Height="36" />
                                     </StackPanel>
                                 </StackPanel>
                             </ui:Card>
@@ -293,7 +292,7 @@
                             <!-- Backups List -->
                             <ui:Card Padding="16,14">
                                 <StackPanel>
-                                    <TextBlock Text="现有备份记录" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,8" />
+                                    <TextBlock Text="现有备份记录" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,8" />
                                     <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Height="130">
                                         <ListBox ItemsSource="{Binding ExistingBackups}" Background="Transparent" BorderThickness="0" />
                                     </Border>
@@ -304,7 +303,7 @@
                 </TabItem>
 
                 <!-- 5. 根目录管理 -->
-                <TabItem FontSize="13" Padding="14,8">
+                <TabItem FontSize="14" Padding="14,8">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="FolderOpen24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -320,7 +319,7 @@
                                             <TextBlock Text="便携软件根目录" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                             <TextBlock Text="添加 Portable 软件主文件夹，用于多盘迁移自动重连与相对路径支持" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
-                                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Add24}" Content="添加根目录" Command="{Binding AddRootDirectoryCommand}" HorizontalAlignment="Right" Height="32" />
+                                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Add24}" Content="添加根目录" Command="{Binding AddRootDirectoryCommand}" HorizontalAlignment="Right" Height="36" />
                                     </Grid>
 
                                     <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Height="220">
@@ -333,12 +332,12 @@
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel>
-                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                                            <TextBlock Text="{Binding Path}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                                            <TextBlock Text="{Binding Path}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
                                                         </StackPanel>
                                                         <ui:Button Grid.Column="1" Appearance="Secondary" Content="移除" 
                                                                    Command="{Binding DataContext.DeleteRootDirectoryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                   CommandParameter="{Binding}" Padding="8,3" FontSize="11" />
+                                                                   CommandParameter="{Binding}" Padding="10,4" FontSize="12" Height="32" />
                                                     </Grid>
                                                 </DataTemplate>
                                             </ListBox.ItemTemplate>
@@ -351,7 +350,7 @@
                 </TabItem>
 
                 <!-- 6. 迁移与诊断 -->
-                <TabItem FontSize="13" Padding="14,8">
+                <TabItem FontSize="14" Padding="14,8">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Apps24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -365,8 +364,8 @@
                                     <TextBlock Text="JSON 数据交换" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                     <TextBlock Text="支持跨电脑、跨操作系统快速导出与导入软件清单" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,12" />
                                     <StackPanel Orientation="Horizontal">
-                                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon ArrowExport24}" Content="导出软件列表为 JSON..." Command="{Binding ExportJsonCommand}" Height="34" />
-                                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon ArrowImport24}" Content="从 JSON 文件导入..." Command="{Binding ImportJsonCommand}" Margin="10,0,0,0" Height="34" />
+                                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon ArrowExport24, FontSize=20}" Content="导出软件列表为 JSON..." Command="{Binding ExportJsonCommand}" Height="36" />
+                                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon ArrowImport24, FontSize=20}" Content="从 JSON 文件导入..." Command="{Binding ImportJsonCommand}" Margin="8,0,0,0" Height="36" />
                                     </StackPanel>
                                 </StackPanel>
                             </ui:Card>
@@ -375,7 +374,7 @@
                                 <StackPanel>
                                     <TextBlock Text="故障排除与日志" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                     <TextBlock Text="查看 Serilog 运行日志与软件启动诊断信息" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,12" />
-                                    <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24}" Content="打开日志文件夹" Command="{Binding OpenLogsDirectoryCommand}" HorizontalAlignment="Left" Height="34" />
+                                    <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24, FontSize=20}" Content="打开日志文件夹" Command="{Binding OpenLogsDirectoryCommand}" HorizontalAlignment="Left" Height="36" />
                                 </StackPanel>
                             </ui:Card>
 
@@ -387,9 +386,9 @@
                                     </Grid.ColumnDefinitions>
                                     <Image Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="48" Height="48" Margin="0,0,16,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="Portable Hub" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="Portable Hub" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                         <TextBlock Text="轻量、现代的 Windows 便携软件启动与统一管理中心" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                        <TextBlock Text="开源仓库：https://github.com/candy-blue/PortableHub" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,2,0,0" />
+                                        <TextBlock Text="开源仓库：https://github.com/candy-blue/PortableHub" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,2,0,0" />
                                     </StackPanel>
                                 </Grid>
                             </ui:Card>
@@ -402,8 +401,8 @@
         <!-- Bottom Action Bar -->
         <Border Grid.Row="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="24,12">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Save24}" Content="保存" Command="{Binding SaveAndCloseCommand}" Width="100" Height="34" />
-                <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Margin="10,0,0,0" Width="80" Height="34" />
+                <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Save24, FontSize=20}" Content="保存" Command="{Binding SaveAndCloseCommand}" Width="100" Height="36" FontSize="14" />
+                <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Margin="8,0,0,0" Width="80" Height="36" FontSize="14" />
             </StackPanel>
         </Border>
     </Grid>

@@ -15,6 +15,7 @@
     <SolidColorBrush x:Key="BrushAccentHover" Color="{DynamicResource AppAccentHover}" />
     <SolidColorBrush x:Key="BrushDanger" Color="{DynamicResource AppDanger}" />
     <SolidColorBrush x:Key="BrushSuccess" Color="{DynamicResource AppSuccess}" />
+    <SolidColorBrush x:Key="BrushFavorite" Color="{DynamicResource AppFavorite}" />
     <SolidColorBrush x:Key="BrushInputBg" Color="{DynamicResource AppInputBg}" />
     <SolidColorBrush x:Key="BrushSidebarBg" Color="{DynamicResource AppSidebarBg}" />
     <SolidColorBrush x:Key="BrushBadgeBg" Color="{DynamicResource AppBadgeBg}" />

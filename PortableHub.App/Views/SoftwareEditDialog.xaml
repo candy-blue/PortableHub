@@ -8,13 +8,12 @@
         Height="650" Width="540"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
+        WindowCornerPreference="Round"
         WindowBackdropType="Mica"
         ExtendsContentIntoTitleBar="True"
-        FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
+        FontFamily="{StaticResource AppFontFamily}"
         TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType"
         RenderOptions.BitmapScalingMode="HighQuality"
-        RenderOptions.ClearTypeHint="Enabled"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
 
@@ -26,9 +25,9 @@
         </Grid.RowDefinitions>
 
         <!-- TitleBar -->
-        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="软件配置 - Portable Hub" Height="40" ShowMaximize="False">
+        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="软件配置 - Portable Hub" Height="44" FontSize="18" FontWeight="SemiBold" ShowMaximize="False">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
@@ -50,60 +49,60 @@
                                    Width="48" Height="48" Stretch="Uniform" />
                         </Border>
                         <ui:Button Appearance="Secondary" Content="更换图标" Command="{Binding BrowseIconCommand}" 
-                                   FontSize="11" Padding="6,3" Margin="0,6,0,0" HorizontalAlignment="Center" />
+                                   FontSize="12" Padding="6,3" Margin="0,6,0,0" HorizontalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Software Name -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="软件名称 *" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                        <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="请输入软件展示名称" />
+                        <TextBlock Text="软件名称 *" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                        <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="请输入软件展示名称" Height="36" />
                     </StackPanel>
                 </Grid>
 
                 <!-- Exe Path -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="可执行文件路径 (.exe) *" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBlock Text="可执行文件路径 (.exe) *" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ui:TextBox Text="{Binding ExePath, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="请选择或输入便携软件 .exe 完整路径" />
-                        <ui:Button Grid.Column="1" Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24}" Content="浏览..." Command="{Binding BrowseExeCommand}" Margin="8,0,0,0" />
+                        <ui:TextBox Text="{Binding ExePath, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="请选择或输入便携软件 .exe 完整路径" Height="36" />
+                        <ui:Button Grid.Column="1" Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24, FontSize=20}" Content="浏览..." Command="{Binding BrowseExeCommand}" Margin="8,0,0,0" Height="36" />
                     </Grid>
                 </StackPanel>
 
                 <!-- Category -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="所属分类 *" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBlock Text="所属分类 *" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
                     <ComboBox ItemsSource="{Binding Categories}" 
                               SelectedItem="{Binding SelectedCategory}" 
                               DisplayMemberPath="Name"
-                              Height="34" />
+                              Height="36" />
                 </StackPanel>
 
                 <!-- Arguments -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="启动参数 (可选，例如: --portable --minimized)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <ui:TextBox Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="例如: --portable" />
+                    <TextBlock Text="启动参数 (可选，例如: --portable --minimized)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <ui:TextBox Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="例如: --portable" Height="36" />
                 </StackPanel>
 
                 <!-- Working Directory -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="工作目录 (留空默认为 EXE 所在目录)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <ui:TextBox Text="{Binding WorkingDirectory, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="默认自动设为程序所在目录" />
+                    <TextBlock Text="工作目录 (留空默认为 EXE 所在目录)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <ui:TextBox Text="{Binding WorkingDirectory, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="默认自动设为程序所在目录" Height="36" />
                 </StackPanel>
 
                 <!-- Description -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="软件描述 / 备注" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <ui:TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="简短用途说明" />
+                    <TextBlock Text="软件描述 / 备注" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <ui:TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="简短用途说明" Height="36" />
                 </StackPanel>
 
                 <!-- Tags -->
                 <StackPanel Margin="0,0,0,16">
-                    <TextBlock Text="标签 (空格分隔，例如: #搜索 #开发 #网络)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <ui:TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="输入标签便于快速检索" />
+                    <TextBlock Text="标签 (空格分隔，例如: #搜索 #开发 #网络)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <ui:TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="输入标签便于快速检索" Height="36" />
                 </StackPanel>
 
                 <!-- Launch Options -->
@@ -114,7 +113,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="以管理员权限运行" FontWeight="Medium" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="以管理员权限运行" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                             <ui:ToggleSwitch Grid.Column="1" IsChecked="{Binding RunAsAdmin}" />
                         </Grid>
                         <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="0,4" Height="1" />
@@ -123,7 +122,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="单实例运行 (重复打开时自动激活现有窗口)" FontWeight="Medium" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="单实例运行 (重复打开时自动激活现有窗口)" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                             <ui:ToggleSwitch Grid.Column="1" IsChecked="{Binding SingleInstance}" />
                         </Grid>
                     </StackPanel>
@@ -134,8 +133,8 @@
         <!-- Actions -->
         <Border Grid.Row="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="20,12">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Width="85" Margin="0,0,10,0" />
-                <ui:Button Appearance="Primary" Content="保存" Command="{Binding SaveCommand}" Width="85" />
+                <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Width="80" Height="36" Margin="0,0,8,0" />
+                <ui:Button Appearance="Primary" Content="保存" Command="{Binding SaveCommand}" Width="80" Height="36" />
             </StackPanel>
         </Border>
     </Grid>

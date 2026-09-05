@@ -8,13 +8,12 @@
         Height="630" Width="520"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
+        WindowCornerPreference="Round"
         WindowBackdropType="Mica"
         ExtendsContentIntoTitleBar="True"
-        FontFamily="Microsoft YaHei UI, Segoe UI, sans-serif"
+        FontFamily="{StaticResource AppFontFamily}"
         TextOptions.TextFormattingMode="Display"
-        TextOptions.TextRenderingMode="ClearType"
         RenderOptions.BitmapScalingMode="HighQuality"
-        RenderOptions.ClearTypeHint="Enabled"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
     
@@ -26,9 +25,9 @@
         </Grid.RowDefinitions>
 
         <!-- TitleBar -->
-        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="分类管理 - Portable Hub" Height="40" ShowMaximize="False">
+        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="分类管理 - Portable Hub" Height="44" FontSize="18" FontWeight="SemiBold" ShowMaximize="False">
             <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
+                <ui:ImageIcon Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
@@ -48,7 +47,7 @@
                                 BorderBrush="{Binding Color, Converter={StaticResource ColorHexToBrushConverter}}"
                                 BorderThickness="1.5">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:SymbolIcon Symbol="{Binding SelectedSymbol}" FontSize="18"
+                                <ui:SymbolIcon Symbol="{Binding SelectedSymbol}" FontSize="20"
                                                Foreground="{Binding Color, Converter={StaticResource ColorHexToBrushConverter}}"
                                                Margin="0,0,8,0" />
                                 <TextBlock Text="{Binding Name, FallbackValue='分类预览'}" FontSize="14" FontWeight="SemiBold"
@@ -62,13 +61,13 @@
 
                 <!-- Category Name -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="分类名称 *" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=100}" PlaceholderText="请输入分类名称，如：常用工具、开发必备..." Height="34" />
+                    <TextBlock Text="分类名称 *" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <ui:TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=100}" PlaceholderText="请输入分类名称，如：常用工具、开发必备..." Height="36" />
                 </StackPanel>
 
                 <!-- Category Icon Selection from WPF-UI Symbol library -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="分类图标 (WPF-UI 官方矢量图标库)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBlock Text="分类图标 (WPF-UI 官方矢量图标库)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
                     <ListBox ItemsSource="{Binding AvailableIconOptions}"
                              SelectedItem="{Binding SelectedIconOption, Mode=TwoWay}"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -121,7 +120,7 @@
 
                 <!-- Category Color Selection & System Color Picker -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="分类主题色 (预设主题色与系统取色器)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
+                    <TextBlock Text="分类主题色 (预设主题色与系统取色器)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
                     
                     <!-- Preset Color Swatches -->
                     <ItemsControl ItemsSource="{Binding AvailableColors}" Margin="0,0,0,10">
@@ -153,15 +152,15 @@
                                 Background="{Binding Color, Converter={StaticResource ColorHexToBrushConverter}}"
                                 BorderThickness="1.5" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" 
                                 Margin="0,0,8,0" VerticalAlignment="Center" />
-                        <ui:TextBox Text="{Binding Color, UpdateSourceTrigger=PropertyChanged, Delay=100}" Width="110" Height="34" VerticalAlignment="Center" ToolTip="十六进制色值 (如 #3B82F6)" />
-                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon Color24}" Content="系统取色器" Command="{Binding OpenColorPickerCommand}" Height="34" Margin="10,0,0,0" VerticalAlignment="Center" ToolTip="打开调色板选取任意自定义色彩" />
+                        <ui:TextBox Text="{Binding Color, UpdateSourceTrigger=PropertyChanged, Delay=100}" Width="110" Height="36" VerticalAlignment="Center" ToolTip="十六进制色值 (如 #3B82F6)" />
+                        <ui:Button Appearance="Secondary" Icon="{ui:SymbolIcon Color24, FontSize=20}" Content="系统取色器" Command="{Binding OpenColorPickerCommand}" Height="36" Margin="8,0,0,0" VerticalAlignment="Center" ToolTip="打开调色板选取任意自定义色彩" />
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Sort Order -->
                 <StackPanel>
-                    <TextBlock Text="排序序号 (数值越小越靠前，也可在左侧列表直接拖动排序)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <ui:TextBox Text="{Binding SortOrder, UpdateSourceTrigger=PropertyChanged, Delay=100}" Width="100" Height="34" HorizontalAlignment="Left" />
+                    <TextBlock Text="排序序号 (数值越小越靠前，也可在左侧列表直接拖动排序)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <ui:TextBox Text="{Binding SortOrder, UpdateSourceTrigger=PropertyChanged, Delay=100}" Width="100" Height="36" HorizontalAlignment="Left" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
@@ -169,8 +168,8 @@
         <!-- Actions -->
         <Border Grid.Row="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="20,12">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Width="80" Height="34" Margin="0,0,10,0" />
-                <ui:Button Appearance="Primary" Content="保存" Command="{Binding SaveCommand}" Width="80" Height="34" />
+                <ui:Button Appearance="Secondary" Content="取消" Command="{Binding CancelCommand}" Width="80" Height="36" Margin="0,0,8,0" />
+                <ui:Button Appearance="Primary" Content="保存" Command="{Binding SaveCommand}" Width="80" Height="36" />
             </StackPanel>
         </Border>
     </Grid>
