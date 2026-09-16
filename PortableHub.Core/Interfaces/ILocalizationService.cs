@@ -8,5 +8,6 @@ public interface ILocalizationService
     IReadOnlyList<LanguageOption> SupportedLanguages { get; }
     void SetLanguage(string cultureCode);
     string GetString(string key, string? fallback = null);
+    string GetFormattedString(string key, string fallbackFormat, params object[] args);
     event EventHandler? LanguageChanged;
 }

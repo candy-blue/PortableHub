@@ -5,7 +5,23 @@ using Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol;
 
 namespace PortableHub.App.ViewModels;
 
-public record CategoryIconOption(Symbol Symbol, string Name, string Key);
+public partial class CategoryIconOption : ObservableObject
+{
+    public Symbol Symbol { get; }
+    public string Name { get; }
+    public string Key { get; }
+
+    [ObservableProperty]
+    private bool _isSelected;
+
+    public CategoryIconOption(Symbol symbol, string name, string key, bool isSelected = false)
+    {
+        Symbol = symbol;
+        Name = name;
+        Key = key;
+        _isSelected = isSelected;
+    }
+}
 
 public partial class CategoryEditViewModel : ObservableObject
 {
@@ -91,6 +107,11 @@ public partial class CategoryEditViewModel : ObservableObject
         _selectedIconOption = AvailableIconOptions.FirstOrDefault(o => o.Symbol == _selectedSymbol) 
                               ?? AvailableIconOptions.FirstOrDefault(o => o.Key.Equals(_icon, StringComparison.OrdinalIgnoreCase))
                               ?? AvailableIconOptions[1]; // Folder
+
+        if (_selectedIconOption != null)
+        {
+            _selectedIconOption.IsSelected = true;
+        }
     }
 
     partial void OnSelectedIconOptionChanged(CategoryIconOption? value)
@@ -99,6 +120,10 @@ public partial class CategoryEditViewModel : ObservableObject
         {
             SelectedSymbol = value.Symbol;
             Icon = value.Key;
+            foreach (var opt in AvailableIconOptions)
+            {
+                opt.IsSelected = (opt == value);
+            }
         }
     }
 

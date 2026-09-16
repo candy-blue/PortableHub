@@ -2,8 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- AppFontFamily Single Source of Truth (Section 8.1) -->
-    <FontFamily x:Key="AppFontFamily">Segoe UI Variable, Microsoft YaHei UI, Segoe UI</FontFamily>
+    <!-- AppFontFamily Single Source of Truth (Official Fluent 2 / WinUI 3 Typography: Segoe UI + Microsoft YaHei UI) -->
+    <FontFamily x:Key="AppFontFamily">Segoe UI, Microsoft YaHei UI, Microsoft YaHei, 微软雅黑, Segoe UI Variable, sans-serif</FontFamily>
+    <!-- Override iNKORE internal default font family token -->
+    <FontFamily x:Key="ContentControlThemeFontFamily">Segoe UI, Microsoft YaHei UI, Microsoft YaHei, 微软雅黑, Segoe UI Variable, sans-serif</FontFamily>
 
     <!-- Standard Integer Font Scale Tokens (Section 9: Display 28, TitleLG 24, Title 20, TitleSM 18, Subtitle 16, BodyLG 15, Body 14, BodySM 13, BodyXS 12) -->
     <sys:Double x:Key="Display">28</sys:Double>

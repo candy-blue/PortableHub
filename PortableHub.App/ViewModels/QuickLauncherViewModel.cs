@@ -19,6 +19,9 @@ public partial class QuickLauncherViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedIndex = 0;
 
+    [ObservableProperty]
+    private bool _hasNoResults;
+
     public ObservableCollection<Software> Results { get; } = [];
 
     public QuickLauncherViewModel(ISearchService searchService, ILaunchService launchService)
@@ -47,6 +50,7 @@ public partial class QuickLauncherViewModel : ObservableObject
             Results.Add(item);
         }
         SelectedIndex = Results.Count > 0 ? 0 : -1;
+        HasNoResults = Results.Count == 0 && !string.IsNullOrWhiteSpace(SearchQuery);
     }
 
     public void MoveSelection(int delta)
@@ -77,9 +81,32 @@ public partial class QuickLauncherViewModel : ObservableObject
         }
     }
 
+    public event EventHandler<string>? LaunchFailed;
+    public Action<string, string>? ShowErrorAction { get; set; }
+
     private async Task LaunchItemAsync(Software target)
     {
-        RequestClose?.Invoke(this, EventArgs.Empty);
-        await _launchService.LaunchAsync(target);
+        if (target == null) return;
+
+        var result = await _launchService.LaunchAsync(target);
+        if (result.Success)
+        {
+            RequestClose?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            var msg = result.ErrorMessage ?? "未知启动错误";
+            LaunchFailed?.Invoke(this, msg);
+
+            var errorDetails = $"无法启动软件 \"{target.Name}\"：\n\n{msg}";
+            if (ShowErrorAction != null)
+            {
+                ShowErrorAction(errorDetails, "启动失败");
+            }
+            else
+            {
+                Views.ModernDialog.ShowError(errorDetails, "启动失败");
+            }
+        }
     }
 }

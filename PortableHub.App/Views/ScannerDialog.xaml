@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
-        Title="扫描发现便携软件" 
+        xmlns:helpers="clr-namespace:PortableHub.App.Helpers"
+        Title="{DynamicResource Loc_Scanner_Title}" 
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="620" Width="800"
         WindowStartupLocation="CenterOwner"
@@ -23,8 +24,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- TitleBar (Section 24) -->
-        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="扫描发现便携软件 - Portable Hub" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True" />
+        <!-- TitleBar (Section 24: Standardized Fluent TitleBar with collapsed client caption buttons) -->
+        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="{DynamicResource Loc_Scanner_Title}" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            helpers:TitleBarHelper.RemoveCaptionButtons="True" />
 
         <!-- Main Content -->
         <Grid Grid.Row="1" Margin="24,14,24,10">
@@ -47,12 +50,12 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding DirectoryPath, UpdateSourceTrigger=PropertyChanged}" 
-                             ui:ControlHelper.PlaceholderText="请选择或输入要扫描的 Portable 软件根目录 (如 D:\Portable)" Height="36" VerticalContentAlignment="Center" Style="{StaticResource ModernTextBox}" />
+                             ui:ControlHelper.PlaceholderText="{DynamicResource Loc_Scanner_PathEmptyWarning}" Height="36" VerticalContentAlignment="Center" Style="{StaticResource ModernTextBox}" />
                     <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernButton}" 
                             Command="{Binding BrowseDirectoryCommand}" Margin="8,0,0,0" Height="36" Padding="12,0" VerticalContentAlignment="Center">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Folder" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="浏览目录..." VerticalAlignment="Center" FontSize="14" />
+                            <TextBlock Text="{DynamicResource Loc_Scanner_SelectFolder}" VerticalAlignment="Center" FontSize="14" />
                         </StackPanel>
                     </Button>
                     <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource PrimaryButton}"
@@ -60,7 +63,7 @@
                             IsEnabled="{Binding IsScanning, Converter={StaticResource InverseBooleanConverter}}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Play" FontSize="18" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="开始扫描" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Loc_Scanner_StartScan}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
@@ -114,13 +117,13 @@
         <Border Grid.Row="2" Style="{StaticResource DialogFooterBarStyle}">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button Style="{StaticResource ModernButton}" Content="全选" Command="{Binding SelectAllCommand}" Height="36" Padding="14,0" Margin="0,0,8,0" FontSize="14" />
-                    <Button Style="{StaticResource ModernButton}" Content="全不选" Command="{Binding UnselectAllCommand}" Height="36" Padding="14,0" FontSize="14" />
+                    <Button Style="{StaticResource ModernButton}" Content="{DynamicResource Loc_Scanner_SelectAll}" Command="{Binding SelectAllCommand}" Height="36" Padding="14,0" Margin="0,0,8,0" FontSize="14" />
+                    <Button Style="{StaticResource ModernButton}" Content="{DynamicResource Loc_Scanner_DeselectAll}" Command="{Binding UnselectAllCommand}" Height="36" Padding="14,0" FontSize="14" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource ModernButton}" Content="取消" Command="{Binding CancelScanCommand}" Width="80" Height="36" Margin="0,0,8,0" FontSize="14" />
-                    <Button Style="{StaticResource PrimaryButton}" Foreground="#FFFFFF" Content="添加选中软件" Command="{Binding AddSelectedCommand}" Height="36" Padding="16,0" FontSize="14" />
+                    <Button Style="{StaticResource ModernButton}" Content="{DynamicResource Loc_Btn_Cancel}" Command="{Binding CancelScanCommand}" Width="80" Height="36" Margin="0,0,8,0" FontSize="14" />
+                    <Button Style="{StaticResource PrimaryButton}" Foreground="#FFFFFF" Content="{DynamicResource Loc_Scanner_ImportSelected}" Command="{Binding AddSelectedCommand}" Height="36" Padding="16,0" FontSize="14" />
                 </StackPanel>
             </Grid>
         </Border>

@@ -56,6 +56,12 @@ public partial class SettingsViewModel : ObservableObject
     private string _globalHotkey = "Ctrl+Alt+Space";
 
     [ObservableProperty]
+    private string _hotkeyOpenStyle = "Grid";
+
+    [ObservableProperty]
+    private int _selectedTabIndex;
+
+    [ObservableProperty]
     private string _backupFrequency = "Weekly";
 
     [ObservableProperty]
@@ -137,6 +143,7 @@ public partial class SettingsViewModel : ObservableObject
         MinimizeToTray = s.MinimizeToTray;
         CloseToTray = s.CloseToTray;
         GlobalHotkey = s.GlobalHotkey;
+        HotkeyOpenStyle = string.IsNullOrEmpty(s.HotkeyOpenStyle) ? "Grid" : s.HotkeyOpenStyle;
 
         var ver = GithubUpdateService.GetCurrentVersion();
         CurrentAppVersion = $"v{ver.Major}.{ver.Minor}.{ver.Build}";
@@ -375,6 +382,7 @@ public partial class SettingsViewModel : ObservableObject
         s.MinimizeToTray = MinimizeToTray;
         s.CloseToTray = CloseToTray;
         s.GlobalHotkey = GlobalHotkey;
+        s.HotkeyOpenStyle = HotkeyOpenStyle;
         s.BackupFrequency = BackupFrequency;
         s.MaxBackupCount = Math.Max(1, MaxBackupCount);
 

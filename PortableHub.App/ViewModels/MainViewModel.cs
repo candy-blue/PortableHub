@@ -111,6 +111,21 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private SoftwareCardViewModel? _selectedSoftware;
 
+    [ObservableProperty]
+    private bool _isEmptyLibraryState;
+
+    [ObservableProperty]
+    private bool _isSearchEmptyState;
+
+    [ObservableProperty]
+    private bool _isSearchActive;
+
+    [RelayCommand]
+    public void ClearSearch()
+    {
+        SearchText = string.Empty;
+    }
+
     [RelayCommand]
     public void ToggleSidebar() => IsSidebarCollapsed = !IsSidebarCollapsed;
 
@@ -385,6 +400,10 @@ public partial class MainViewModel : ObservableObject
         {
             SelectedSoftware = FilteredSoftware.FirstOrDefault();
         }
+
+        IsSearchActive = !string.IsNullOrWhiteSpace(SearchText);
+        IsEmptyLibraryState = FilteredSoftware.Count == 0 && !IsSearchActive;
+        IsSearchEmptyState = FilteredSoftware.Count == 0 && IsSearchActive;
     }
 
     [RelayCommand]
@@ -456,57 +475,78 @@ public partial class MainViewModel : ObservableObject
 
     private async void OnEditSoftware(SoftwareCardViewModel card)
     {
-        if (ShowSoftwareEditDialog != null)
+        try
         {
-            var saved = await ShowSoftwareEditDialog(card.Model);
-            if (saved)
+            if (ShowSoftwareEditDialog != null)
             {
-                await RefreshDataAsync();
+                var saved = await ShowSoftwareEditDialog(card.Model);
+                if (saved)
+                {
+                    await RefreshDataAsync();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Views.ModernDialog.ShowError($"编辑软件失败：\n{ex.Message}", "错误");
         }
     }
 
     private async void OnDeleteSoftware(SoftwareCardViewModel card)
     {
-        var result = Views.ModernDialog.ShowConfirm(
-            $"确定从 PortableHub 移除软件【{card.Name}】吗？\n\n注意：此操作仅从应用列表中移除索引，绝不会删除磁盘上的软件本体文件。",
-            "移除软件",
-            isDestructive: true,
-            confirmText: "移除");
-
-        if (result)
+        try
         {
-            await _softwareRepository.DeleteAsync(card.Id);
-            await RefreshDataAsync();
+            var result = Views.ModernDialog.ShowConfirm(
+                $"确定从 PortableHub 移除软件【{card.Name}】吗？\n\n注意：此操作仅从应用列表中移除索引，绝不会删除磁盘上的软件本体文件。",
+                "移除软件",
+                isDestructive: true,
+                confirmText: "移除");
+
+            if (result)
+            {
+                await _softwareRepository.DeleteAsync(card.Id);
+                await RefreshDataAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Views.ModernDialog.ShowError($"移除软件失败：\n{ex.Message}", "错误");
         }
     }
 
     private async void OnRelocateSoftware(SoftwareCardViewModel card)
     {
-        var dialog = new OpenFileDialog
+        try
         {
-            Title = $"为【{card.Name}】重新定位可执行文件",
-            Filter = "可执行文件 (*.exe)|*.exe|所有文件 (*.*)|*.*",
-            FileName = Path.GetFileName(card.ExePath)
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            var newPath = dialog.FileName;
-            card.Model.ExePath = newPath;
-            await _softwareRepository.UpdatePathAsync(card.Id, newPath, card.Model.RootId, card.Model.RelativePath);
-
-            // Re-extract icon if needed
-            var newIcon = await _iconService.ExtractAndCacheIconAsync(newPath, card.Id);
-            if (newIcon != null)
+            var dialog = new OpenFileDialog
             {
-                card.IconPath = newIcon;
-                card.Model.IconPath = newIcon;
-                await _softwareRepository.UpdateAsync(card.Model);
-            }
+                Title = $"为【{card.Name}】重新定位可执行文件",
+                Filter = "可执行文件 (*.exe)|*.exe|所有文件 (*.*)|*.*",
+                FileName = Path.GetFileName(card.ExePath)
+            };
 
-            card.RefreshState();
-            ApplyFilter();
+            if (dialog.ShowDialog() == true)
+            {
+                var newPath = dialog.FileName;
+                card.Model.ExePath = newPath;
+                await _softwareRepository.UpdatePathAsync(card.Id, newPath, card.Model.RootId, card.Model.RelativePath);
+
+                // Re-extract icon if needed
+                var newIcon = await _iconService.ExtractAndCacheIconAsync(newPath, card.Id);
+                if (newIcon != null)
+                {
+                    card.IconPath = newIcon;
+                    card.Model.IconPath = newIcon;
+                    await _softwareRepository.UpdateAsync(card.Model);
+                }
+
+                card.RefreshState();
+                ApplyFilter();
+            }
+        }
+        catch (Exception ex)
+        {
+            Views.ModernDialog.ShowError($"重新定位软件失败：\n{ex.Message}", "错误");
         }
     }
 
@@ -593,19 +633,30 @@ public partial class MainViewModel : ObservableObject
             FilteredSoftware[i].Model.SortOrder = i + 1;
         }
 
+        // Snapshot ID pairs immediately on the UI thread
+        var pairs = FilteredSoftware.Select((c, idx) => (c.Id, idx + 1)).ToList();
+
         // Debounce database write (500ms)
         _reorderDebounceCts?.Cancel();
         _reorderDebounceCts = new CancellationTokenSource();
         var token = _reorderDebounceCts.Token;
 
-        Task.Delay(500, token).ContinueWith(async t =>
+        _ = Task.Run(async () =>
         {
-            if (!t.IsCanceled)
+            try
             {
-                var pairs = FilteredSoftware.Select((c, idx) => (c.Id, idx + 1)).ToList();
+                await Task.Delay(500, token);
                 await _softwareRepository.UpdateSortOrdersAsync(pairs);
             }
-        }, TaskScheduler.Default);
+            catch (OperationCanceledException)
+            {
+                // Debounce superseded by subsequent move
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to persist card sort orders: {ex}");
+            }
+        }, token);
     }
 
     private CancellationTokenSource? _reorderCategoryDebounceCts;
@@ -627,21 +678,32 @@ public partial class MainViewModel : ObservableObject
             CustomCategories[i].SortOrder = i + 1;
         }
 
+        // Snapshot ID pairs immediately on the UI thread
+        var pairs = CustomCategories
+            .Where(c => c.Id.HasValue)
+            .Select((c, idx) => (c.Id!.Value, idx + 1))
+            .ToList();
+
         _reorderCategoryDebounceCts?.Cancel();
         _reorderCategoryDebounceCts = new CancellationTokenSource();
         var token = _reorderCategoryDebounceCts.Token;
 
-        Task.Delay(500, token).ContinueWith(async t =>
+        _ = Task.Run(async () =>
         {
-            if (!t.IsCanceled)
+            try
             {
-                var pairs = CustomCategories
-                    .Where(c => c.Id.HasValue)
-                    .Select((c, idx) => (c.Id!.Value, idx + 1))
-                    .ToList();
+                await Task.Delay(500, token);
                 await _categoryRepository.UpdateSortOrdersAsync(pairs);
             }
-        }, TaskScheduler.Default);
+            catch (OperationCanceledException)
+            {
+                // Debounce superseded by subsequent move
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to persist category sort orders: {ex}");
+            }
+        }, token);
     }
 
     [RelayCommand]

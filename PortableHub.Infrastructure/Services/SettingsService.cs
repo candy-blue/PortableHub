@@ -10,6 +10,7 @@ public class SettingsService : ISettingsService
     private bool _isPortableMode;
     private string _dataDirectory = string.Empty;
     private AppSettings _settings = new();
+    private readonly SemaphoreSlim _fileLock = new(1, 1);
 
     public AppSettings CurrentSettings => _settings;
     public bool IsPortableMode => _isPortableMode;
@@ -72,6 +73,20 @@ public class SettingsService : ISettingsService
         {
             Directory.CreateDirectory(GetLogsDirectory());
         }
+
+        // Clean up any dangling temporary settings files from previous abnormal terminations
+        try
+        {
+            if (Directory.Exists(_dataDirectory))
+            {
+                var danglingFiles = Directory.GetFiles(_dataDirectory, "settings_*.tmp");
+                foreach (var f in danglingFiles)
+                {
+                    try { File.Delete(f); } catch { }
+                }
+            }
+        }
+        catch { }
     }
 
     public string GetDataDirectory() => _dataDirectory;
@@ -86,40 +101,135 @@ public class SettingsService : ISettingsService
 
     public async Task LoadSettingsAsync()
     {
-        var settingsFile = Path.Combine(_dataDirectory, "settings.json");
-        if (File.Exists(settingsFile))
+        await _fileLock.WaitAsync();
+        try
         {
-            try
+            var settingsFile = Path.Combine(_dataDirectory, "settings.json");
+            var backupFile = Path.Combine(_dataDirectory, "settings.json.bak");
+
+            AppSettings? loaded = null;
+
+            if (File.Exists(settingsFile))
             {
-                var json = await File.ReadAllTextAsync(settingsFile);
-                var loaded = JsonSerializer.Deserialize<AppSettings>(json);
-                if (loaded != null)
+                loaded = TryReadSettings(settingsFile);
+            }
+
+            // Fallback to backup file if primary file was corrupted or 0 bytes
+            if (loaded == null && File.Exists(backupFile))
+            {
+                loaded = TryReadSettings(backupFile);
+            }
+
+            if (loaded != null)
+            {
+                _settings = loaded;
+                if (string.IsNullOrWhiteSpace(_settings.GlobalHotkey) ||
+                    !WindowsHotkeyService.ParseHotkey(_settings.GlobalHotkey, out _, out _))
                 {
-                    _settings = loaded;
-                    if (string.IsNullOrWhiteSpace(_settings.GlobalHotkey) ||
-                        !WindowsHotkeyService.ParseHotkey(_settings.GlobalHotkey, out _, out _))
-                    {
-                        _settings.GlobalHotkey = "Ctrl+Alt+Space";
-                    }
+                    _settings.GlobalHotkey = "Ctrl+Alt+Space";
                 }
             }
-            catch
+            else
             {
-                // Fallback to defaults on corrupt settings
                 _settings = new AppSettings();
+                SaveSettingsInternal();
             }
         }
-        else
+        finally
         {
-            _settings = new AppSettings();
-            await SaveSettingsAsync();
+            _fileLock.Release();
+        }
+    }
+
+    private static AppSettings? TryReadSettings(string path)
+    {
+        try
+        {
+            var info = new FileInfo(path);
+            if (!info.Exists || info.Length == 0)
+                return null;
+
+            var json = File.ReadAllText(path);
+            if (string.IsNullOrWhiteSpace(json))
+                return null;
+
+            return JsonSerializer.Deserialize<AppSettings>(json);
+        }
+        catch
+        {
+            return null;
         }
     }
 
     public async Task SaveSettingsAsync()
     {
+        await _fileLock.WaitAsync();
+        try
+        {
+            SaveSettingsInternal();
+        }
+        finally
+        {
+            _fileLock.Release();
+        }
+    }
+
+    public void SaveSettings()
+    {
+        _fileLock.Wait();
+        try
+        {
+            SaveSettingsInternal();
+        }
+        finally
+        {
+            _fileLock.Release();
+        }
+    }
+
+    private void SaveSettingsInternal()
+    {
+        if (!Directory.Exists(_dataDirectory))
+        {
+            Directory.CreateDirectory(_dataDirectory);
+        }
+
         var settingsFile = Path.Combine(_dataDirectory, "settings.json");
-        var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(settingsFile, json);
+        var tempFile = Path.Combine(_dataDirectory, $"settings_{Guid.NewGuid():N}.tmp");
+        var backupFile = Path.Combine(_dataDirectory, "settings.json.bak");
+
+        try
+        {
+            var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
+
+            // 1. Write completely to temp file and flush
+            using (var stream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.WriteThrough))
+            using (var writer = new StreamWriter(stream, System.Text.Encoding.UTF8))
+            {
+                writer.Write(json);
+                writer.Flush();
+            }
+
+            // 2. Maintain backup copy of last good configuration
+            if (File.Exists(settingsFile))
+            {
+                try
+                {
+                    File.Copy(settingsFile, backupFile, overwrite: true);
+                }
+                catch { }
+            }
+
+            // 3. Atomically replace destination file (NTFS MoveFileEx atomic directory entry swap)
+            File.Move(tempFile, settingsFile, overwrite: true);
+        }
+        catch
+        {
+            if (File.Exists(tempFile))
+            {
+                try { File.Delete(tempFile); } catch { }
+            }
+            throw;
+        }
     }
 }

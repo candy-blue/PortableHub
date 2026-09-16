@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        Title="选取分类主题色"
+        xmlns:helpers="clr-namespace:PortableHub.App.Helpers"
+        Title="{DynamicResource Loc_ColorPicker_Title}"
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Width="480"
         SizeToContent="Height"
@@ -56,8 +57,10 @@
         </Grid.RowDefinitions>
 
         <!-- TitleBar -->
-        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="选取主题色 - Portable Hub" Height="36" FontSize="14" FontWeight="SemiBold"
-                            Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True" />
+        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="{DynamicResource Loc_ColorPicker_Title}" Height="36" FontSize="14" FontWeight="SemiBold"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True"
+                            helpers:TitleBarHelper.RemoveCaptionButtons="True" />
 
         <!-- Main Body -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,10,24,16">
@@ -162,7 +165,7 @@
                                     BorderThickness="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                                     Margin="0,0,10,0" />
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="当前颜色" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{DynamicResource Loc_ColorPicker_CustomColor}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <TextBox x:Name="HexInputBox" Width="88" Height="30"
                                          Style="{StaticResource ModernTextBox}"
                                          FontWeight="SemiBold" FontSize="13"
@@ -197,7 +200,7 @@
                 </Border>
 
                 <!-- 4. Preset Windows 11 Fluent Swatches -->
-                <TextBlock Text="推荐主题色 (Windows 11 Fluent 调色盘)" FontSize="13" FontWeight="SemiBold"
+                <TextBlock Text="{DynamicResource Loc_ColorPicker_PresetColors}" FontSize="13" FontWeight="SemiBold"
                            Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
                 <WrapPanel x:Name="PresetSwatchesPanel" Orientation="Horizontal" Margin="0,0,0,4" />
             </StackPanel>
@@ -206,9 +209,9 @@
         <!-- Footer Actions -->
         <Border Grid.Row="2" Style="{StaticResource DialogFooterBarStyle}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ModernButton}" Content="取消"
+                <Button Style="{StaticResource ModernButton}" Content="{DynamicResource Loc_Btn_Cancel}"
                         Width="84" Height="34" Margin="0,0,10,0" IsCancel="True" Click="Cancel_Click" />
-                <Button Style="{StaticResource PrimaryButton}" Content="应用颜色"
+                <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Loc_ColorPicker_Apply}"
                         Width="92" Height="34" IsDefault="True" Click="Confirm_Click" />
             </StackPanel>
         </Border>

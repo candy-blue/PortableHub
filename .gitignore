@@ -8,7 +8,12 @@
 *.sln.docstates
 
 ## Data directories
-data/
+/data/
 release/
 *.phbackup
 *.log
+
+## Agent / Local Tool Artifacts
+.agents/
+.codegraph/
+ORIGINAL_REQUEST.md

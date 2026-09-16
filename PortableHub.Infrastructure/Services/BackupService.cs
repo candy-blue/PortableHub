@@ -172,22 +172,63 @@ public class BackupService : IBackupService
         GC.Collect();
         GC.WaitForPendingFinalizers();
 
+        var dataDir = _settingsService.GetDataDirectory();
+        var iconsDir = _settingsService.GetIconsDirectory();
+        var dbPath = _settingsService.GetDatabasePath();
+        var dbDir = Path.GetDirectoryName(dbPath);
+
+        // Ensure all target directories exist before extraction
+        if (!string.IsNullOrEmpty(dataDir) && !Directory.Exists(dataDir))
+        {
+            Directory.CreateDirectory(dataDir);
+        }
+        if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
+        {
+            Directory.CreateDirectory(dbDir);
+        }
+        if (!string.IsNullOrEmpty(iconsDir) && !Directory.Exists(iconsDir))
+        {
+            Directory.CreateDirectory(iconsDir);
+        }
+
+        // Clean up any existing SQLite WAL and SHM files to prevent WAL corruption / stale replay
+        var walPath = dbPath + "-wal";
+        var shmPath = dbPath + "-shm";
+        if (File.Exists(walPath))
+        {
+            try { File.Delete(walPath); } catch { }
+        }
+        if (File.Exists(shmPath))
+        {
+            try { File.Delete(shmPath); } catch { }
+        }
+        if (File.Exists(dbPath))
+        {
+            try { File.Delete(dbPath); } catch { }
+        }
+
         // 3. Extract contents
         using (var zip = ZipFile.OpenRead(backupFilePath))
         {
-            var dataDir = _settingsService.GetDataDirectory();
-            var iconsDir = _settingsService.GetIconsDirectory();
-
             foreach (var entry in zip.Entries)
             {
                 if (entry.FullName.Equals("portablehub.db", StringComparison.OrdinalIgnoreCase))
                 {
-                    var dest = _settingsService.GetDatabasePath();
-                    entry.ExtractToFile(dest, overwrite: true);
+                    var destDir = Path.GetDirectoryName(dbPath);
+                    if (!string.IsNullOrEmpty(destDir) && !Directory.Exists(destDir))
+                    {
+                        Directory.CreateDirectory(destDir);
+                    }
+                    entry.ExtractToFile(dbPath, overwrite: true);
                 }
                 else if (entry.FullName.Equals("settings.json", StringComparison.OrdinalIgnoreCase))
                 {
                     var dest = Path.Combine(dataDir, "settings.json");
+                    var destDir = Path.GetDirectoryName(dest);
+                    if (!string.IsNullOrEmpty(destDir) && !Directory.Exists(destDir))
+                    {
+                        Directory.CreateDirectory(destDir);
+                    }
                     entry.ExtractToFile(dest, overwrite: true);
                 }
                 else if (entry.FullName.StartsWith("icons/", StringComparison.OrdinalIgnoreCase) ||
@@ -197,11 +238,19 @@ public class BackupService : IBackupService
                     if (!string.IsNullOrEmpty(fileName))
                     {
                         var dest = Path.Combine(iconsDir, fileName);
+                        var destDir = Path.GetDirectoryName(dest);
+                        if (!string.IsNullOrEmpty(destDir) && !Directory.Exists(destDir))
+                        {
+                            Directory.CreateDirectory(destDir);
+                        }
                         entry.ExtractToFile(dest, overwrite: true);
                     }
                 }
             }
         }
+
+        // Clear pools again after extraction to invalidate old file handles
+        SqliteConnection.ClearAllPools();
 
         // Reload settings
         await _settingsService.LoadSettingsAsync();
@@ -315,54 +364,155 @@ public class BackupService : IBackupService
         if (export == null)
             return 0;
 
-        var existingCategories = await _categoryRepository.GetAllAsync();
-        var categoryMap = existingCategories.ToDictionary(c => c.Name, c => c.Id, StringComparer.OrdinalIgnoreCase);
+        // 1. Persist Roots
+        var existingRoots = await _rootRepository.GetAllAsync();
+        var existingRootPaths = new HashSet<string>(
+            existingRoots.Where(r => !string.IsNullOrWhiteSpace(r.Path)).Select(r => r.Path.TrimEnd('\\', '/')),
+            StringComparer.OrdinalIgnoreCase);
 
-        // Add missing categories
-        foreach (var cat in export.Categories)
+        if (export.Roots != null)
         {
-            if (!categoryMap.ContainsKey(cat.Name))
+            foreach (var r in export.Roots)
             {
-                var newCat = new Category
+                if (string.IsNullOrWhiteSpace(r.Path))
+                    continue;
+
+                var normalizedPath = r.Path.TrimEnd('\\', '/');
+                if (!existingRootPaths.Contains(normalizedPath))
                 {
-                    Name = cat.Name,
-                    Icon = cat.Icon,
-                    Color = cat.Color,
-                    SortOrder = cat.SortOrder
-                };
-                var id = await _categoryRepository.AddAsync(newCat);
-                categoryMap[cat.Name] = id;
+                    var rootName = string.IsNullOrWhiteSpace(r.Name)
+                        ? (Path.GetFileName(normalizedPath) ?? normalizedPath)
+                        : r.Name;
+
+                    var newRoot = new RootDirectory
+                    {
+                        Name = rootName,
+                        Path = r.Path,
+                        IsAvailable = Directory.Exists(r.Path),
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _rootRepository.AddAsync(newRoot);
+                    existingRootPaths.Add(normalizedPath);
+                }
             }
         }
 
-        var defaultCategoryId = categoryMap.Values.FirstOrDefault();
+        // Reload roots to obtain fresh IDs for software mapping
+        var allRoots = await _rootRepository.GetAllAsync();
+
+        // 2. Persist Categories with null-safety
+        var existingCategories = await _categoryRepository.GetAllAsync();
+        var categoryMap = existingCategories.ToDictionary(c => c.Name, c => c.Id, StringComparer.OrdinalIgnoreCase);
+
+        if (export.Categories != null)
+        {
+            foreach (var cat in export.Categories)
+            {
+                if (string.IsNullOrWhiteSpace(cat.Name))
+                    continue;
+
+                if (!categoryMap.ContainsKey(cat.Name))
+                {
+                    var newCat = new Category
+                    {
+                        Name = cat.Name,
+                        Icon = cat.Icon,
+                        Color = cat.Color,
+                        SortOrder = cat.SortOrder
+                    };
+                    var id = await _categoryRepository.AddAsync(newCat);
+                    categoryMap[cat.Name] = id;
+                }
+            }
+        }
+
+        // FK Safety: Ensure at least one valid fallback category exists in the database
+        if (categoryMap.Count == 0)
+        {
+            var fallbackCat = new Category
+            {
+                Name = "其他",
+                Icon = "Apps24",
+                Color = "#6B7280",
+                SortOrder = 1,
+                IsSystem = true
+            };
+            var id = await _categoryRepository.AddAsync(fallbackCat);
+            categoryMap[fallbackCat.Name] = id;
+        }
+
+        var defaultCategoryId = categoryMap.Values.First();
         var count = 0;
 
-        foreach (var s in export.Software)
+        // 3. Persist Software with null-safety and FK guarantee
+        if (export.Software != null)
         {
-            var catId = defaultCategoryId;
-            if (!string.IsNullOrEmpty(s.Category) && categoryMap.TryGetValue(s.Category, out var foundId))
+            foreach (var s in export.Software)
             {
-                catId = foundId;
+                if (string.IsNullOrWhiteSpace(s.ExePath))
+                    continue;
+
+                var catId = defaultCategoryId;
+                if (!string.IsNullOrWhiteSpace(s.Category))
+                {
+                    if (categoryMap.TryGetValue(s.Category, out var foundId))
+                    {
+                        catId = foundId;
+                    }
+                    else
+                    {
+                        // Dynamically create category if specified in software item
+                        var newCat = new Category
+                        {
+                            Name = s.Category,
+                            Icon = "Folder24",
+                            Color = "#3B82F6",
+                            SortOrder = categoryMap.Count + 1
+                        };
+                        catId = await _categoryRepository.AddAsync(newCat);
+                        categoryMap[s.Category] = catId;
+                    }
+                }
+
+                // Resolve RootId if matching root found
+                int? rootId = null;
+                var normalizedExe = s.ExePath.TrimEnd('\\', '/');
+                foreach (var root in allRoots)
+                {
+                    if (!string.IsNullOrWhiteSpace(root.Path))
+                    {
+                        var normRoot = root.Path.TrimEnd('\\', '/');
+                        if (normalizedExe.StartsWith(normRoot, StringComparison.OrdinalIgnoreCase))
+                        {
+                            rootId = root.Id;
+                            break;
+                        }
+                    }
+                }
+
+                var softwareName = string.IsNullOrWhiteSpace(s.Name)
+                    ? (Path.GetFileNameWithoutExtension(s.ExePath) ?? "Unnamed")
+                    : s.Name;
+
+                var software = new Software
+                {
+                    RootId = rootId,
+                    Name = softwareName,
+                    ExePath = s.ExePath,
+                    RelativePath = s.RelativePath,
+                    Arguments = s.Arguments,
+                    WorkingDirectory = s.WorkingDirectory,
+                    Description = s.Description,
+                    Tags = s.Tags,
+                    IsFavorite = s.IsFavorite,
+                    RunAsAdmin = s.RunAsAdmin,
+                    SingleInstance = s.SingleInstance,
+                    CategoryId = catId
+                };
+
+                await _softwareRepository.AddAsync(software);
+                count++;
             }
-
-            var software = new Software
-            {
-                Name = s.Name,
-                ExePath = s.ExePath,
-                RelativePath = s.RelativePath,
-                Arguments = s.Arguments,
-                WorkingDirectory = s.WorkingDirectory,
-                Description = s.Description,
-                Tags = s.Tags,
-                IsFavorite = s.IsFavorite,
-                RunAsAdmin = s.RunAsAdmin,
-                SingleInstance = s.SingleInstance,
-                CategoryId = catId
-            };
-
-            await _softwareRepository.AddAsync(software);
-            count++;
         }
 
         return count;

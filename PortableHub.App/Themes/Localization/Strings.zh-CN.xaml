@@ -2,7 +2,12 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Application & General -->
+    <!-- ========================================================================== -->
+    <!-- Portable Hub Localization Dictionary - Culture: zh-CN                  -->
+    <!-- Total Symmetric Keys: 193                                               -->
+    <!-- ========================================================================== -->
+
+    <!-- 1. Base Existing Keys (89 keys) -->
     <sys:String x:Key="Loc_AppName">Portable Hub</sys:String>
     <sys:String x:Key="Loc_AppTagline">轻量、现代的 Windows 便携软件启动与统一管理中心</sys:String>
     <sys:String x:Key="Loc_Btn_Cancel">取消</sys:String>
@@ -16,8 +21,6 @@
     <sys:String x:Key="Loc_Btn_Add">添加</sys:String>
     <sys:String x:Key="Loc_Tip_Prompt">提示</sys:String>
     <sys:String x:Key="Loc_Tip_Success">操作成功</sys:String>
-
-    <!-- Sidebar Navigation -->
     <sys:String x:Key="Loc_Nav_Title">导航</sys:String>
     <sys:String x:Key="Loc_Nav_Home">首页</sys:String>
     <sys:String x:Key="Loc_Nav_All">全部软件</sys:String>
@@ -28,8 +31,6 @@
     <sys:String x:Key="Loc_Nav_ScanSoftware">扫描软件</sys:String>
     <sys:String x:Key="Loc_Nav_AddSoftware">添加软件</sys:String>
     <sys:String x:Key="Loc_Nav_Settings">系统设置</sys:String>
-
-    <!-- Toolbar & Search -->
     <sys:String x:Key="Loc_Search_Placeholder">搜索软件名称、拼音或分类...</sys:String>
     <sys:String x:Key="Loc_Sort_Custom">自定义排序</sys:String>
     <sys:String x:Key="Loc_Sort_NameAZ">名称 (A-Z)</sys:String>
@@ -39,8 +40,6 @@
     <sys:String x:Key="Loc_Sort_LaunchCount">启动次数</sys:String>
     <sys:String x:Key="Loc_View_Grid">网格视图</sys:String>
     <sys:String x:Key="Loc_View_List">列表视图</sys:String>
-
-    <!-- Context Menus & Software Operations -->
     <sys:String x:Key="Loc_Action_Launch">立即启动</sys:String>
     <sys:String x:Key="Loc_Action_LaunchAdmin">以管理员身份运行</sys:String>
     <sys:String x:Key="Loc_Action_ToggleFavorite">收藏 / 取消收藏</sys:String>
@@ -56,14 +55,16 @@
     <sys:String x:Key="Loc_Action_More">更多操作</sys:String>
     <sys:String x:Key="Loc_Status_Running">运行中</sys:String>
     <sys:String x:Key="Loc_Status_Invalid">失效</sys:String>
-
-    <!-- Empty State & Drag Drop -->
     <sys:String x:Key="Loc_Empty_NoSoftware">还没有软件</sys:String>
     <sys:String x:Key="Loc_Empty_DragHint">将 Portable 软件拖到这里，或点击下方按钮添加</sys:String>
+    <sys:String x:Key="Loc_Search_Clear">清空搜索</sys:String>
+    <sys:String x:Key="Loc_Search_ClearBtn">清空搜索条件</sys:String>
+    <sys:String x:Key="Loc_Search_NoResult">未找到匹配的应用</sys:String>
+    <sys:String x:Key="Loc_Search_NoResultHint">请检查拼写、尝试缩短关键词或按拼音首字母检索</sys:String>
+    <sys:String x:Key="Loc_QuickLaunch_NoResult">未找到匹配软件</sys:String>
+    <sys:String x:Key="Loc_QuickLaunch_NoResultHint">按 Esc 退出，或在主界面添加/扫描新应用</sys:String>
     <sys:String x:Key="Loc_Drag_Title">释放鼠标即可添加到便携软件列表</sys:String>
     <sys:String x:Key="Loc_Drag_Subtitle">支持 .exe 程序、.lnk 快捷方式、批处理文件及软件目录</sys:String>
-
-    <!-- Settings Navigation -->
     <sys:String x:Key="Loc_Settings_Title">系统设置</sys:String>
     <sys:String x:Key="Loc_Settings_Appearance">外观与个性化</sys:String>
     <sys:String x:Key="Loc_Settings_Startup">启动与托盘</sys:String>
@@ -71,8 +72,6 @@
     <sys:String x:Key="Loc_Settings_Data">数据与备份</sys:String>
     <sys:String x:Key="Loc_Settings_Roots">根目录管理</sys:String>
     <sys:String x:Key="Loc_Settings_Diagnostics">迁移与关于</sys:String>
-
-    <!-- Settings Content: Appearance -->
     <sys:String x:Key="Loc_Settings_ThemeTitle">应用主题</sys:String>
     <sys:String x:Key="Loc_Settings_ThemeDesc">选择 Portable Hub 界面色彩模式与 Mica 材质</sys:String>
     <sys:String x:Key="Loc_Settings_ThemeSystem">跟随系统</sys:String>
@@ -85,12 +84,16 @@
     <sys:String x:Key="Loc_Settings_CardSmall">紧凑 (小)</sys:String>
     <sys:String x:Key="Loc_Settings_CardMedium">标准 (中)</sys:String>
     <sys:String x:Key="Loc_Settings_CardLarge">舒适 (大)</sys:String>
+    <sys:String x:Key="Loc_Settings_ViewModeTitle">默认视图模式</sys:String>
+    <sys:String x:Key="Loc_Settings_ViewModeDesc">选择主界面软件列表的默认展现形态</sys:String>
     <sys:String x:Key="Loc_Settings_LaunchModeTitle">软件启动触发方式</sys:String>
     <sys:String x:Key="Loc_Settings_LaunchModeDesc">选择在主面板卡片上启动程序的鼠标交互方式</sys:String>
     <sys:String x:Key="Loc_Settings_DoubleClick">双击启动</sys:String>
     <sys:String x:Key="Loc_Settings_SingleClick">单击启动</sys:String>
-
-    <!-- Settings Content: Updates & About -->
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleTitle">快捷键呼出样式</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleDesc">选择按下全局快捷键时唤出的窗口形态</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleGrid">网格面板（主窗口）</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleSearch">快捷搜索框</sys:String>
     <sys:String x:Key="Loc_Updates_Title">软件更新与关于</sys:String>
     <sys:String x:Key="Loc_Updates_CurrentVersion">当前版本</sys:String>
     <sys:String x:Key="Loc_Updates_CheckBtn">检查更新</sys:String>
@@ -100,12 +103,127 @@
     <sys:String x:Key="Loc_Updates_DownloadBtn">前往下载更新</sys:String>
     <sys:String x:Key="Loc_Updates_Failed">检查更新失败，请稍后再试或访问 GitHub 仓库</sys:String>
     <sys:String x:Key="Loc_About_Repo">开源仓库</sys:String>
-
-    <!-- Category Dialog -->
     <sys:String x:Key="Loc_CatDialog_Title">分类管理</sys:String>
     <sys:String x:Key="Loc_CatDialog_NameLabel">分类名称 *</sys:String>
     <sys:String x:Key="Loc_CatDialog_NamePlaceholder">请输入分类名称，如：常用工具、开发必备...</sys:String>
     <sys:String x:Key="Loc_CatDialog_IconLabel">分类图标</sys:String>
     <sys:String x:Key="Loc_CatDialog_ColorLabel">分类主题色</sys:String>
     <sys:String x:Key="Loc_CatDialog_PickColorBtn">高级调色盘...</sys:String>
+
+    <!-- 2. Newly Added Keys (104 keys) -->
+    <sys:String x:Key="Loc_State_Off">关</sys:String>
+    <sys:String x:Key="Loc_State_On">开</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_Title">调色盘</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_PresetColors">预设色彩</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_CustomColor">自定义颜色 (HEX)</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_Apply">确定使用</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_InvalidHex">请输入有效的 HEX 颜色值 (例如 #0078D4)</sys:String>
+    <sys:String x:Key="Loc_Scanner_Title">软件扫描与批量导入</sys:String>
+    <sys:String x:Key="Loc_Scanner_Subtitle">扫描指定目录下的便携式可执行文件 (.exe)，快速批量添加到 Portable Hub</sys:String>
+    <sys:String x:Key="Loc_Scanner_ScanDirLabel">扫描目录</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectFolder">选择文件夹</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectFolderDialogTitle">选择扫描目录</sys:String>
+    <sys:String x:Key="Loc_Scanner_StartScan">开始扫描</sys:String>
+    <sys:String x:Key="Loc_Scanner_Scanning">正在扫描...</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectAll">全选</sys:String>
+    <sys:String x:Key="Loc_Scanner_DeselectAll">全不选</sys:String>
+    <sys:String x:Key="Loc_Scanner_DefaultCategory">默认归属分类:</sys:String>
+    <sys:String x:Key="Loc_Scanner_FoundCountFormat">找到 {0} 个软件</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectedCountFormat">已选中 {0} 个</sys:String>
+    <sys:String x:Key="Loc_Scanner_ColName">名称</sys:String>
+    <sys:String x:Key="Loc_Scanner_ColPath">可执行文件路径</sys:String>
+    <sys:String x:Key="Loc_Scanner_ImportSelected">导入选中项</sys:String>
+    <sys:String x:Key="Loc_Scanner_PathEmptyWarning">请先选择或输入有效的扫描目录</sys:String>
+    <sys:String x:Key="Loc_Scanner_ScanningWarning">扫描进行中，请等待完成</sys:String>
+    <sys:String x:Key="Loc_Scanner_ImportSuccessFormat">成功导入 {0} 个软件！</sys:String>
+    <sys:String x:Key="Loc_Scanner_NoSoftwareSelected">请勾选需要导入的软件</sys:String>
+    <sys:String x:Key="Loc_Scanner_DirNotFound">指定的目录不存在</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TitleAdd">添加软件</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TitleEdit">编辑软件</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TabBasic">基本信息</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TabAdv">高级选项</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NameLabel">软件名称 *</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NamePlaceholder">例如：Visual Studio Code</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExeLabel">可执行文件 *</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExePlaceholder">选择可执行文件 (.exe) 或脚本...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_CategoryLabel">所属分类</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_DescLabel">软件说明</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_DescPlaceholder">可选，简短描述软件用途...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_IconLabel">软件图标</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectCustomIcon">选择自定义图标...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RestoreDefaultIcon">恢复默认图标</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ArgsLabel">启动参数</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ArgsPlaceholder">例如：--portable --user-data-dir ./data</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_WorkDirLabel">工作目录</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_WorkDirPlaceholder">留空则使用可执行文件所在目录</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RunAdminLabel">始终以管理员身份运行</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RunAdminDesc">启动时请求管理员权限提权</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SingleInstanceLabel">单实例运行</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SingleInstanceDesc">防止重复多开，再次启动时自动唤醒已有窗口</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectExeTitle">选择可执行文件</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExeFilter">可执行文件 (*.exe;*.bat;*.cmd;*.lnk)|*.exe;*.bat;*.cmd;*.lnk|所有文件 (*.*)|*.*</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectIconTitle">选择自定义图标</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_IconFilter">图标文件 (*.ico;*.png;*.exe)|*.ico;*.png;*.exe|所有文件 (*.*)|*.*</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NameRequired">请输入软件名称。</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExePathRequired">请选择可执行文件路径。</sys:String>
+    <sys:String x:Key="Loc_CatDialog_NameRequired">请输入分类名称。</sys:String>
+    <sys:String x:Key="Loc_ModernDialog_ConfirmTitle">确认操作</sys:String>
+    <sys:String x:Key="Loc_Tip_Warning">警告</sys:String>
+    <sys:String x:Key="Loc_Tip_Error">错误</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_Placeholder">搜索软件、拼音或按 ↑↓ 选择，Enter 启动，Esc 退出...</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_OpenMain">打开主界面</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_NoResults">未找到匹配的软件</sys:String>
+    <sys:String x:Key="Loc_Settings_SaveSuccess">设置已保存</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectBackupPath">选择备份文件导出路径</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupFilter">JSON 备份文件 (*.json)|*.json</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectRestorePath">选择备份文件进行恢复</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupSuccess">数据备份成功！</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupFailed">备份失败：{0}</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreConfirm">恢复备份将覆盖当前所有分类与软件数据，确定继续？</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreSuccess">数据恢复成功，已重新载入！</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreFailed">恢复失败：{0}</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportDirTitle">导出目录</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectPortableRootTitle">选择便携根目录</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectSoftwareDirTitle">选择软件目录</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsConfirm">确定要清理所有历史备份文件吗？</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsSuccess">已清理历史备份文件</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsFailed">清理失败：{0}</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenTitle">扫描失效路径</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenNone">未发现失效路径</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenFound">共发现 {0} 个失效软件路径</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportBrokenTitle">导出失效清单</sys:String>
+    <sys:String x:Key="Loc_Settings_TextFilter">文本文件 (*.txt)|*.txt</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportSuccess">导出成功</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportFailed">导出失败：{0}</sys:String>
+    <sys:String x:Key="Loc_Main_Title">Portable Hub - 便携软件启动中心</sys:String>
+    <sys:String x:Key="Loc_Main_SelectExeRelocate">选择新的可执行文件路径</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteSoftware">确定要从列表中移除“{0}”吗？(不会删除磁盘文件)</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteCategory">确定要删除分类“{0}”吗？其下软件将被移至未分类。</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteBatch">确定要从列表中移除选中的 {0} 个软件吗？</sys:String>
+    <sys:String x:Key="Loc_Main_ShortcutCreated">桌面快捷方式创建成功</sys:String>
+    <sys:String x:Key="Loc_Main_ShortcutFailed">创建桌面快捷方式失败</sys:String>
+    <sys:String x:Key="Loc_Main_PathCopied">路径已复制到剪贴板</sys:String>
+    <sys:String x:Key="Loc_Main_AddCategoryPrompt">请输入新分类名称：</sys:String>
+    <sys:String x:Key="Loc_Main_AddCategoryTitle">新建分类</sys:String>
+    <sys:String x:Key="Loc_Main_DefaultCategoryUncategorized">未分类</sys:String>
+    <sys:String x:Key="Loc_Tray_ShowMain">显示主面板</sys:String>
+    <sys:String x:Key="Loc_Tray_QuickLaunch">快速启动框</sys:String>
+    <sys:String x:Key="Loc_Tray_Settings">设置</sys:String>
+    <sys:String x:Key="Loc_Tray_Exit">退出程序</sys:String>
+    <sys:String x:Key="Loc_Tray_LaunchFailed">启动失败: {0}</sys:String>
+    <sys:String x:Key="Loc_Tray_LaunchSuccess">启动成功</sys:String>
+    <sys:String x:Key="Loc_Launch_FileNotFound">可执行文件不存在或路径无效：{0}</sys:String>
+    <sys:String x:Key="Loc_Launch_FailedFormat">启动失败: {0}</sys:String>
+    <sys:String x:Key="Loc_App_StartupFailedTitle">Portable Hub 启动失败</sys:String>
+    <sys:String x:Key="Loc_App_StartupFailed">程序启动发生致命异常，即将退出：{0}</sys:String>
+    <sys:String x:Key="Loc_App_RuntimeError">系统运行时异常：{0}</sys:String>
+    <sys:String x:Key="Loc_App_FatalError">发生未捕获致命错误：{0}</sys:String>
+
+    <!-- 联动启动 (Linked Launch) -->
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppsLabel">联动启动 (最多5个)</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppsDesc">启动当前应用时，将同时自动启动以下关联程序（具备防循环死锁与上限保护）</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_AddLinkedApp">选择要联动的应用...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppMaxLimit">已达到联动数量上限（5个）</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NoLinkedApps">暂无联动启动项，可从下方下拉框选择添加</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RemoveLinkedApp">移除此联动</sys:String>
 </ResourceDictionary>

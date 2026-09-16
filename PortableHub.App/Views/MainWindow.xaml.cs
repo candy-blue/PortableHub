@@ -170,11 +170,26 @@ public partial class MainWindow : Window
     private void AnimateSidebar(bool collapsed)
     {
         double targetWidth = collapsed ? 56.0 : 224.0;
-        var anim = new System.Windows.Media.Animation.DoubleAnimation(targetWidth, TimeSpan.FromMilliseconds(180))
+        var duration = TimeSpan.FromMilliseconds(240);
+        var ease = new System.Windows.Media.Animation.QuarticEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
+
+        var anim = new System.Windows.Media.Animation.DoubleAnimation(targetWidth, duration)
         {
-            EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+            EasingFunction = ease
         };
         SidebarBorder.BeginAnimation(WidthProperty, anim);
+
+        if (CategoriesHeaderArea != null)
+        {
+            var fade = new System.Windows.Media.Animation.DoubleAnimation(
+                collapsed ? 0.0 : 1.0,
+                TimeSpan.FromMilliseconds(collapsed ? 140 : 220))
+            {
+                EasingFunction = ease
+            };
+            CategoriesHeaderArea.BeginAnimation(UIElement.OpacityProperty, fade);
+            CategoriesHeaderArea.IsHitTestVisible = !collapsed;
+        }
     }
 
     private void AnimateContentEntrance()
@@ -223,6 +238,24 @@ public partial class MainWindow : Window
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool BringWindowToTop(IntPtr hWnd);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
     public void ShowAndActivate()
     {
         if (WindowState == WindowState.Minimized)
@@ -230,12 +263,57 @@ public partial class MainWindow : Window
             WindowState = WindowState.Normal;
         }
         Show();
+
+        // Bring to front and activate
+        Topmost = true;
+        Topmost = false;
         Activate();
         Focus();
 
         var helper = new WindowInteropHelper(this);
         helper.EnsureHandle();
-        SetForegroundWindow(helper.Handle);
+        var hWnd = helper.Handle;
+
+        const int SW_RESTORE = 9;
+        ShowWindow(hWnd, SW_RESTORE);
+
+        IntPtr foreWnd = GetForegroundWindow();
+        uint foreThread = GetWindowThreadProcessId(foreWnd, IntPtr.Zero);
+        uint appThread = GetWindowThreadProcessId(hWnd, IntPtr.Zero);
+
+        if (foreThread != appThread && foreThread != 0)
+        {
+            AttachThreadInput(foreThread, appThread, true);
+            BringWindowToTop(hWnd);
+            SetForegroundWindow(hWnd);
+            AttachThreadInput(foreThread, appThread, false);
+        }
+        else
+        {
+            BringWindowToTop(hWnd);
+            SetForegroundWindow(hWnd);
+        }
+
+        SwitchToThisWindow(hWnd, true);
+    }
+
+    public void ToggleShowHide()
+    {
+        if (IsVisible && IsActive && WindowState != WindowState.Minimized)
+        {
+            if (_settingsService.CurrentSettings.MinimizeToTray)
+            {
+                Hide();
+            }
+            else
+            {
+                WindowState = WindowState.Minimized;
+            }
+        }
+        else
+        {
+            ShowAndActivate();
+        }
     }
 
     private void Window_StateChanged(object? sender, EventArgs e)
@@ -256,7 +334,12 @@ public partial class MainWindow : Window
     {
         var s = _settingsService.CurrentSettings;
         if (s.WindowWidth >= MinWidth) Width = s.WindowWidth;
+        else if (s.WindowWidth > 0) Width = MinWidth;
         if (s.WindowHeight >= MinHeight) Height = s.WindowHeight;
+        else if (s.WindowHeight > 0) Height = MinHeight;
+
+        if (Width < MinWidth) Width = MinWidth;
+        if (Height < MinHeight) Height = MinHeight;
 
         if (s.WindowLeft.HasValue && s.WindowTop.HasValue)
         {
@@ -277,7 +360,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SaveWindowBounds()
+    private void SaveWindowBounds(bool sync = false)
     {
         var s = _settingsService.CurrentSettings;
         if (WindowState == WindowState.Maximized)
@@ -292,20 +375,35 @@ public partial class MainWindow : Window
             s.WindowLeft = Left;
             s.WindowTop = Top;
         }
-        _ = _settingsService.SaveSettingsAsync();
+
+        if (sync)
+        {
+            try
+            {
+                _settingsService.SaveSettings();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to flush settings synchronously: {ex}");
+            }
+        }
+        else
+        {
+            _ = _settingsService.SaveSettingsAsync();
+        }
     }
 
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
-        SaveWindowBounds();
-
         if (!_isRealExit && _settingsService.CurrentSettings.CloseToTray)
         {
+            SaveWindowBounds(sync: false);
             e.Cancel = true;
             Hide();
         }
         else
         {
+            SaveWindowBounds(sync: true);
             System.Windows.Application.Current.Shutdown();
         }
     }
@@ -574,7 +672,11 @@ public partial class MainWindow : Window
         {
             var card = (menu.DataContext as SoftwareCardViewModel)
                        ?? ((menu.PlacementTarget as FrameworkElement)?.DataContext as SoftwareCardViewModel);
-            var moveItem = menu.Items.OfType<MenuItem>().FirstOrDefault(m => (m.Header as string) == "移动到分类");
+            var moveItem = menu.Items.OfType<MenuItem>().FirstOrDefault(m =>
+                m.Name == "MoveToCategoryMenuItem" ||
+                Equals(m.Tag, "MoveToCategory") ||
+                string.Equals(m.Header as string, Application.Current?.TryFindResource("Loc_Action_MoveToCategory") as string, StringComparison.Ordinal) ||
+                (m.Header as string) == "移动到分类");
             if (moveItem != null)
             {
                 moveItem.Items.Clear();
@@ -591,7 +693,14 @@ public partial class MainWindow : Window
                     {
                         if (card != null)
                         {
-                            await _viewModel.MoveSoftwareToCategoryAsync(card, catId);
+                            try
+                            {
+                                await _viewModel.MoveSoftwareToCategoryAsync(card, catId);
+                            }
+                            catch (Exception ex)
+                            {
+                                ModernDialog.ShowError($"移动分类失败: {ex.Message}", "错误");
+                            }
                         }
                     };
                     moveItem.Items.Add(subItem);

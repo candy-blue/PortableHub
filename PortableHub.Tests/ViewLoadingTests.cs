@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ using PortableHub.Core.Models;
 using PortableHub.Infrastructure.Data;
 using PortableHub.Infrastructure.Repositories;
 using PortableHub.Infrastructure.Services;
+using PortableHub.Infrastructure.Windows;
 using Xunit;
 
 namespace PortableHub.Tests;
@@ -32,9 +34,11 @@ public class StaTestFixture : IDisposable
     {
         _thread = new Thread(() =>
         {
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             if (Application.Current == null)
             {
                 var app = new Application();
+                app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
                 app.Resources.MergedDictionaries.Add(new iNKORE.UI.WPF.Modern.ThemeResources());
                 app.Resources.MergedDictionaries.Add(new iNKORE.UI.WPF.Modern.Controls.XamlControlsResources());
                 try
@@ -71,14 +75,24 @@ public class StaTestFixture : IDisposable
                 app.Resources.Add("ComparisonToVisibilityConverter", new ComparisonToVisibilityConverter());
                 ThemeService.UpdateDynamicThemeColors(true);
             }
+            _ = iNKORE.UI.WPF.Modern.ThemeManager.Current;
             _tcs.SetResult(Dispatcher.CurrentDispatcher);
-            Dispatcher.Run();
+            try
+            {
+                Dispatcher.Run();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Dispatcher.Run terminated with: {ex}");
+            }
         });
         _thread.SetApartmentState(ApartmentState.STA);
         _thread.IsBackground = true;
         _thread.Start();
         _dispatcher = _tcs.Task.Result;
     }
+
+    public int GetDispatcherThreadId() => _dispatcher!.Thread.ManagedThreadId;
 
     public void Run(Action action)
     {
@@ -90,9 +104,54 @@ public class StaTestFixture : IDisposable
         await _dispatcher!.InvokeAsync(action);
     }
 
+    public async Task RunAsync(Func<Task> action)
+    {
+        if (_dispatcher == null) throw new ObjectDisposedException(nameof(StaTestFixture));
+        var operation = _dispatcher.InvokeAsync(async () =>
+        {
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(_dispatcher));
+            await action();
+        });
+        await operation.Task.Unwrap();
+    }
+
+    public async Task<T> RunAsync<T>(Func<Task<T>> action)
+    {
+        if (_dispatcher == null) throw new ObjectDisposedException(nameof(StaTestFixture));
+        var operation = _dispatcher.InvokeAsync(async () =>
+        {
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(_dispatcher));
+            return await action();
+        });
+        return await operation.Task.Unwrap();
+    }
+
     public void Dispose()
     {
-        _dispatcher?.InvokeShutdown();
+        if (_dispatcher != null && !_dispatcher.HasShutdownStarted)
+        {
+            try
+            {
+                _dispatcher.Invoke(() =>
+                {
+                    if (Application.Current != null)
+                    {
+                        var windows = Application.Current.Windows.Cast<Window>().ToList();
+                        foreach (var window in windows)
+                        {
+                            try { window.Close(); } catch { }
+                        }
+                    }
+                }, DispatcherPriority.Send);
+
+                _dispatcher.InvokeShutdown();
+                _thread.Join(3000);
+            }
+            catch
+            {
+                // Suppress teardown exceptions
+            }
+        }
     }
 }
 
@@ -151,12 +210,13 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
     {
         using var env = new TestEnvironment();
         await env.InitializeAsync();
-        var provider = CreateServiceProvider(env);
-        var vm = provider.GetRequiredService<SettingsViewModel>();
-        await vm.InitializeAsync();
 
-        await _fixture.RunAsync(() =>
+        await _fixture.RunAsync(async () =>
         {
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<SettingsViewModel>();
+            await vm.InitializeAsync();
+
             var window = new SettingsWindow(vm);
             try
             {
@@ -180,12 +240,177 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
                     Assert.Equal(t, tabControl.SelectedIndex);
                     Assert.NotNull(navListBox.SelectedItem);
                 }
+
+                // Verify that client AppTitleBar does NOT have visible caption buttons (ghosting fix)
+                var appTb = window.FindName("AppTitleBar") as iNKORE.UI.WPF.Modern.Controls.Primitives.TitleBarControl;
+                Assert.NotNull(appTb);
+                Assert.True(appTb.IsIconVisible);
+
+                var appTbVisibleButtons = FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.Primitives.TitleBarButton>(appTb)
+                    .Where(b => b.Visibility == Visibility.Visible)
+                    .ToList();
+                Assert.Empty(appTbVisibleButtons);
+
+                var titleTb = FindVisualChildren<TextBlock>(appTb).FirstOrDefault(t => t.Name == "Title");
+                Assert.NotNull(titleTb);
+                Assert.Equal("系统设置", titleTb.Text);
+                Assert.Equal(Visibility.Visible, titleTb.Visibility);
+
+                // Verify that the window template still provides the genuine caption buttons
+                var templateButtons = FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.Primitives.TitleBarButton>(window)
+                    .Where(b => b.Visibility == Visibility.Visible)
+                    .ToList();
+                Assert.Equal(3, templateButtons.Count);
+                Assert.All(templateButtons, btn =>
+                {
+                    var parentTb = FindVisualParent<iNKORE.UI.WPF.Modern.Controls.Primitives.TitleBarControl>(btn);
+                    Assert.NotNull(parentTb);
+                    Assert.Equal(window, parentTb.TemplatedParent);
+                });
             }
             finally
             {
-                window.Close();
+                if (window.IsLoaded)
+                    window.Close();
             }
         });
+    }
+
+    [Fact]
+    public async Task SettingsWindow_UsesInkoreSettingsCards_AndRendersProperly()
+    {
+        using var env = new TestEnvironment();
+        await env.InitializeAsync();
+
+        await _fixture.RunAsync(async () =>
+        {
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<SettingsViewModel>();
+            await vm.InitializeAsync();
+
+            var window = new SettingsWindow(vm);
+            try
+            {
+                provider.GetRequiredService<ThemeService>().ApplyTheme("Dark");
+                iNKORE.UI.WPF.Modern.ThemeManager.Current.ApplicationTheme = iNKORE.UI.WPF.Modern.ApplicationTheme.Dark;
+                window.Show();
+                var navListBox = window.FindName("SettingsNavListBox") as ListBox;
+                if (navListBox != null) navListBox.SelectedIndex = 0;
+                window.Measure(new Size(960, 700));
+                window.Arrange(new Rect(0, 0, 960, 700));
+                window.UpdateLayout();
+
+                // Verify native iNKORE SettingsCard controls are present
+                var cards = FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.SettingsCard>(window).ToList();
+                Assert.NotEmpty(cards);
+                Assert.True(cards.Count >= 4, $"Expected at least 4 SettingsCards on Tab 1, found {cards.Count}");
+
+                var res = window.TryFindResource("ContentControlThemeFontFamily") as FontFamily;
+                Assert.NotNull(res);
+                Assert.Contains("Segoe UI", res.Source);
+
+                var tabControl = FindVisualChildren<TabControl>(window).FirstOrDefault();
+                if (tabControl != null)
+                {
+                    tabControl.SelectedIndex = 1;
+                    window.UpdateLayout();
+                }
+
+                var switches = FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.ToggleSwitch>(window).ToList();
+                Assert.NotEmpty(switches);
+
+                var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(960, 700, 96, 96, PixelFormats.Pbgra32);
+                rtb.Render(window);
+                var enc = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+                var outPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_output", "settings_window.png");
+                using var fs = File.Create(outPath);
+                enc.Save(fs);
+            }
+            finally
+            {
+                if (window.IsLoaded)
+                    window.Close();
+            }
+        });
+    }
+
+    [Fact]
+    public async Task SettingsWindow_BackupTab_AtNarrowWidth_RendersCleanlyWithoutVerticalWrapping()
+    {
+        using var env = new TestEnvironment();
+        await env.InitializeAsync();
+
+        await _fixture.RunAsync(async () =>
+        {
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<SettingsViewModel>();
+            await vm.InitializeAsync();
+
+            var window = new SettingsWindow(vm);
+            try
+            {
+                provider.GetRequiredService<ThemeService>().ApplyTheme("Dark");
+                iNKORE.UI.WPF.Modern.ThemeManager.Current.ApplicationTheme = iNKORE.UI.WPF.Modern.ApplicationTheme.Dark;
+                window.Show();
+                var navListBox = window.FindName("SettingsNavListBox") as ListBox;
+                if (navListBox != null) navListBox.SelectedIndex = 3;
+                window.Measure(new Size(900, 700));
+                window.Arrange(new Rect(0, 0, 900, 700));
+                window.UpdateLayout();
+
+                // Assert that native iNKORE SettingsCard controls in Tab 4 are properly sized and not vertically squashed
+                var cards = FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.SettingsCard>(window).ToList();
+                Assert.True(cards.Count >= 4, $"Expected at least 4 SettingsCards, found {cards.Count}");
+                foreach (var card in cards)
+                {
+                    Assert.True(card.ActualHeight < 150, $"Card '{card.Header}' was unexpectedly tall ({card.ActualHeight}px), indicating vertical text wrapping!");
+                }
+
+                var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(900, 700, 96, 96, PixelFormats.Pbgra32);
+                rtb.Render(window);
+                var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+
+                var outDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_output");
+                Directory.CreateDirectory(outDir);
+                var artifactPath = Path.Combine(outDir, "backup_narrow_rendered.png");
+                using (var fs = File.Create(artifactPath))
+                {
+                    encoder.Save(fs);
+                }
+            }
+            finally
+            {
+                if (window.IsLoaded)
+                    window.Close();
+            }
+        });
+    }
+
+
+
+    private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        var parent = System.Windows.Media.VisualTreeHelper.GetParent(child);
+        while (parent != null)
+        {
+            if (parent is T typedParent)
+                return typedParent;
+            parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+        }
+        return null;
+    }
+
+    private static void DumpVisualTree(DependencyObject element, int depth, List<string> lines)
+    {
+        var indent = new string(' ', depth * 2);
+        var fe = element as FrameworkElement;
+        lines.Add($"{indent}{element.GetType().Name} (Name='{fe?.Name}', Visibility={fe?.Visibility}, Size=({fe?.ActualWidth}x{fe?.ActualHeight}), Text={(element as TextBlock)?.Text})");
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(element); i++)
+        {
+            DumpVisualTree(System.Windows.Media.VisualTreeHelper.GetChild(element, i), depth + 1, lines);
+        }
     }
 
     [Fact]
@@ -193,12 +418,13 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
     {
         using var env = new TestEnvironment();
         await env.InitializeAsync();
-        var provider = CreateServiceProvider(env);
-        var vm = provider.GetRequiredService<SettingsViewModel>();
-        var themeService = provider.GetRequiredService<ThemeService>();
 
         await _fixture.RunAsync(async () =>
         {
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<SettingsViewModel>();
+            var themeService = provider.GetRequiredService<ThemeService>();
+
             await vm.InitializeAsync();
             var original = vm.Theme;
 
@@ -218,12 +444,13 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
     {
         using var env = new TestEnvironment();
         await env.InitializeAsync();
-        var provider = CreateServiceProvider(env);
-        var vm = provider.GetRequiredService<SettingsViewModel>();
-        var themeService = provider.GetRequiredService<ThemeService>();
 
         await _fixture.RunAsync(async () =>
         {
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<SettingsViewModel>();
+            var themeService = provider.GetRequiredService<ThemeService>();
+
             await vm.InitializeAsync();
             var original = vm.Theme;
             var window = new SettingsWindow(vm);
@@ -248,12 +475,13 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
     {
         using var env = new TestEnvironment();
         await env.InitializeAsync();
-        var provider = CreateServiceProvider(env);
-        var vm = provider.GetRequiredService<SettingsViewModel>();
-        var themeService = provider.GetRequiredService<ThemeService>();
 
         await _fixture.RunAsync(async () =>
         {
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<SettingsViewModel>();
+            var themeService = provider.GetRequiredService<ThemeService>();
+
             await vm.InitializeAsync();
             var original = vm.Theme;
             var window = new SettingsWindow(vm);
@@ -278,12 +506,13 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
     {
         using var env = new TestEnvironment();
         await env.InitializeAsync();
-        var provider = CreateServiceProvider(env);
-        var vm = provider.GetRequiredService<SettingsViewModel>();
-        var themeService = provider.GetRequiredService<ThemeService>();
 
         await _fixture.RunAsync(async () =>
         {
+            var provider = CreateServiceProvider(env);
+            var vm = provider.GetRequiredService<SettingsViewModel>();
+            var themeService = provider.GetRequiredService<ThemeService>();
+
             await vm.InitializeAsync();
             var original = vm.Theme;
             var window = new SettingsWindow(vm);
@@ -362,12 +591,52 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
             var provider = CreateServiceProvider(env);
             var vm = provider.GetRequiredService<MainViewModel>();
             var settingsService = provider.GetRequiredService<ISettingsService>();
+            var themeService = provider.GetRequiredService<PortableHub.App.Services.ThemeService>();
+            themeService.ApplyTheme("Dark");
+            iNKORE.UI.WPF.Modern.ThemeManager.Current.ApplicationTheme = iNKORE.UI.WPF.Modern.ApplicationTheme.Dark;
 
             var window = new MainWindow(vm, settingsService);
             Assert.NotNull(window);
+            window.Show();
+            window.UpdateLayout();
             var titleBar = window.FindName("AppTitleBar") as iNKORE.UI.WPF.Modern.Controls.Primitives.TitleBarControl;
             Assert.NotNull(titleBar);
             Assert.True(titleBar.IsIconVisible);
+
+            // Client AppTitleBar should have no visible caption buttons
+            var appTbVisibleButtons = FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.Primitives.TitleBarButton>(titleBar)
+                .Where(b => b.Visibility == Visibility.Visible)
+                .ToList();
+            Assert.Empty(appTbVisibleButtons);
+
+            var titleTb = FindVisualChildren<TextBlock>(titleBar).FirstOrDefault(t => t.Name == "Title");
+            Assert.NotNull(titleTb);
+            Assert.Equal("Portable Hub", titleTb.Text);
+            Assert.Equal(Visibility.Visible, titleTb.Visibility);
+
+            // Render MainWindow with dark backdrop to simulate Mica compositing
+            window.Measure(new Size(1000, 700));
+            window.Arrange(new Rect(0, 0, 1000, 700));
+            window.UpdateLayout();
+            var dv = new DrawingVisual();
+            using (var dc = dv.RenderOpen())
+            {
+                dc.DrawRectangle(new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20)), null, new Rect(0, 0, 1000, 700));
+            }
+            var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(1000, 700, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(dv);
+            rtb.Render(window);
+            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+            var outDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_output");
+            Directory.CreateDirectory(outDir);
+            var artifactPath = Path.Combine(outDir, "main_window_rendered.png");
+            using (var fs = File.Create(artifactPath))
+            {
+                encoder.Save(fs);
+            }
+
+            window.Close();
         });
     }
 
@@ -848,7 +1117,7 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
     [Fact]
     public void Verify_SymbolHelper_Resolves_LegacyAndModernNames()
     {
-        // Legacy WPF-UI names mapping
+        // Legacy symbol aliases mapping
         Assert.Equal(iNKORE.UI.WPF.Modern.Controls.Symbol.AllApps, PortableHub.App.Helpers.SymbolHelper.ResolveSymbol("Apps24"));
         Assert.Equal(iNKORE.UI.WPF.Modern.Controls.Symbol.Setting, PortableHub.App.Helpers.SymbolHelper.ResolveSymbol("Settings24"));
         Assert.Equal(iNKORE.UI.WPF.Modern.Controls.Symbol.Favorite, PortableHub.App.Helpers.SymbolHelper.ResolveSymbol("Star24"));
@@ -980,6 +1249,16 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
         return null;
     }
 
+    private static IEnumerable<T> FindVisualChildren<T>(System.Windows.DependencyObject parent) where T : System.Windows.DependencyObject
+    {
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+            if (child is T typedChild) yield return typedChild;
+            foreach (var grandchild in FindVisualChildren<T>(child)) yield return grandchild;
+        }
+    }
+
     [Fact]
     public void Verify_RadioButton_VisualProperties_InLightAndDarkThemes()
     {
@@ -1033,7 +1312,8 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
             rtb.Render(card);
             var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
             encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
-            using (var fs = System.IO.File.Create(@"C:\Users\cst\.gemini\antigravity\brain\23260f3a-bf13-4538-8d5c-8d0de67518a6\light_radiobuttons_sample.png"))
+            var tempLightPath = Path.Combine(Path.GetTempPath(), "light_radiobuttons_sample.png");
+            using (var fs = System.IO.File.Create(tempLightPath))
             {
                 encoder.Save(fs);
             }
@@ -1068,7 +1348,8 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
             darkRtb.Render(darkCard);
             var darkEncoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
             darkEncoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(darkRtb));
-            using (var fs = System.IO.File.Create(@"C:\Users\cst\.gemini\antigravity\brain\23260f3a-bf13-4538-8d5c-8d0de67518a6\dark_radiobuttons_sample.png"))
+            var tempDarkPath = Path.Combine(Path.GetTempPath(), "dark_radiobuttons_sample.png");
+            using (var fs = System.IO.File.Create(tempDarkPath))
             {
                 darkEncoder.Save(fs);
             }
@@ -1094,12 +1375,15 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
             button.ApplyTemplate();
             Assert.NotNull(button.Template);
 
-            // 3. Verify ToggleSwitch template and triggers
-            var toggleStyle = Application.Current.TryFindResource(typeof(iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)) as Style;
-            Assert.NotNull(toggleStyle);
-            var toggleTemplate = toggleStyle.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.TemplateProperty)?.Value as ControlTemplate;
-            Assert.NotNull(toggleTemplate);
-            Assert.NotEmpty(toggleTemplate.Triggers);
+            // 3. Verify ToggleSwitch applies template and has SwitchThumb
+            var toggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch();
+            var dummyWin = new Window { Content = toggle };
+            dummyWin.Show();
+            toggle.ApplyTemplate();
+            Assert.NotNull(toggle.Template);
+            var switchThumb = toggle.Template.FindName("SwitchThumb", toggle);
+            Assert.NotNull(switchThumb);
+            dummyWin.Close();
 
             // 4. Verify RadioButton template and triggers
             var rbStyle = Application.Current.TryFindResource(typeof(RadioButton)) as Style;
@@ -1191,6 +1475,377 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
             var hexBox = colorPicker.FindName("HexInputBox") as TextBox;
             Assert.NotNull(hexBox);
             Assert.Equal("#10B981", hexBox.Text);
+        });
+    }
+
+    [Fact]
+    public void ShortcutHelper_IsDriveRoot_DetectsDrivesCorrectly()
+    {
+        Assert.True(ShortcutHelper.IsDriveRoot(@"C:\"));
+        Assert.True(ShortcutHelper.IsDriveRoot(@"C:"));
+        Assert.True(ShortcutHelper.IsDriveRoot(@"D:\"));
+        Assert.True(ShortcutHelper.IsDriveRoot(@"d:\"));
+        Assert.False(ShortcutHelper.IsDriveRoot(@"C:\Windows"));
+        Assert.False(ShortcutHelper.IsDriveRoot(@"C:\Program Files\App.exe"));
+        Assert.False(ShortcutHelper.IsDriveRoot(""));
+        Assert.False(ShortcutHelper.IsDriveRoot(null));
+    }
+
+    [Fact]
+    public void SettingsService_SaveSettings_PersistsSynchronouslyAndCreatesBackup()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), "PH_SettingsTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        try
+        {
+            var settingsService = new SettingsService(tempDir);
+            settingsService.InitializePortableMode(true);
+            settingsService.CurrentSettings.CardSize = "TestSize1";
+            settingsService.SaveSettings();
+
+            var dataDir = settingsService.GetDataDirectory();
+            var settingsFile = Path.Combine(dataDir, "settings.json");
+            var backupFile = Path.Combine(dataDir, "settings.json.bak");
+            Assert.True(File.Exists(settingsFile));
+            var content1 = File.ReadAllText(settingsFile);
+            Assert.Contains("TestSize1", content1);
+
+            // Second save should produce backup of first
+            settingsService.CurrentSettings.CardSize = "TestSize2";
+            settingsService.SaveSettings();
+
+            Assert.True(File.Exists(backupFile));
+            var backupContent = File.ReadAllText(backupFile);
+            Assert.Contains("TestSize1", backupContent);
+
+            var content2 = File.ReadAllText(settingsFile);
+            Assert.Contains("TestSize2", content2);
+
+            // No dangling tmp files
+            var tmpFiles = Directory.GetFiles(dataDir, "*.tmp");
+            Assert.Empty(tmpFiles);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public async Task FileScannerService_ComputesRelativePath_AndAllowsBinLibGit()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), "PH_ScannerTest_" + Guid.NewGuid().ToString("N"));
+        var binDir = Path.Combine(tempDir, "tools", "bin");
+        var libDir = Path.Combine(tempDir, "tools", "lib");
+        var gitDir = Path.Combine(tempDir, "git", "cmd");
+        Directory.CreateDirectory(binDir);
+        Directory.CreateDirectory(libDir);
+        Directory.CreateDirectory(gitDir);
+
+        try
+        {
+            var binExe = Path.Combine(binDir, "mytool.exe");
+            var libExe = Path.Combine(libDir, "subtool.exe");
+            var gitExe = Path.Combine(gitDir, "git.exe");
+            File.WriteAllBytes(binExe, new byte[] { 0x4D, 0x5A, 0x90, 0x00 });
+            File.WriteAllBytes(libExe, new byte[] { 0x4D, 0x5A, 0x90, 0x00 });
+            File.WriteAllBytes(gitExe, new byte[] { 0x4D, 0x5A, 0x90, 0x00 });
+
+            var scanner = new FileScannerService();
+            var candidates = await scanner.ScanDirectoryAsync(tempDir, Array.Empty<Category>());
+
+            Assert.Equal(3, candidates.Count);
+
+            var binCandidate = candidates.FirstOrDefault(c => c.ExePath == binExe);
+            Assert.NotNull(binCandidate);
+            Assert.Equal(Path.Combine("tools", "bin", "mytool.exe"), binCandidate.RelativePath);
+
+            var libCandidate = candidates.FirstOrDefault(c => c.ExePath == libExe);
+            Assert.NotNull(libCandidate);
+            Assert.Equal(Path.Combine("tools", "lib", "subtool.exe"), libCandidate.RelativePath);
+
+            var gitCandidate = candidates.FirstOrDefault(c => c.ExePath == gitExe);
+            Assert.NotNull(gitCandidate);
+            Assert.Equal(Path.Combine("git", "cmd", "git.exe"), gitCandidate.RelativePath);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Inspect_TextBox_Styles()
+    {
+        _fixture.Run(() =>
+        {
+            var modernTb = new TextBox
+            {
+                Style = (Style)Application.Current.FindResource("ModernTextBox"),
+                Width = 260,
+                Height = 40,
+                Text = "Unfocused TextBox"
+            };
+
+            var grid = new Grid { Background = Brushes.White, Width = 300, Height = 100 };
+            grid.Children.Add(modernTb);
+            grid.Measure(new Size(300, 100));
+            grid.Arrange(new Rect(0, 0, 300, 100));
+            grid.UpdateLayout();
+
+            var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(300, 100, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(grid);
+            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+            var outDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_output");
+            Directory.CreateDirectory(outDir);
+            var outPath = Path.Combine(outDir, "textbox_unfocused.png");
+            using (var fs = File.Create(outPath))
+            {
+                encoder.Save(fs);
+            }
+
+            // Test focused
+            var focusedTb = new TextBox
+            {
+                Style = (Style)Application.Current.FindResource("ModernTextBox"),
+                Width = 260,
+                Height = 40,
+                Text = "Focused TextBox"
+            };
+            var gridFocused = new Grid { Background = Brushes.White, Width = 300, Height = 100 };
+            gridFocused.Children.Add(focusedTb);
+            gridFocused.Measure(new Size(300, 100));
+            gridFocused.Arrange(new Rect(0, 0, 300, 100));
+            gridFocused.UpdateLayout();
+
+            // Programmatically focus
+            focusedTb.Focus();
+            gridFocused.UpdateLayout();
+
+            var rtbFocused = new System.Windows.Media.Imaging.RenderTargetBitmap(300, 100, 96, 96, PixelFormats.Pbgra32);
+            rtbFocused.Render(gridFocused);
+            var encoderFocused = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoderFocused.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtbFocused));
+            var outPathFocused = Path.Combine(outDir, "textbox_focused.png");
+            using (var fs = File.Create(outPathFocused))
+            {
+                encoderFocused.Save(fs);
+            }
+
+            // Also test implicit default TextBox
+            var implicitTb = new TextBox
+            {
+                Width = 260,
+                Height = 40,
+                Text = "Implicit TextBox"
+            };
+            var gridImplicit = new Grid { Background = Brushes.White, Width = 300, Height = 100 };
+            gridImplicit.Children.Add(implicitTb);
+            gridImplicit.Measure(new Size(300, 100));
+            gridImplicit.Arrange(new Rect(0, 0, 300, 100));
+            gridImplicit.UpdateLayout();
+
+            var rtbImplicit = new System.Windows.Media.Imaging.RenderTargetBitmap(300, 100, 96, 96, PixelFormats.Pbgra32);
+            rtbImplicit.Render(gridImplicit);
+            var encoderImplicit = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoderImplicit.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtbImplicit));
+            var outPathImplicit = Path.Combine(outDir, "textbox_implicit.png");
+            using (var fs = File.Create(outPathImplicit))
+            {
+                encoderImplicit.Save(fs);
+            }
+        });
+    }
+
+    [Fact]
+    public void ToggleSwitch_CanBeToggled_ByClicking()
+    {
+        _fixture.Run(() =>
+        {
+            var toggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch();
+            var window = new Window { Content = toggle };
+            window.Show();
+            toggle.ApplyTemplate();
+
+            Assert.False(toggle.IsOn);
+
+            // Simulate toggle via automation peer (which is what standard UI testing & accessibility uses)
+            var peer = new iNKORE.UI.WPF.Modern.Automation.Peers.ToggleSwitchAutomationPeer(toggle);
+            var toggleProvider = peer.GetPattern(System.Windows.Automation.Peers.PatternInterface.Toggle) as System.Windows.Automation.Provider.IToggleProvider;
+            Assert.NotNull(toggleProvider);
+
+            toggleProvider.Toggle();
+            Assert.True(toggle.IsOn);
+
+            toggleProvider.Toggle();
+            Assert.False(toggle.IsOn);
+
+            var thumb = toggle.Template.FindName("SwitchThumb", toggle) as System.Windows.Controls.Primitives.Thumb;
+            Assert.NotNull(thumb);
+
+            // Simulate click on Thumb (which fires DragCompleted with 0 horizontal change)
+            var dragCompleted = new System.Windows.Controls.Primitives.DragCompletedEventArgs(0, 0, false)
+            {
+                RoutedEvent = System.Windows.Controls.Primitives.Thumb.DragCompletedEvent,
+                Source = thumb
+            };
+            thumb.RaiseEvent(dragCompleted);
+
+            Assert.True(toggle.IsOn);
+
+            window.Close();
+        });
+    }
+
+    [Fact]
+    public void SoftwareEditDialog_TogglesCanBeToggled_And_RendersCorrectly()
+    {
+        _fixture.Run(() =>
+        {
+            using var env = new TestEnvironment();
+            var software = new Software
+            {
+                Id = 1,
+                Name = "Test App",
+                ExePath = @"C:\Test\app.exe",
+                RunAsAdmin = false,
+                SingleInstance = true
+            };
+            var provider = CreateServiceProvider(env);
+            var iconService = provider.GetRequiredService<IIconService>();
+            var scannerService = provider.GetRequiredService<IFileScannerService>();
+            var vm = new SoftwareEditViewModel(
+                software,
+                true,
+                iconService,
+                scannerService,
+                env.SoftwareRepository,
+                env.CategoryRepository);
+
+            provider.GetRequiredService<ThemeService>().ApplyTheme("Dark");
+            iNKORE.UI.WPF.Modern.ThemeManager.Current.ApplicationTheme = iNKORE.UI.WPF.Modern.ApplicationTheme.Dark;
+
+            var dialog = new SoftwareEditDialog(vm);
+            dialog.Show();
+            dialog.Measure(new Size(540, 740));
+            dialog.Arrange(new Rect(0, 0, 540, 740));
+            dialog.UpdateLayout();
+
+            // Render to PNG
+            var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(540, 740, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(dialog);
+            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+            var outDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_output");
+            Directory.CreateDirectory(outDir);
+            var outPath = Path.Combine(outDir, "software_edit_dialog.png");
+            using (var fs = File.Create(outPath))
+            {
+                encoder.Save(fs);
+            }
+
+            // Find the ToggleSwitches in dialog
+            var toggles = new System.Collections.Generic.List<iNKORE.UI.WPF.Modern.Controls.ToggleSwitch>();
+            void FindToggles(DependencyObject parent)
+            {
+                int count = VisualTreeHelper.GetChildrenCount(parent);
+                for (int i = 0; i < count; i++)
+                {
+                    var child = VisualTreeHelper.GetChild(parent, i);
+                    if (child is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ts)
+                    {
+                        toggles.Add(ts);
+                    }
+                    FindToggles(child);
+                }
+            }
+            FindToggles(dialog);
+
+            Assert.True(toggles.Count >= 2, $"Expected at least 2 ToggleSwitches, found {toggles.Count}");
+            var runAdminToggle = toggles[0];
+            var singleInstanceToggle = toggles[1];
+
+            Assert.False(runAdminToggle.IsOn);
+            Assert.True(singleInstanceToggle.IsOn);
+
+            // Verify ToggleSwitches have IsHitTestVisible=False to prevent thumb capture lockup, and null content
+            Assert.False(runAdminToggle.IsHitTestVisible);
+            Assert.False(singleInstanceToggle.IsHitTestVisible);
+            Assert.Null(runAdminToggle.OnContent);
+            Assert.Null(runAdminToggle.OffContent);
+            Assert.Null(singleInstanceToggle.OnContent);
+            Assert.Null(singleInstanceToggle.OffContent);
+
+            // Find the clickable row grids
+            var runAdminGrid = (FrameworkElement)VisualTreeHelper.GetParent(runAdminToggle);
+            while (runAdminGrid != null && runAdminGrid is not Grid)
+            {
+                runAdminGrid = (FrameworkElement)VisualTreeHelper.GetParent(runAdminGrid);
+            }
+            Assert.NotNull(runAdminGrid);
+
+            var singleInstanceGrid = (FrameworkElement)VisualTreeHelper.GetParent(singleInstanceToggle);
+            while (singleInstanceGrid != null && singleInstanceGrid is not Grid)
+            {
+                singleInstanceGrid = (FrameworkElement)VisualTreeHelper.GetParent(singleInstanceGrid);
+            }
+            Assert.NotNull(singleInstanceGrid);
+
+            // 1. Simulate row click on runAdmin (User clicks anywhere on switch or row)
+            var mouseClick = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0, System.Windows.Input.MouseButton.Left)
+            {
+                RoutedEvent = UIElement.MouseLeftButtonUpEvent,
+                Source = runAdminGrid
+            };
+            runAdminGrid.RaiseEvent(mouseClick);
+
+            // 2. Simulate row click on singleInstance
+            var mouseClickSingle = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0, System.Windows.Input.MouseButton.Left)
+            {
+                RoutedEvent = UIElement.MouseLeftButtonUpEvent,
+                Source = singleInstanceGrid
+            };
+            singleInstanceGrid.RaiseEvent(mouseClickSingle);
+
+            // Verify ViewModel and UI switches updated via TwoWay binding
+            Assert.True(vm.RunAsAdmin);
+            Assert.False(vm.SingleInstance);
+            Assert.True(runAdminToggle.IsOn);
+            Assert.False(singleInstanceToggle.IsOn);
+
+            // 3. Simulate Keyboard accessibility (Space / Enter on rows)
+            var keySpace = new System.Windows.Input.KeyEventArgs(
+                System.Windows.Input.Keyboard.PrimaryDevice,
+                PresentationSource.FromVisual(dialog)!,
+                0,
+                System.Windows.Input.Key.Space)
+            {
+                RoutedEvent = UIElement.KeyDownEvent,
+                Source = runAdminGrid
+            };
+            runAdminGrid.RaiseEvent(keySpace);
+
+            var keyEnter = new System.Windows.Input.KeyEventArgs(
+                System.Windows.Input.Keyboard.PrimaryDevice,
+                PresentationSource.FromVisual(dialog)!,
+                0,
+                System.Windows.Input.Key.Enter)
+            {
+                RoutedEvent = UIElement.KeyDownEvent,
+                Source = singleInstanceGrid
+            };
+            singleInstanceGrid.RaiseEvent(keyEnter);
+
+            // Verify ViewModel toggled back
+            Assert.False(vm.RunAsAdmin);
+            Assert.True(vm.SingleInstance);
+            Assert.False(runAdminToggle.IsOn);
+            Assert.True(singleInstanceToggle.IsOn);
+
+            dialog.Close();
         });
     }
 

@@ -4,9 +4,9 @@
 
 ![Windows 11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white)
 ![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20LTS-512BD4?logo=dotnet&logoColor=white)
-![UI](https://img.shields.io/badge/UI-WPF--UI%20(WinUI%203)-blue)
+![UI](https://img.shields.io/badge/UI-iNKORE.UI.WPF.Modern%20(WinUI%203)-blue)
 ![Database](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-61%20Passed-success)
+![Tests](https://img.shields.io/badge/Tests-189%20Passed-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 **Windows 平台轻量级便携软件启动与管理中心**
@@ -19,7 +19,7 @@
 
 ## ✨ 核心特性
 
-- 🎨 **微软 WinUI 3 官方规范设计 (WPF-UI)**
+- 🎨 **微软 WinUI 3 官方规范设计 (iNKORE.UI.WPF.Modern)**
   - 支持 Windows 11 Mica 磨砂材质与暗色/亮色/跟随系统主题自适应；
   - 深度优化字体渲染与像素级图文对齐。
 
@@ -67,7 +67,7 @@ PortableHub
 │   ├── Repositories          # Dapper 高性能仓储实现
 │   ├── Services              # 软件启动、图标缓存、备份、热键与托盘服务
 │   └── Windows               # Windows 原生 Win32 API 交互与快捷方式解析
-└── PortableHub.Tests          # 自动化单元测试与 UI 测试套件（83+ 项全量覆盖）
+└── PortableHub.Tests          # 自动化单元测试与 UI 测试套件（189+ 项全量覆盖）
 ```
 
 ---

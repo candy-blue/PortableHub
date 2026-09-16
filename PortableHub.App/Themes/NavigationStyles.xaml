@@ -23,8 +23,8 @@
                         <Border x:Name="ItemBorder" CornerRadius="6" Background="Transparent" Cursor="Hand" SnapsToDevicePixels="True">
                             <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" />
                         </Border>
-                        <!-- Animated Fluent 2 Selection Pill (Height 18, Width 3, 140ms QuadraticEase) -->
-                        <Border x:Name="SelectionPill" Width="3" Height="18" CornerRadius="1.5"
+                        <!-- Animated Fluent 2 Selection Pill (Height 20, Width 3.5) -->
+                        <Border x:Name="SelectionPill" Width="3.5" Height="20" CornerRadius="1.75"
                                 Background="{DynamicResource SystemAccentColorPrimaryBrush}" 
                                 HorizontalAlignment="Left" VerticalAlignment="Center"
                                 Opacity="0"
@@ -39,11 +39,6 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut" />
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
                                         <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.14">
                                             <DoubleAnimation.EasingFunction>
                                                 <QuadraticEase EasingMode="EaseOut" />
@@ -55,11 +50,11 @@
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.10" />
                                         <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.2" Duration="0:0:0.10" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
+                            <Setter TargetName="SelectionPill" Property="Opacity" Value="1" />
                             <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -71,21 +66,21 @@
         </Setter>
     </Style>
 
-    <!-- Dedicated Settings Left Navigation Item Style (Section 23: Height 40, CornerRadius 6, Left Selection Pill) -->
+    <!-- Dedicated Settings Left Navigation Item Style (Height 42, CornerRadius 6, Left Selection Pill) -->
     <Style x:Key="SettingsNavListBoxItemStyle" TargetType="ListBoxItem">
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0,2" />
-        <Setter Property="Height" Value="40" />
+        <Setter Property="Height" Value="42" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Grid Height="40" ClipToBounds="True">
+                    <Grid Height="42" ClipToBounds="True">
                         <Border x:Name="ItemBorder" CornerRadius="6" Background="Transparent" Cursor="Hand" SnapsToDevicePixels="True">
                             <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch" />
                         </Border>
                         <!-- Animated Selection Pill -->
-                        <Border x:Name="SelectionPill" Width="3" Height="18" CornerRadius="1.5"
+                        <Border x:Name="SelectionPill" Width="3.5" Height="22" CornerRadius="1.75"
                                 Background="{DynamicResource AppAccentBrush}" 
                                 HorizontalAlignment="Left" VerticalAlignment="Center"
                                 Opacity="0"
@@ -100,11 +95,6 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut" />
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
                                         <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.14">
                                             <DoubleAnimation.EasingFunction>
                                                 <QuadraticEase EasingMode="EaseOut" />
@@ -116,15 +106,15 @@
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.10" />
                                         <DoubleAnimation Storyboard.TargetName="SelectionPill" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.2" Duration="0:0:0.10" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
-                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource AppCardHoverBrush}" />
+                            <Setter TargetName="SelectionPill" Property="Opacity" Value="1" />
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource AppSecondaryBackgroundBrush}" />
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

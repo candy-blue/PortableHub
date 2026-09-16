@@ -169,6 +169,7 @@ public partial class ScannerViewModel : ObservableObject
             {
                 Name = c.DeducedName,
                 ExePath = c.ExePath,
+                RelativePath = c.RelativePath,
                 CategoryId = c.CategoryId,
                 RootId = c.RootId,
                 Description = c.FileDescription,

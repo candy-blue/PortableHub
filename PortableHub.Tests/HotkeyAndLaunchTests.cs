@@ -84,4 +84,19 @@ public class HotkeyAndLaunchTests
         var available = hotkeyService.TestHotkeyAvailable(hotkey);
         Assert.Equal(expectedValid, available);
     }
+
+    [Fact]
+    public void AppSettings_HotkeyOpenStyle_DefaultsToGrid_AndSerializesCorrectly()
+    {
+        var settings = new AppSettings();
+        Assert.Equal("Grid", settings.HotkeyOpenStyle);
+
+        settings.HotkeyOpenStyle = "Search";
+        var json = System.Text.Json.JsonSerializer.Serialize(settings);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<AppSettings>(json);
+
+        Assert.NotNull(deserialized);
+        Assert.Equal("Search", deserialized.HotkeyOpenStyle);
+    }
 }
+

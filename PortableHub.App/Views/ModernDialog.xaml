@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:helpers="clr-namespace:PortableHub.App.Helpers"
         Title="Portable Hub"
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Width="460"
@@ -29,7 +30,9 @@
 
         <!-- TitleBar -->
         <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="Portable Hub" Height="36" FontSize="14" FontWeight="SemiBold"
-                            Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True" />
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True"
+                            helpers:TitleBarHelper.RemoveCaptionButtons="True" />
 
         <!-- Dialog Content -->
         <Grid Grid.Row="1" Margin="24,16,24,20">
@@ -49,9 +52,9 @@
 
             <!-- Text Content -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock x:Name="TitleTextBlock" Text="确认操作" FontSize="18" FontWeight="SemiBold"
+                <TextBlock x:Name="TitleTextBlock" Text="{DynamicResource Loc_ModernDialog_ConfirmTitle}" FontSize="18" FontWeight="SemiBold"
                            Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
-                <TextBlock x:Name="MessageTextBlock" Text="详细说明内容" FontSize="14"
+                <TextBlock x:Name="MessageTextBlock" FontSize="14"
                            Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"
                            LineHeight="22" Margin="0,8,0,0" />
             </StackPanel>
@@ -60,9 +63,9 @@
         <!-- Footer Actions -->
         <Border Grid.Row="2" Style="{StaticResource DialogFooterBarStyle}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="CancelButton" Style="{StaticResource ModernButton}" Content="取消"
+                <Button x:Name="CancelButton" Style="{StaticResource ModernButton}" Content="{DynamicResource Loc_Btn_Cancel}"
                         Width="88" Height="36" Margin="0,0,10,0" IsCancel="True" Click="CancelButton_Click" />
-                <Button x:Name="ConfirmButton" Style="{StaticResource PrimaryButton}" Content="确定"
+                <Button x:Name="ConfirmButton" Style="{StaticResource PrimaryButton}" Content="{DynamicResource Loc_Btn_Confirm}"
                         Width="88" Height="36" IsDefault="True" Click="ConfirmButton_Click" />
             </StackPanel>
         </Border>

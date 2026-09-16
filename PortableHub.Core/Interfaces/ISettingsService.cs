@@ -7,6 +7,7 @@ public interface ISettingsService
     AppSettings CurrentSettings { get; }
     Task LoadSettingsAsync();
     Task SaveSettingsAsync();
+    void SaveSettings();
     string GetDataDirectory();
     string GetDatabasePath();
     string GetIconsDirectory();

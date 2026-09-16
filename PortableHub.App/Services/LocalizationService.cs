@@ -69,6 +69,19 @@ public class LocalizationService : ILocalizationService
         return fallback ?? key;
     }
 
+    public string GetFormattedString(string key, string fallbackFormat, params object[] args)
+    {
+        var format = GetString(key, fallbackFormat);
+        try
+        {
+            return string.Format(CultureInfo.CurrentUICulture, format, args);
+        }
+        catch
+        {
+            return string.Format(CultureInfo.InvariantCulture, fallbackFormat, args);
+        }
+    }
+
     private void ApplyDictionary(string cultureCode)
     {
         if (Application.Current == null) return;
@@ -78,6 +91,13 @@ public class LocalizationService : ILocalizationService
         try
         {
             var newDict = new ResourceDictionary { Source = dictUri };
+
+            // Fallback chaining: If culture is not zh-CN, embed zh-CN as child dictionary in MergedDictionaries
+            if (!cultureCode.Equals(DefaultCulture, StringComparison.OrdinalIgnoreCase))
+            {
+                var fallbackUri = new Uri($"pack://application:,,,/PortableHub.App;component/Themes/Localization/Strings.{DefaultCulture}.xaml", UriKind.Absolute);
+                newDict.MergedDictionaries.Add(new ResourceDictionary { Source = fallbackUri });
+            }
 
             // Find existing localization dictionary
             ResourceDictionary? existing = null;

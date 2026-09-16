@@ -21,6 +21,7 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <!-- Single-file compression (reduces 172MB self-contained executable to ~68MB) -->
     <EnableCompressionInSingleFile Condition="'$(SelfContained)' == 'true'">true</EnableCompressionInSingleFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS0618</NoWarn>
   </PropertyGroup>
 

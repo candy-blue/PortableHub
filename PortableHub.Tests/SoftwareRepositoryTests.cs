@@ -115,4 +115,55 @@ public class SoftwareRepositoryTests
         Assert.Equal(10, app1.SortOrder);
         Assert.Equal(5, app2.SortOrder);
     }
+
+    [Fact]
+    public async Task Add_And_Update_ShouldPersistLinkedSoftwareIds()
+    {
+        using var env = new TestEnvironment();
+        await env.InitializeAsync();
+
+        var categories = await env.CategoryRepository.GetAllAsync();
+        var software = new Software
+        {
+            Name = "Primary App",
+            ExePath = "C:\\Tools\\App.exe",
+            CategoryId = categories[0].Id,
+            LinkedSoftwareIds = "2, 3, 4"
+        };
+
+        var id = await env.SoftwareRepository.AddAsync(software);
+        Assert.True(id > 0);
+
+        var retrieved = await env.SoftwareRepository.GetByIdAsync(id);
+        Assert.NotNull(retrieved);
+        Assert.Equal("2, 3, 4", retrieved.LinkedSoftwareIds);
+        Assert.Equal(new List<int> { 2, 3, 4 }, retrieved.GetLinkedSoftwareIdList());
+
+        // Update linked IDs
+        retrieved.LinkedSoftwareIds = "5, 6";
+        await env.SoftwareRepository.UpdateAsync(retrieved);
+
+        var updated = await env.SoftwareRepository.GetByIdAsync(id);
+        Assert.NotNull(updated);
+        Assert.Equal("5, 6", updated.LinkedSoftwareIds);
+        Assert.Equal(new List<int> { 5, 6 }, updated.GetLinkedSoftwareIdList());
+    }
+
+    [Fact]
+    public void Software_GetLinkedSoftwareIdList_ShouldHandleLimitsCyclesAndFormatting()
+    {
+        var software = new Software
+        {
+            Id = 10,
+            LinkedSoftwareIds = "10, 20, invalid, -5, 0, 20, 30, 40, 50, 60, 70"
+        };
+
+        var ids = software.GetLinkedSoftwareIdList();
+
+        // 10 is self -> excluded
+        // invalid / -5 / 0 -> excluded
+        // duplicate 20 -> deduplicated
+        // 20, 30, 40, 50, 60 -> capped at max 5 items
+        Assert.Equal(new List<int> { 20, 30, 40, 50, 60 }, ids);
+    }
 }

@@ -20,9 +20,29 @@ public class LaunchService : ILaunchService
         if (string.IsNullOrWhiteSpace(software.ExePath))
             return false;
 
-        var processName = Path.GetFileNameWithoutExtension(software.ExePath);
-        var processes = Process.GetProcessesByName(processName);
-        return processes.Length > 0;
+        try
+        {
+            var processName = Path.GetFileNameWithoutExtension(software.ExePath);
+            if (string.IsNullOrWhiteSpace(processName))
+                return false;
+
+            var processes = Process.GetProcessesByName(processName);
+            try
+            {
+                return processes.Length > 0;
+            }
+            finally
+            {
+                foreach (var proc in processes)
+                {
+                    try { proc.Dispose(); } catch { }
+                }
+            }
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public bool ActivateExistingWindow(Software software)
@@ -30,31 +50,103 @@ public class LaunchService : ILaunchService
         if (string.IsNullOrWhiteSpace(software.ExePath))
             return false;
 
-        var processName = Path.GetFileNameWithoutExtension(software.ExePath);
-        var processes = Process.GetProcessesByName(processName);
-
-        foreach (var proc in processes)
+        try
         {
+            var processName = Path.GetFileNameWithoutExtension(software.ExePath);
+            if (string.IsNullOrWhiteSpace(processName))
+                return false;
+
+            var processes = Process.GetProcessesByName(processName);
             try
             {
-                var handle = proc.MainWindowHandle;
-                if (handle != IntPtr.Zero)
+                foreach (var proc in processes)
                 {
-                    ShowWindow(handle, SW_RESTORE);
-                    SetForegroundWindow(handle);
-                    return true;
+                    try
+                    {
+                        var handle = proc.MainWindowHandle;
+                        if (handle != IntPtr.Zero)
+                        {
+                            ShowWindow(handle, SW_RESTORE);
+                            SetForegroundWindow(handle);
+                            return true;
+                        }
+                    }
+                    catch
+                    {
+                        // Continue to next process instance
+                    }
+                }
+
+                return false;
+            }
+            finally
+            {
+                foreach (var proc in processes)
+                {
+                    try { proc.Dispose(); } catch { }
                 }
             }
-            catch
-            {
-                // Continue to next process instance
-            }
         }
-
-        return false;
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task<LaunchResult> LaunchAsync(Software software)
+    {
+        var context = new CascadeContext();
+        if (software.Id > 0)
+        {
+            context.Visited.Add(software.Id);
+        }
+        return await LaunchWithLinkedCascadeAsync(software, context);
+    }
+
+    private class CascadeContext
+    {
+        public HashSet<int> Visited { get; } = new();
+        public int LaunchedLinkedCount { get; set; }
+    }
+
+    private async Task<LaunchResult> LaunchWithLinkedCascadeAsync(Software software, CascadeContext context)
+    {
+        var primaryResult = await LaunchSingleAsync(software);
+        if (!primaryResult.Success)
+        {
+            return primaryResult;
+        }
+
+        // Linked launch processing (Maximum 5 linked apps guard, cycle prevention)
+        if (_softwareRepository != null)
+        {
+            var linkedIds = software.GetLinkedSoftwareIdList();
+            foreach (var linkedId in linkedIds)
+            {
+                if (context.LaunchedLinkedCount >= 5) break; // Hard limit: max 5 linked apps
+                if (!context.Visited.Add(linkedId)) continue; // Loop / cycle guard
+
+                try
+                {
+                    var linkedSoftware = await _softwareRepository.GetByIdAsync(linkedId);
+                    if (linkedSoftware != null)
+                    {
+                        context.LaunchedLinkedCount++;
+                        // Cascade launch linked software with the same shared context
+                        _ = await LaunchWithLinkedCascadeAsync(linkedSoftware, context);
+                    }
+                }
+                catch
+                {
+                    // Defensive: linked app launch failure does not break primary software launch
+                }
+            }
+        }
+
+        return primaryResult;
+    }
+
+    private async Task<LaunchResult> LaunchSingleAsync(Software software)
     {
         if (string.IsNullOrWhiteSpace(software.ExePath))
         {
@@ -73,7 +165,10 @@ public class LaunchService : ILaunchService
             if (activated)
             {
                 // Record launch
-                await _softwareRepository.IncrementLaunchCountAsync(software.Id, DateTime.UtcNow);
+                if (_softwareRepository != null)
+                {
+                    await _softwareRepository.IncrementLaunchCountAsync(software.Id, DateTime.UtcNow);
+                }
                 return LaunchResult.Ok(null, activated: true);
             }
         }
@@ -97,11 +192,24 @@ public class LaunchService : ILaunchService
                 startInfo.Verb = "runas";
             }
 
-            var process = Process.Start(startInfo);
+            using var process = Process.Start(startInfo);
             if (process != null)
             {
-                await _softwareRepository.IncrementLaunchCountAsync(software.Id, DateTime.UtcNow);
-                return LaunchResult.Ok(process.Id);
+                int? processId = null;
+                try
+                {
+                    processId = process.Id;
+                }
+                catch
+                {
+                    // ShellExecute might not expose Id in all execution scenarios
+                }
+
+                if (_softwareRepository != null)
+                {
+                    await _softwareRepository.IncrementLaunchCountAsync(software.Id, DateTime.UtcNow);
+                }
+                return LaunchResult.Ok(processId);
             }
 
             return LaunchResult.Fail("启动失败：进程未能成功创建。");

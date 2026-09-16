@@ -150,4 +150,36 @@ public partial class QuickLauncherWindow : Window
             Hide();
         }
     }
+
+    private void ResultsListBoxItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Left && sender is System.Windows.Controls.ListBoxItem item && item.DataContext is PortableHub.Core.Models.Software software)
+        {
+            _viewModel.SelectedIndex = ResultsListBox.Items.IndexOf(software);
+            _ = _viewModel.LaunchSelectedAsync();
+            e.Handled = true;
+        }
+    }
+
+    private void ResultsListBoxItem_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is System.Windows.Controls.ListBoxItem item && item.DataContext is PortableHub.Core.Models.Software software)
+        {
+            var idx = ResultsListBox.Items.IndexOf(software);
+            if (idx >= 0)
+            {
+                _viewModel.SelectedIndex = idx;
+            }
+        }
+    }
+
+    private void LaunchBadge_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement el && el.DataContext is PortableHub.Core.Models.Software software)
+        {
+            _viewModel.SelectedIndex = ResultsListBox.Items.IndexOf(software);
+            _ = _viewModel.LaunchSelectedAsync();
+            e.Handled = true;
+        }
+    }
 }

@@ -49,6 +49,15 @@ public partial class SoftwareEditViewModel : ObservableObject
     private bool _singleInstance = true;
 
     public ObservableCollection<Category> Categories { get; } = [];
+    public ObservableCollection<Software> LinkedApps { get; } = [];
+    public ObservableCollection<Software> AvailableCandidates { get; } = [];
+
+    [ObservableProperty]
+    private Software? _selectedCandidateToAdd;
+
+    public bool CanAddMoreLinkedApps => LinkedApps.Count < 5;
+
+    private List<Software> _allCachedSoftware = [];
 
     public event EventHandler<bool>? RequestClose;
 
@@ -89,6 +98,61 @@ public partial class SoftwareEditViewModel : ObservableObject
 
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == Model.CategoryId) 
                            ?? Categories.FirstOrDefault();
+
+        // Load software candidates and existing linked apps
+        var allSoftware = await _softwareRepository.GetAllAsync();
+        _allCachedSoftware = allSoftware.ToList();
+
+        var linkedIds = Model.GetLinkedSoftwareIdList();
+        LinkedApps.Clear();
+        foreach (var id in linkedIds)
+        {
+            var s = _allCachedSoftware.FirstOrDefault(x => x.Id == id);
+            if (s != null)
+            {
+                LinkedApps.Add(s);
+            }
+        }
+
+        UpdateAvailableCandidates();
+    }
+
+    private void UpdateAvailableCandidates()
+    {
+        AvailableCandidates.Clear();
+        var linkedIdSet = new HashSet<int>(LinkedApps.Select(s => s.Id));
+        if (Model.Id > 0)
+        {
+            linkedIdSet.Add(Model.Id); // Do not allow linking self
+        }
+
+        foreach (var s in _allCachedSoftware.Where(x => !linkedIdSet.Contains(x.Id)).OrderBy(x => x.Name))
+        {
+            AvailableCandidates.Add(s);
+        }
+
+        OnPropertyChanged(nameof(CanAddMoreLinkedApps));
+    }
+
+    partial void OnSelectedCandidateToAddChanged(Software? value)
+    {
+        if (value != null && LinkedApps.Count < 5)
+        {
+            LinkedApps.Add(value);
+            _selectedCandidateToAdd = null;
+            OnPropertyChanged(nameof(SelectedCandidateToAdd));
+            UpdateAvailableCandidates();
+        }
+    }
+
+    [RelayCommand]
+    public void RemoveLinkedApp(Software? app)
+    {
+        if (app != null && LinkedApps.Contains(app))
+        {
+            LinkedApps.Remove(app);
+            UpdateAvailableCandidates();
+        }
     }
 
     [RelayCommand]
@@ -172,6 +236,9 @@ public partial class SoftwareEditViewModel : ObservableObject
         Model.IconPath = IconPath;
         Model.RunAsAdmin = RunAsAdmin;
         Model.SingleInstance = SingleInstance;
+        Model.LinkedSoftwareIds = LinkedApps.Count > 0
+            ? string.Join(",", LinkedApps.Select(s => s.Id))
+            : null;
 
         if (IsEditMode)
         {

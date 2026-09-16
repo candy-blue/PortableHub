@@ -12,14 +12,14 @@ public class FileScannerService : IFileScannerService
         "uninstall", "unins000", "unins001", "setup", "installer", "install",
         "update", "updater", "crashpad_handler", "helper", "service", "driver",
         "elevate", "vc_redist", "dxwebsetup", "vcredist_x64", "vcredist_x86",
-        "python", "pythonw", "node", "npm", "npx", "git", "cmd", "powershell",
+        "python", "pythonw", "node", "npm", "npx", "cmd", "powershell",
         "conhost", "bash", "ssh", "7za", "7zr", "regsvr32", "rundll32",
         "unitycrashhandler64", "unitycrashhandler32", "ffmpeg", "ffprobe"
     };
 
     private static readonly string[] ExcludedFolders =
     [
-        "bin", "lib", "runtimes", "plugins", "resources", "node_modules", ".git",
+        "runtimes", "plugins", "resources", "node_modules", ".git",
         "obj", "packages", "locales", "swiftshader", "x86", "x64", "arm64"
     ];
 
@@ -110,6 +110,14 @@ public class FileScannerService : IFileScannerService
                 }
 
                 var candidate = AnalyzeExe(exe, existingCategories, rootId);
+                try
+                {
+                    candidate.RelativePath = Path.GetRelativePath(directoryPath, exe);
+                }
+                catch
+                {
+                    // Ignore relative path calculation errors
+                }
                 candidates.Add(candidate);
             }
 

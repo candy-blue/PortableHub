@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
+        xmlns:helpers="clr-namespace:PortableHub.App.Helpers"
         Title="{DynamicResource Loc_CatDialog_Title}" 
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="540" Width="520"
@@ -24,8 +25,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- TitleBar (Section 24) -->
-        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="{DynamicResource Loc_CatDialog_Title}" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True" />
+        <!-- TitleBar (Section 24: Standardized Fluent TitleBar with collapsed client caption buttons) -->
+        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="{DynamicResource Loc_CatDialog_Title}" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            helpers:TitleBarHelper.RemoveCaptionButtons="True" />
 
         <!-- Form ScrollViewer -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,12,24,12">
@@ -71,40 +74,57 @@
                         </StackPanel>
                         <ui:DropDownButton.Flyout>
                             <ui:Flyout x:Name="IconFlyout" Placement="Bottom">
-                                <Border Width="272" MaxHeight="210" Padding="6,4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+                                <Border Width="276" MaxHeight="260" Padding="8,8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <ItemsControl ItemsSource="{Binding AvailableIconOptions}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <WrapPanel Orientation="Horizontal" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Button Width="36" Height="36" Margin="3"
-                                                            Cursor="Hand"
-                                                            ToolTip="{Binding Name}"
-                                                            Click="IconButton_Click"
-                                                            Command="{Binding DataContext.SelectIconOptionCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                                            CommandParameter="{Binding}"
-                                                            FocusVisualStyle="{x:Null}">
-                                                        <Button.Template>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border x:Name="BtnBorder" CornerRadius="6" Background="Transparent" BorderThickness="1.5" BorderBrush="Transparent">
-                                                                    <ui:SymbolIcon Symbol="{Binding Symbol}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter TargetName="BtnBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
-                                                                        <Setter TargetName="BtnBorder" Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Button.Template>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                        <StackPanel>
+                                            <TextBlock Text="{DynamicResource Loc_CatDialog_IconLabel}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="4,2,4,8" />
+                                            <ItemsControl ItemsSource="{Binding AvailableIconOptions}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <UniformGrid Columns="6" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Width="38" Height="38" Margin="2"
+                                                                Cursor="Hand"
+                                                                ToolTip="{Binding Name}"
+                                                                Click="IconButton_Click"
+                                                                Command="{Binding DataContext.SelectIconOptionCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                                CommandParameter="{Binding}"
+                                                                FocusVisualStyle="{x:Null}">
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border x:Name="BtnBorder" CornerRadius="6" Background="Transparent" BorderThickness="1.5" BorderBrush="Transparent">
+                                                                        <ui:SymbolIcon x:Name="IconGlyph" Symbol="{Binding Symbol}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="BtnBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                                                            <Setter TargetName="BtnBorder" Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                                                                        </Trigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                            <Setter TargetName="BtnBorder" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+                                                                            <Setter TargetName="BtnBorder" Property="BorderBrush" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                                                            <Setter TargetName="IconGlyph" Property="Foreground" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                                                        </DataTrigger>
+                                                                        <MultiDataTrigger>
+                                                                            <MultiDataTrigger.Conditions>
+                                                                                <Condition Binding="{Binding IsSelected}" Value="True" />
+                                                                                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
+                                                                            </MultiDataTrigger.Conditions>
+                                                                            <Setter TargetName="BtnBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                                                            <Setter TargetName="BtnBorder" Property="BorderBrush" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                                                            <Setter TargetName="IconGlyph" Property="Foreground" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                                                        </MultiDataTrigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
                                     </ScrollViewer>
                                 </Border>
                             </ui:Flyout>

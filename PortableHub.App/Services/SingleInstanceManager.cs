@@ -33,6 +33,35 @@ public class SingleInstanceManager : IDisposable
         PostMessage((IntPtr)HWND_BROADCAST, WM_SHOWME, IntPtr.Zero, IntPtr.Zero);
     }
 
+    private const uint MSGFLT_ADD = 1;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool ChangeWindowMessageFilter(int message, uint dwFlag);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool ChangeWindowMessageFilterEx(IntPtr hWnd, int msg, uint action, IntPtr pChangeFilterStruct);
+
+    static SingleInstanceManager()
+    {
+        AllowUipiMessage();
+    }
+
+    public static void AllowUipiMessage(IntPtr? hwnd = null)
+    {
+        try
+        {
+            ChangeWindowMessageFilter(WM_SHOWME, MSGFLT_ADD);
+            if (hwnd.HasValue && hwnd.Value != IntPtr.Zero)
+            {
+                ChangeWindowMessageFilterEx(hwnd.Value, WM_SHOWME, MSGFLT_ADD, IntPtr.Zero);
+            }
+        }
+        catch
+        {
+            // Defensive: ignore on systems where filtering API is restricted
+        }
+    }
+
     public void Dispose()
     {
         if (_hasHandle && _mutex != null)

@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
-        Title="系统设置" 
+        xmlns:helpers="clr-namespace:PortableHub.App.Helpers"
+        Title="{DynamicResource Loc_Settings_Title}" 
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
-        Height="700" Width="860"
-        MinHeight="580" MinWidth="750"
+        Height="700" Width="960"
+        MinHeight="580" MinWidth="900"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
         ui:WindowHelper.UseModernWindowStyle="True"
@@ -29,20 +30,22 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Modern TitleBar (Section 24) -->
-        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="系统设置 - Portable Hub" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True" />
+        <!-- Modern TitleBar (Standardized Fluent TitleBar with high contrast header) -->
+        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="{DynamicResource Loc_Settings_Title}" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            helpers:TitleBarHelper.RemoveCaptionButtons="True" />
 
         <!-- Main Settings Content (Windows 11 Left Navigation + Right Content Area) -->
         <Grid Grid.Row="1" Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="240" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Left Navigation Sidebar -->
+            <!-- Left Navigation Menu -->
             <Grid Grid.Column="0" Margin="16,10,0,10">
                 <ListBox x:Name="SettingsNavListBox"
-                         SelectedIndex="0"
+                         SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}"
                          ItemContainerStyle="{StaticResource SettingsNavListBoxItemStyle}"
                          Background="Transparent"
                          BorderThickness="0"
@@ -50,68 +53,68 @@
                          ScrollViewer.VerticalScrollBarVisibility="Auto">
                     <!-- 1. 外观与个性化 -->
                     <ListBoxItem>
-                        <Grid Height="40" Margin="10,0">
+                        <Grid Height="42" Margin="12,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ui:SymbolIcon Symbol="FontColor" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Grid.Column="1" Text="外观与个性化" FontSize="14" VerticalAlignment="Center" Margin="6,0,0,0" />
+                            <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Settings_Appearance}" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0" />
                         </Grid>
                     </ListBoxItem>
                     <!-- 2. 启动与托盘 -->
                     <ListBoxItem>
-                        <Grid Height="40" Margin="10,0">
+                        <Grid Height="42" Margin="12,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ui:SymbolIcon Symbol="AllApps" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Grid.Column="1" Text="启动与托盘" FontSize="14" VerticalAlignment="Center" Margin="6,0,0,0" />
+                            <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Settings_Startup}" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0" />
                         </Grid>
                     </ListBoxItem>
                     <!-- 3. 全局快捷键 -->
                     <ListBoxItem>
-                        <Grid Height="40" Margin="10,0">
+                        <Grid Height="42" Margin="12,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ui:SymbolIcon Symbol="Keyboard" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Grid.Column="1" Text="全局快捷键" FontSize="14" VerticalAlignment="Center" Margin="6,0,0,0" />
+                            <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Settings_Hotkeys}" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0" />
                         </Grid>
                     </ListBoxItem>
                     <!-- 4. 数据与备份 -->
                     <ListBoxItem>
-                        <Grid Height="40" Margin="10,0">
+                        <Grid Height="42" Margin="12,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ui:SymbolIcon Symbol="Library" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Grid.Column="1" Text="数据与备份" FontSize="14" VerticalAlignment="Center" Margin="6,0,0,0" />
+                            <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Settings_Data}" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0" />
                         </Grid>
                     </ListBoxItem>
                     <!-- 5. 根目录管理 -->
                     <ListBoxItem>
-                        <Grid Height="40" Margin="10,0">
+                        <Grid Height="42" Margin="12,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ui:SymbolIcon Symbol="OpenFile" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Grid.Column="1" Text="根目录管理" FontSize="14" VerticalAlignment="Center" Margin="6,0,0,0" />
+                            <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Settings_Roots}" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0" />
                         </Grid>
                     </ListBoxItem>
                     <!-- 6. 迁移与诊断 -->
                     <ListBoxItem>
-                        <Grid Height="40" Margin="10,0">
+                        <Grid Height="42" Margin="12,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <ui:SymbolIcon Symbol="Sync" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Grid.Column="1" Text="迁移与诊断" FontSize="14" VerticalAlignment="Center" Margin="6,0,0,0" />
+                            <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Settings_Diagnostics}" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0" />
                         </Grid>
                     </ListBoxItem>
                 </ListBox>
@@ -126,6 +129,7 @@
                         Background="Transparent"
                         BorderThickness="0"
                         Margin="16,8,24,10"
+                        FontFamily="{StaticResource AppFontFamily}"
                         Padding="0">
                 <TabControl.Template>
                     <ControlTemplate TargetType="TabControl">
@@ -133,106 +137,83 @@
                     </ControlTemplate>
                 </TabControl.Template>
 
-                <!-- 1. 外观 -->
+                <!-- 1. 外观与个性化 -->
                 <TabItem>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="8,4,8,12">
-                            <TextBlock Text="外观与个性化" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,16" />
+                            <StackPanel Margin="0,0,0,18">
+                                <TextBlock Text="{DynamicResource Loc_Settings_Appearance}" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="自定义系统主题色彩、显示语言、卡片尺寸及交互展现模式" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                            </StackPanel>
 
                             <!-- Theme Card -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="应用主题" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="选择 Portable Hub 界面色彩模式与 Mica 材质" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <RadioButton Content="跟随系统" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=System}" GroupName="ThemeGroup" />
-                                        <RadioButton Content="浅色模式" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=Light}" GroupName="ThemeGroup" Margin="16,0,0,0" />
-                                        <RadioButton Content="深色模式" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=Dark}" GroupName="ThemeGroup" Margin="16,0,0,0" />
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <ui:SettingsCard Header="{DynamicResource Loc_Settings_ThemeTitle}" 
+                                             Description="{DynamicResource Loc_Settings_ThemeDesc}" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE790;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <RadioButton Content="{DynamicResource Loc_Settings_ThemeSystem}" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=System}" GroupName="ThemeGroup" />
+                                    <RadioButton Content="{DynamicResource Loc_Settings_ThemeLight}" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=Light}" GroupName="ThemeGroup" Margin="16,0,0,0" />
+                                    <RadioButton Content="{DynamicResource Loc_Settings_ThemeDark}" IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter=Dark}" GroupName="ThemeGroup" Margin="16,0,0,0" />
+                                </StackPanel>
+                            </ui:SettingsCard>
 
                             <!-- Language Card -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{DynamicResource Loc_Settings_LanguageTitle}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="{DynamicResource Loc_Settings_LanguageDesc}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                    </StackPanel>
-                                    <ComboBox Grid.Column="1"
-                                              ItemsSource="{Binding SupportedLanguages}"
-                                              SelectedValue="{Binding Language, Mode=TwoWay}"
-                                              SelectedValuePath="Code"
-                                              DisplayMemberPath="DisplayName"
-                                              MinWidth="210" Height="36"
-                                              VerticalAlignment="Center" />
-                                </Grid>
-                            </Border>
+                            <ui:SettingsCard Header="{DynamicResource Loc_Settings_LanguageTitle}" 
+                                             Description="{DynamicResource Loc_Settings_LanguageDesc}" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xF2B7;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox ItemsSource="{Binding SupportedLanguages}"
+                                          SelectedValue="{Binding Language, Mode=TwoWay}"
+                                          SelectedValuePath="Code"
+                                          DisplayMemberPath="DisplayName"
+                                          MinWidth="210" Height="36"
+                                          VerticalAlignment="Center" />
+                            </ui:SettingsCard>
 
                             <!-- Card Size Card -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="软件卡片尺寸" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="根据屏幕分辨率和软件数量调整主界面卡片大小" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <RadioButton Content="小 (紧凑)" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Small}" GroupName="CardSizeGroup" />
-                                        <RadioButton Content="中 (推荐)" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Medium}" GroupName="CardSizeGroup" Margin="16,0,0,0" />
-                                        <RadioButton Content="大 (醒目)" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Large}" GroupName="CardSizeGroup" Margin="16,0,0,0" />
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <ui:SettingsCard Header="{DynamicResource Loc_Settings_CardSizeTitle}" 
+                                             Description="{DynamicResource Loc_Settings_CardSizeDesc}" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE744;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <RadioButton Content="{DynamicResource Loc_Settings_CardSmall}" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Small}" GroupName="CardSizeGroup" />
+                                    <RadioButton Content="{DynamicResource Loc_Settings_CardMedium}" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Medium}" GroupName="CardSizeGroup" Margin="16,0,0,0" />
+                                    <RadioButton Content="{DynamicResource Loc_Settings_CardLarge}" IsChecked="{Binding CardSize, Converter={StaticResource ComparisonConverter}, ConverterParameter=Large}" GroupName="CardSizeGroup" Margin="16,0,0,0" />
+                                </StackPanel>
+                            </ui:SettingsCard>
 
-                            <!-- Default View Mode Card (Design Doc Section 47) -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="默认视图模式" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="软件列表首选呈现方式（网格卡片或紧凑列表）" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <RadioButton Content="网格卡片 (推荐)" IsChecked="{Binding ViewMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=Grid}" GroupName="ViewModeGroup" />
-                                        <RadioButton Content="紧凑列表" IsChecked="{Binding ViewMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=List}" GroupName="ViewModeGroup" Margin="16,0,0,0" />
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <!-- Default View Mode Card -->
+                            <ui:SettingsCard Header="{DynamicResource Loc_Settings_ViewModeTitle}" 
+                                             Description="{DynamicResource Loc_Settings_ViewModeDesc}" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE80A;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <RadioButton Content="{DynamicResource Loc_View_Grid}" IsChecked="{Binding ViewMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=Grid}" GroupName="ViewModeGroup" />
+                                    <RadioButton Content="{DynamicResource Loc_View_List}" IsChecked="{Binding ViewMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=List}" GroupName="ViewModeGroup" Margin="16,0,0,0" />
+                                </StackPanel>
+                            </ui:SettingsCard>
 
-                            <!-- Launch Click Mode Card (Double Click vs Single Click) -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,0" Padding="16,14">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="软件打开交互方式" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="在主界面卡片或列表中启动便携软件的鼠标点击习惯" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <RadioButton Content="双击打开 (推荐)" IsChecked="{Binding LaunchClickMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=DoubleClick}" GroupName="LaunchClickModeGroup" />
-                                        <RadioButton Content="单击打开" IsChecked="{Binding LaunchClickMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=SingleClick}" GroupName="LaunchClickModeGroup" Margin="16,0,0,0" />
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <!-- Launch Click Mode Card -->
+                            <ui:SettingsCard Header="{DynamicResource Loc_Settings_LaunchModeTitle}" 
+                                             Description="{DynamicResource Loc_Settings_LaunchModeDesc}" 
+                                             Margin="0,0,0,0">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE8B0;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <RadioButton Content="{DynamicResource Loc_Settings_DoubleClick}" IsChecked="{Binding LaunchClickMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=DoubleClick}" GroupName="LaunchClickModeGroup" />
+                                    <RadioButton Content="{DynamicResource Loc_Settings_SingleClick}" IsChecked="{Binding LaunchClickMode, Converter={StaticResource ComparisonConverter}, ConverterParameter=SingleClick}" GroupName="LaunchClickModeGroup" Margin="16,0,0,0" />
+                                </StackPanel>
+                            </ui:SettingsCard>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -241,112 +222,106 @@
                 <TabItem>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="8,4,8,12">
-                            <TextBlock Text="启动与托盘" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,16" />
+                            <StackPanel Margin="0,0,0,18">
+                                <TextBlock Text="{DynamicResource Loc_Settings_Startup}" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="配置系统开机自启、托盘后台常驻及窗口关闭最小化行为" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                            </StackPanel>
 
                             <!-- Windows Startup Card -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="随 Windows 开机启动" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="在开机登录系统时自动启动 Portable Hub" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                        <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding StartWithWindows, Mode=TwoWay}" />
-                                    </Grid>
-                                    <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="0,6" Height="1" />
-                                    <Grid Margin="0,4,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="启动后自动最小化到系统托盘" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="开机静默常驻通知区，不主动弹出主窗口" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                        <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding StartMinimizedToTray, Mode=TwoWay}" />
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
+                            <ui:SettingsCard Header="随 Windows 开机启动" 
+                                             Description="在开机登录系统时自动启动 Portable Hub" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE7E8;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch IsOn="{Binding StartWithWindows, Mode=TwoWay}" />
+                            </ui:SettingsCard>
 
-                            <!-- Close / Minimize Behavior Card -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,0" Padding="16,14">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="关闭窗口 (X) 时最小化到托盘" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="点击右上角关闭按钮时保留后台托盘与全局快捷键" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                        <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding CloseToTray, Mode=TwoWay}" />
-                                    </Grid>
-                                    <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="0,6" Height="1" />
-                                    <Grid Margin="0,4,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="最小化时隐藏任务栏图标" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="主窗口最小化后彻底隐藏任务栏，仅显示托盘小图标" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                        <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding MinimizeToTray, Mode=TwoWay}" />
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
+                            <!-- Start Minimized Card -->
+                            <ui:SettingsCard Header="启动后自动最小化到系统托盘" 
+                                             Description="开机静默常驻通知区，不主动弹出主窗口" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE70B;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch IsOn="{Binding StartMinimizedToTray, Mode=TwoWay}" />
+                            </ui:SettingsCard>
+
+                            <!-- Close To Tray Card -->
+                            <ui:SettingsCard Header="关闭窗口 (X) 时最小化到托盘" 
+                                             Description="点击右上角关闭按钮时保留后台托盘与全局快捷键" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE711;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch IsOn="{Binding CloseToTray, Mode=TwoWay}" />
+                            </ui:SettingsCard>
+
+                            <!-- Minimize To Tray Card -->
+                            <ui:SettingsCard Header="最小化时隐藏任务栏图标" 
+                                             Description="主窗口最小化后彻底隐藏任务栏，仅显示托盘小图标" 
+                                             Margin="0,0,0,0">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE921;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch IsOn="{Binding MinimizeToTray, Mode=TwoWay}" />
+                            </ui:SettingsCard>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
 
-                <!-- 3. 快捷键 -->
+                <!-- 3. 全局快捷键 -->
                 <TabItem>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="8,4,8,12">
-                            <TextBlock Text="全局快捷键" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,16" />
+                            <StackPanel Margin="0,0,0,18">
+                                <TextBlock Text="{DynamicResource Loc_Settings_Hotkeys}" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="设置在任意应用或桌面快速呼出 Portable Hub 面板的全局热键" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                            </StackPanel>
 
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,0" Padding="16,16">
-                                <StackPanel>
-                                    <TextBlock Text="快速启动窗口呼出快捷键" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="无论当前在任何程序中，按下此按键立即在当前鼠标屏幕中央呼出聚焦搜索窗口" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,12" />
-
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="280" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox x:Name="HotkeyInputBox" 
-                                                 Text="{Binding GlobalHotkey, UpdateSourceTrigger=PropertyChanged}" 
-                                                 Height="36" 
-                                                 VerticalContentAlignment="Center"
-                                                 Style="{StaticResource ModernTextBox}"
-                                                 PreviewKeyDown="HotkeyInputBox_PreviewKeyDown"
-                                                 PreviewMouseDown="HotkeyInputBox_PreviewMouseDown"
-                                                 ToolTip="可直接在此框内按下快捷键（如 Ctrl+,）或鼠标中键/侧键自动录入，亦可手动输入" />
-                                        <TextBlock Grid.Column="1" Text="{Binding HotkeyStatus}" FontSize="12" VerticalAlignment="Center" Margin="14,0,0,0">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsHotkeyValid}" Value="False">
-                                                             <Setter Property="Foreground" Value="{DynamicResource BrushDanger}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Grid>
-
-                                    <TextBlock Text="支持快捷键如：Ctrl+Alt+Space, Ctrl+,, 鼠标中键 等。已解除强制阻断，特殊或冲突按键保存时将提供确认提示。" 
-                                               TextWrapping="Wrap"
-                                               FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                            <!-- Hotkey Input Card -->
+                            <ui:SettingsCard Header="快速启动窗口呼出快捷键" 
+                                             Description="支持直接在此按下快捷键或鼠标中键自动录入，亦可手动输入" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE765;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBox x:Name="HotkeyInputBox" 
+                                             Text="{Binding GlobalHotkey, UpdateSourceTrigger=PropertyChanged}" 
+                                             Height="36" Width="200"
+                                             VerticalContentAlignment="Center"
+                                             Style="{StaticResource ModernTextBox}"
+                                             PreviewKeyDown="HotkeyInputBox_PreviewKeyDown"
+                                             PreviewMouseDown="HotkeyInputBox_PreviewMouseDown"
+                                             ToolTip="可直接在此框内按下快捷键（如 Ctrl+,）或鼠标中键/侧键自动录入，亦可手动输入" />
+                                    <TextBlock Text="{Binding HotkeyStatus}" FontSize="12" VerticalAlignment="Center" Margin="12,0,0,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsHotkeyValid}" Value="False">
+                                                         <Setter Property="Foreground" Value="{DynamicResource BrushDanger}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
-                            </Border>
+                            </ui:SettingsCard>
+
+                            <!-- 快捷键呼出样式 -->
+                            <ui:SettingsCard Header="{DynamicResource Loc_Settings_HotkeyOpenStyleTitle}" 
+                                             Description="{DynamicResource Loc_Settings_HotkeyOpenStyleDesc}" 
+                                             Margin="0,0,0,0">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE737;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <RadioButton Content="{DynamicResource Loc_Settings_HotkeyOpenStyleGrid}" IsChecked="{Binding HotkeyOpenStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=Grid}" GroupName="HotkeyOpenStyleGroup" />
+                                    <RadioButton Content="{DynamicResource Loc_Settings_HotkeyOpenStyleSearch}" IsChecked="{Binding HotkeyOpenStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=Search}" GroupName="HotkeyOpenStyleGroup" Margin="16,0,0,0" />
+                                </StackPanel>
+                            </ui:SettingsCard>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -355,73 +330,78 @@
                 <TabItem>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="8,4,8,12">
-                            <TextBlock Text="数据与备份" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,16" />
+                            <StackPanel Margin="0,0,0,18">
+                                <TextBlock Text="{DynamicResource Loc_Settings_Data}" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="本地软件清单、分类配置存储路径及安全备份快照管理" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                            </StackPanel>
 
-                            <!-- Data Directory -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock Text="数据存储目录" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="SQLite 数据库、设置与图标缓存存放路径" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,10" />
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Text="{Binding DataDirectory, Mode=OneWay}" IsReadOnly="True" Height="36" VerticalContentAlignment="Center" Style="{StaticResource ModernTextBox}" />
-                                        <Button Style="{StaticResource ModernButton}" Command="{Binding OpenDataDirectoryCommand}" Grid.Column="1" Margin="8,0,0,0" Height="36">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <ui:SymbolIcon Symbol="OpenFile" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                                <TextBlock Text="打开目录" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Auto Backup Settings -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock Text="自动定时本地备份 (.phbackup)" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="无需联网，自动在本地打包安全快照（分类、软件记录与图标）" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,12" />
-
-                                    <Grid Margin="0,0,0,14">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="175" />
-                                            <ColumnDefinition Width="30" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="80" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="备份周期:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        <ComboBox Grid.Column="1" SelectedValue="{Binding BackupFrequency, Mode=TwoWay}" SelectedValuePath="Tag" Height="36">
-                                            <ComboBoxItem Content="每周 (推荐)" Tag="Weekly" />
-                                            <ComboBoxItem Content="每天" Tag="Daily" />
-                                            <ComboBoxItem Content="每月" Tag="Monthly" />
-                                            <ComboBoxItem Content="关闭" Tag="Off" />
-                                        </ComboBox>
-
-                                        <TextBlock Grid.Column="3" Text="最多保留份数:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        <TextBox Grid.Column="4" Text="{Binding MaxBackupCount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=5, FallbackValue=5}" Height="36" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Style="{StaticResource ModernTextBox}" />
-                                    </Grid>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding CreateBackupCommand}" Height="36">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <ui:SymbolIcon Symbol="Download" FontSize="18" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                                <TextBlock Text="立即创建备份" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Style="{StaticResource ModernButton}" Command="{Binding RestoreBackupCommand}" Margin="8,0,0,0" Height="36">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <ui:SymbolIcon Symbol="Clock" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                                <TextBlock Text="从备份文件恢复..." VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
+                            <!-- Data Directory Card -->
+                            <ui:SettingsCard Header="数据存储目录" 
+                                             Description="{Binding DataDirectory, Mode=OneWay}" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE8B7;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <Button Style="{StaticResource ModernButton}" Command="{Binding OpenDataDirectoryCommand}" Height="36">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ui:SymbolIcon Symbol="OpenFile" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBlock Text="打开目录" VerticalAlignment="Center" />
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
+                                </Button>
+                            </ui:SettingsCard>
 
-                            <!-- Backups List -->
+                            <!-- 1. Auto Backup Frequency Card -->
+                            <ui:SettingsCard Header="自动备份周期" 
+                                             Description="无需联网，定期在本地自动创建数据安全快照（分类与软件记录）" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE753;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox SelectedValue="{Binding BackupFrequency, Mode=TwoWay}" SelectedValuePath="Tag" Height="36" Width="140" VerticalAlignment="Center">
+                                    <ComboBoxItem Content="每周 (推荐)" Tag="Weekly" />
+                                    <ComboBoxItem Content="每天" Tag="Daily" />
+                                    <ComboBoxItem Content="每月" Tag="Monthly" />
+                                    <ComboBoxItem Content="关闭" Tag="Off" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+
+                            <!-- 2. Auto Backup Retention Count Card -->
+                            <ui:SettingsCard Header="备份保留上限" 
+                                             Description="最多保留的本地历史备份快照数量，超出后自动覆盖最旧快照" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE74C;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBox Text="{Binding MaxBackupCount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=5, FallbackValue=5}" Height="36" Width="60" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Style="{StaticResource ModernTextBox}" />
+                                    <TextBlock Text="份" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </ui:SettingsCard>
+
+                            <!-- 3. Manual Backup & Restore Card -->
+                            <ui:SettingsCard Header="数据快照管理 (.phbackup)" 
+                                             Description="手动创建即时数据快照文件，或从历史备份文件恢复软件库" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE898;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource PrimaryButton}" Foreground="#FFFFFF" Command="{Binding CreateBackupCommand}" Height="36">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Download" FontSize="18" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                            <TextBlock Text="立即创建" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource ModernButton}" Command="{Binding RestoreBackupCommand}" Margin="8,0,0,0" Height="36">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Clock" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                            <TextBlock Text="恢复快照..." VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ui:SettingsCard>
+
+                            <!-- Backups List Card -->
                             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,0" Padding="16,14">
                                 <StackPanel>
                                     <TextBlock Text="现有备份记录" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,8" />
@@ -447,45 +427,47 @@
                 <TabItem>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="8,4,8,12">
-                            <TextBlock Text="便携软件根目录管理" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,16" />
+                            <StackPanel Margin="0,0,0,18">
+                                <TextBlock Text="{DynamicResource Loc_Settings_Roots}" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="便携软件根目录路径映射，跨驱动器与换机时保障路径自愈" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                            </StackPanel>
+
+                            <ui:SettingsCard Header="便携软件根目录" 
+                                             Description="添加 Portable 软件主文件夹，用于多盘迁移自动重连与相对路径支持" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE838;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <Button Style="{StaticResource PrimaryButton}" Foreground="#FFFFFF" Command="{Binding AddRootDirectoryCommand}" Height="36">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ui:SymbolIcon Symbol="Add" FontSize="18" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBlock Text="添加根目录" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </ui:SettingsCard>
 
                             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,0" Padding="16,14">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,12">
-                                        <StackPanel>
-                                            <TextBlock Text="便携软件根目录" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="添加 Portable 软件主文件夹，用于多盘迁移自动重连与相对路径支持" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding AddRootDirectoryCommand}" HorizontalAlignment="Right" Height="36">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <ui:SymbolIcon Symbol="Add" FontSize="18" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                                <TextBlock Text="添加根目录" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </Grid>
-
-                                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Height="220">
-                                        <ListBox ItemsSource="{Binding RootDirectories}" Background="Transparent" BorderThickness="0">
-                                            <ListBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid Margin="6,8">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <StackPanel>
-                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                                            <TextBlock Text="{Binding Path}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                                        </StackPanel>
-                                                        <Button Grid.Column="1" Style="{StaticResource ModernButton}" Content="移除" 
-                                                                Command="{Binding DataContext.DeleteRootDirectoryCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                                                CommandParameter="{Binding}" Padding="10,4" FontSize="12" Height="32" />
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ListBox.ItemTemplate>
-                                        </ListBox>
-                                    </Border>
-                                </StackPanel>
+                                <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Height="220">
+                                    <ListBox ItemsSource="{Binding RootDirectories}" Background="Transparent" BorderThickness="0">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="6,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                                        <TextBlock Text="{Binding Path}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1" Style="{StaticResource ModernButton}" Content="移除" 
+                                                            Command="{Binding DataContext.DeleteRootDirectoryCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                            CommandParameter="{Binding}" Padding="10,4" FontSize="12" Height="32" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
@@ -495,106 +477,104 @@
                 <TabItem>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="8,4,8,12">
-                            <TextBlock Text="迁移与诊断" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,16" />
+                            <StackPanel Margin="0,0,0,18">
+                                <TextBlock Text="{DynamicResource Loc_Settings_Diagnostics}" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="软件数据跨端迁移、运行状态排查与新版功能更新" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                            </StackPanel>
 
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock Text="JSON 数据交换" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="支持跨电脑、跨操作系统快速导出与导入软件清单" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,12" />
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Style="{StaticResource ModernButton}" Command="{Binding ExportJsonCommand}" Height="36">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <ui:SymbolIcon Symbol="Upload" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                                <TextBlock Text="导出软件列表为 JSON..." VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Style="{StaticResource ModernButton}" Command="{Binding ImportJsonCommand}" Margin="8,0,0,0" Height="36">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <ui:SymbolIcon Symbol="Download" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                                <TextBlock Text="从 JSON 文件导入..." VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock Text="故障排除与日志" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="查看 Serilog 运行日志与软件启动诊断信息" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,12" />
-                                    <Button Style="{StaticResource ModernButton}" Command="{Binding OpenLogsDirectoryCommand}" HorizontalAlignment="Left" Height="36">
+                            <ui:SettingsCard Header="JSON 数据交换" 
+                                             Description="支持跨电脑、跨操作系统快速导出与导入软件清单" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE898;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Style="{StaticResource ModernButton}" Command="{Binding ExportJsonCommand}" Height="36">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <ui:SymbolIcon Symbol="OpenFile" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                            <TextBlock Text="打开日志文件夹" VerticalAlignment="Center" />
+                                            <ui:SymbolIcon Symbol="Upload" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                            <TextBlock Text="导出 JSON..." VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource ModernButton}" Command="{Binding ImportJsonCommand}" Margin="8,0,0,0" Height="36">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Download" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                            <TextBlock Text="导入 JSON..." VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
-                            </Border>
+                            </ui:SettingsCard>
+
+                            <ui:SettingsCard Header="故障排除与日志" 
+                                             Description="查看 Serilog 运行日志与软件启动诊断信息" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xEBE8;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <Button Style="{StaticResource ModernButton}" Command="{Binding OpenLogsDirectoryCommand}" Height="36">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ui:SymbolIcon Symbol="OpenFile" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBlock Text="打开日志文件夹" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </ui:SettingsCard>
 
                             <!-- Check for Updates Card -->
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,12" Padding="16,14">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Text="{DynamicResource Loc_Updates_Title}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                                <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding CurrentAppVersion}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                                </Border>
-                                            </StackPanel>
-                                            <TextBlock Text="连接 GitHub Releases 检查官方最新发布版本与功能更新" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
-                                        </StackPanel>
-                                        <Button Grid.Column="1" Style="{StaticResource ModernButton}" Command="{Binding CheckForUpdatesCommand}" Height="36" IsEnabled="{Binding IsCheckingUpdates, Converter={StaticResource InverseBooleanConverter}}">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <ui:SymbolIcon Symbol="Sync" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
-                                                <TextBlock Text="{DynamicResource Loc_Updates_CheckBtn}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </Grid>
-
-                                    <!-- Status / Result Banner -->
-                                    <Border Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToVisibilityConverter}}"
-                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
-                                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,6,0,0">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding UpdateStatusMessage}" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                            <Button Grid.Column="1" Style="{StaticResource PrimaryButton}"
-                                                    Visibility="{Binding HasNewUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                    Command="{Binding OpenReleaseUrlCommand}"
-                                                    Height="32" Padding="12,0" Margin="10,0,0,0">
-                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <ui:SymbolIcon Symbol="Download" FontSize="16" Foreground="#FFFFFF" Margin="0,0,6,0" />
-                                                    <TextBlock Text="{DynamicResource Loc_Updates_DownloadBtn}" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                            </Button>
-                                        </Grid>
+                            <ui:SettingsCard Header="{DynamicResource Loc_Updates_Title}" 
+                                             Description="连接 GitHub Releases 检查官方最新发布版本与功能更新" 
+                                             Margin="0,0,0,8">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="&#xE895;" FontSize="20" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding CurrentAppVersion}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                     </Border>
+                                    <Button Style="{StaticResource ModernButton}" Command="{Binding CheckForUpdatesCommand}" Height="36" IsEnabled="{Binding IsCheckingUpdates, Converter={StaticResource InverseBooleanConverter}}">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Sync" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                            <TextBlock Text="{DynamicResource Loc_Updates_CheckBtn}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
                                 </StackPanel>
-                            </Border>
+                            </ui:SettingsCard>
 
-                            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,0" Padding="16,14">
+                            <!-- Status / Result Banner -->
+                            <Border Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToVisibilityConverter}}"
+                                    Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <Image Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="48" Height="48" Margin="0,0,16,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="Portable Hub" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="轻量、现代的 Windows 便携软件启动与统一管理中心" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
-                                        <TextBlock Text="开源仓库：https://github.com/candy-blue/PortableHub" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,2,0,0" />
-                                    </StackPanel>
+                                    <TextBlock Text="{Binding UpdateStatusMessage}" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                    <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Foreground="#FFFFFF"
+                                            Visibility="{Binding HasNewUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                            Command="{Binding OpenReleaseUrlCommand}"
+                                            Height="32" Padding="12,0" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Download" FontSize="16" Foreground="#FFFFFF" Margin="0,0,6,0" />
+                                            <TextBlock Text="{DynamicResource Loc_Updates_DownloadBtn}" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
                                 </Grid>
                             </Border>
+
+                            <!-- About App Card -->
+                            <ui:SettingsCard Header="Portable Hub" 
+                                             Description="轻量、现代的 Windows 便携软件启动与统一管理中心 (基于 iNKORE.UI.WPF.Modern)" 
+                                             Margin="0,0,0,0">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <Image Source="pack://application:,,,/PortableHub.App;component/Assets/app.png" Width="24" Height="24" RenderOptions.BitmapScalingMode="HighQuality" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <Button Style="{StaticResource ModernButton}" Command="{Binding OpenReleaseUrlCommand}" Height="36">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ui:SymbolIcon Symbol="Globe" FontSize="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBlock Text="GitHub 开源主页" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </ui:SettingsCard>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>

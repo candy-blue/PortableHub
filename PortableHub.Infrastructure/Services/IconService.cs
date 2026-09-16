@@ -104,9 +104,15 @@ public class IconService : IIconService
         {
             try
             {
+                var iconsDir = GetIconsDirectory();
+                if (!Directory.Exists(iconsDir))
+                {
+                    Directory.CreateDirectory(iconsDir);
+                }
+
                 using var img = Image.FromFile(sourceImagePath);
                 var fileName = $"custom_{Guid.NewGuid():N}.png";
-                var targetPath = Path.Combine(GetIconsDirectory(), fileName);
+                var targetPath = Path.Combine(iconsDir, fileName);
 
                 using var bmp = new Bitmap(img);
                 bmp.Save(targetPath, ImageFormat.Png);

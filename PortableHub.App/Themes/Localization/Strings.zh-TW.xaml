@@ -2,7 +2,12 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Application & General -->
+    <!-- ========================================================================== -->
+    <!-- Portable Hub Localization Dictionary - Culture: zh-TW                  -->
+    <!-- Total Symmetric Keys: 193                                               -->
+    <!-- ========================================================================== -->
+
+    <!-- 1. Base Existing Keys (89 keys) -->
     <sys:String x:Key="Loc_AppName">Portable Hub</sys:String>
     <sys:String x:Key="Loc_AppTagline">輕量、現代的 Windows 便攜軟體啟動與統一管理中心</sys:String>
     <sys:String x:Key="Loc_Btn_Cancel">取消</sys:String>
@@ -16,8 +21,6 @@
     <sys:String x:Key="Loc_Btn_Add">新增</sys:String>
     <sys:String x:Key="Loc_Tip_Prompt">提示</sys:String>
     <sys:String x:Key="Loc_Tip_Success">操作成功</sys:String>
-
-    <!-- Sidebar Navigation -->
     <sys:String x:Key="Loc_Nav_Title">導覽</sys:String>
     <sys:String x:Key="Loc_Nav_Home">首頁</sys:String>
     <sys:String x:Key="Loc_Nav_All">全部軟體</sys:String>
@@ -28,8 +31,6 @@
     <sys:String x:Key="Loc_Nav_ScanSoftware">掃描軟體</sys:String>
     <sys:String x:Key="Loc_Nav_AddSoftware">新增軟體</sys:String>
     <sys:String x:Key="Loc_Nav_Settings">系統設定</sys:String>
-
-    <!-- Toolbar & Search -->
     <sys:String x:Key="Loc_Search_Placeholder">搜尋軟體名稱、拼音或分類...</sys:String>
     <sys:String x:Key="Loc_Sort_Custom">自訂排序</sys:String>
     <sys:String x:Key="Loc_Sort_NameAZ">名稱 (A-Z)</sys:String>
@@ -39,8 +40,6 @@
     <sys:String x:Key="Loc_Sort_LaunchCount">啟動次數</sys:String>
     <sys:String x:Key="Loc_View_Grid">網格檢視</sys:String>
     <sys:String x:Key="Loc_View_List">清單檢視</sys:String>
-
-    <!-- Context Menus & Software Operations -->
     <sys:String x:Key="Loc_Action_Launch">立即啟動</sys:String>
     <sys:String x:Key="Loc_Action_LaunchAdmin">以系統管理員身分執行</sys:String>
     <sys:String x:Key="Loc_Action_ToggleFavorite">收藏 / 取消收藏</sys:String>
@@ -56,14 +55,16 @@
     <sys:String x:Key="Loc_Action_More">更多操作</sys:String>
     <sys:String x:Key="Loc_Status_Running">執行中</sys:String>
     <sys:String x:Key="Loc_Status_Invalid">失效</sys:String>
-
-    <!-- Empty State & Drag Drop -->
     <sys:String x:Key="Loc_Empty_NoSoftware">尚無軟體</sys:String>
     <sys:String x:Key="Loc_Empty_DragHint">將 Portable 軟體拖曳至此，或點擊下方按鈕新增</sys:String>
+    <sys:String x:Key="Loc_Search_Clear">清除搜尋</sys:String>
+    <sys:String x:Key="Loc_Search_ClearBtn">清除搜尋條件</sys:String>
+    <sys:String x:Key="Loc_Search_NoResult">未找到相符的應用程式</sys:String>
+    <sys:String x:Key="Loc_Search_NoResultHint">請檢查拼寫、嘗試縮短關鍵字或按拼音首字母檢索</sys:String>
+    <sys:String x:Key="Loc_QuickLaunch_NoResult">未找到相符軟體</sys:String>
+    <sys:String x:Key="Loc_QuickLaunch_NoResultHint">按 Esc 退出，或在主畫面新增/掃描新應用程式</sys:String>
     <sys:String x:Key="Loc_Drag_Title">放開滑鼠即可新增至便攜軟體清單</sys:String>
     <sys:String x:Key="Loc_Drag_Subtitle">支援 .exe 程式、.lnk 捷徑、批次檔及軟體資料夾</sys:String>
-
-    <!-- Settings Navigation -->
     <sys:String x:Key="Loc_Settings_Title">系統設定</sys:String>
     <sys:String x:Key="Loc_Settings_Appearance">外觀與個人化</sys:String>
     <sys:String x:Key="Loc_Settings_Startup">啟動與系統匣</sys:String>
@@ -71,8 +72,6 @@
     <sys:String x:Key="Loc_Settings_Data">資料與備份</sys:String>
     <sys:String x:Key="Loc_Settings_Roots">根目錄管理</sys:String>
     <sys:String x:Key="Loc_Settings_Diagnostics">遷移與關於</sys:String>
-
-    <!-- Settings Content: Appearance -->
     <sys:String x:Key="Loc_Settings_ThemeTitle">應用程式主題</sys:String>
     <sys:String x:Key="Loc_Settings_ThemeDesc">選擇 Portable Hub 介面色彩模式與 Mica 材質</sys:String>
     <sys:String x:Key="Loc_Settings_ThemeSystem">隨系統設定</sys:String>
@@ -85,12 +84,16 @@
     <sys:String x:Key="Loc_Settings_CardSmall">緊湊 (小)</sys:String>
     <sys:String x:Key="Loc_Settings_CardMedium">標準 (中)</sys:String>
     <sys:String x:Key="Loc_Settings_CardLarge">舒適 (大)</sys:String>
+    <sys:String x:Key="Loc_Settings_ViewModeTitle">預設檢視模式</sys:String>
+    <sys:String x:Key="Loc_Settings_ViewModeDesc">選擇主介面軟體列表的預設展現形態</sys:String>
     <sys:String x:Key="Loc_Settings_LaunchModeTitle">軟體啟動觸發方式</sys:String>
     <sys:String x:Key="Loc_Settings_LaunchModeDesc">選擇在主面板卡片上啟動程式的滑鼠互動方式</sys:String>
     <sys:String x:Key="Loc_Settings_DoubleClick">按兩下啟動</sys:String>
     <sys:String x:Key="Loc_Settings_SingleClick">按一下啟動</sys:String>
-
-    <!-- Settings Content: Updates & About -->
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleTitle">快捷鍵呼出樣式</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleDesc">選擇按下全域快捷鍵時喚出的視窗型態</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleGrid">網格面板（主視窗）</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleSearch">快捷搜尋框</sys:String>
     <sys:String x:Key="Loc_Updates_Title">軟體更新與關於</sys:String>
     <sys:String x:Key="Loc_Updates_CurrentVersion">目前版本</sys:String>
     <sys:String x:Key="Loc_Updates_CheckBtn">檢查更新</sys:String>
@@ -100,12 +103,127 @@
     <sys:String x:Key="Loc_Updates_DownloadBtn">前往下載更新</sys:String>
     <sys:String x:Key="Loc_Updates_Failed">檢查更新失敗，請稍後再試或造訪 GitHub 存放庫</sys:String>
     <sys:String x:Key="Loc_About_Repo">開源存放庫</sys:String>
-
-    <!-- Category Dialog -->
     <sys:String x:Key="Loc_CatDialog_Title">分類管理</sys:String>
     <sys:String x:Key="Loc_CatDialog_NameLabel">分類名稱 *</sys:String>
     <sys:String x:Key="Loc_CatDialog_NamePlaceholder">請輸入分類名稱，例如：常用工具、開發必備...</sys:String>
     <sys:String x:Key="Loc_CatDialog_IconLabel">分類圖示</sys:String>
     <sys:String x:Key="Loc_CatDialog_ColorLabel">分類主題色</sys:String>
     <sys:String x:Key="Loc_CatDialog_PickColorBtn">高級調色盤...</sys:String>
+
+    <!-- 2. Newly Added Keys (104 keys) -->
+    <sys:String x:Key="Loc_State_Off">關</sys:String>
+    <sys:String x:Key="Loc_State_On">開</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_Title">調色盤</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_PresetColors">預設色彩</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_CustomColor">自訂顏色 (HEX)</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_Apply">確定使用</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_InvalidHex">請輸入有效的 HEX 顏色代碼 (例如 #0078D4)</sys:String>
+    <sys:String x:Key="Loc_Scanner_Title">軟體掃描與批次匯入</sys:String>
+    <sys:String x:Key="Loc_Scanner_Subtitle">掃描指定目錄下的可攜式執行檔 (.exe)，快速批次新增至 Portable Hub</sys:String>
+    <sys:String x:Key="Loc_Scanner_ScanDirLabel">掃描目錄</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectFolder">選擇資料夾</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectFolderDialogTitle">選擇掃描目錄</sys:String>
+    <sys:String x:Key="Loc_Scanner_StartScan">開始掃描</sys:String>
+    <sys:String x:Key="Loc_Scanner_Scanning">正在掃描...</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectAll">全選</sys:String>
+    <sys:String x:Key="Loc_Scanner_DeselectAll">全部取消</sys:String>
+    <sys:String x:Key="Loc_Scanner_DefaultCategory">預設歸屬分類:</sys:String>
+    <sys:String x:Key="Loc_Scanner_FoundCountFormat">找到 {0} 個軟體</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectedCountFormat">已選取 {0} 個</sys:String>
+    <sys:String x:Key="Loc_Scanner_ColName">名稱</sys:String>
+    <sys:String x:Key="Loc_Scanner_ColPath">執行檔路徑</sys:String>
+    <sys:String x:Key="Loc_Scanner_ImportSelected">匯入選取項目</sys:String>
+    <sys:String x:Key="Loc_Scanner_PathEmptyWarning">請先選擇或輸入有效的掃描目錄</sys:String>
+    <sys:String x:Key="Loc_Scanner_ScanningWarning">掃描進行中，請等待完成</sys:String>
+    <sys:String x:Key="Loc_Scanner_ImportSuccessFormat">成功匯入 {0} 個軟體！</sys:String>
+    <sys:String x:Key="Loc_Scanner_NoSoftwareSelected">請勾選需要匯入的軟體</sys:String>
+    <sys:String x:Key="Loc_Scanner_DirNotFound">指定的目錄不存在</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TitleAdd">新增軟體</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TitleEdit">編輯軟體</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TabBasic">基本資訊</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TabAdv">進階選項</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NameLabel">軟體名稱 *</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NamePlaceholder">例如：Visual Studio Code</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExeLabel">執行檔 *</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExePlaceholder">選擇執行檔 (.exe) 或腳本...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_CategoryLabel">所屬分類</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_DescLabel">軟體說明</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_DescPlaceholder">可選，簡短描述軟體用途...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_IconLabel">軟體圖示</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectCustomIcon">選擇自訂圖示...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RestoreDefaultIcon">恢復預設圖示</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ArgsLabel">啟動參數</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ArgsPlaceholder">例如：--portable --user-data-dir ./data</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_WorkDirLabel">工作目錄</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_WorkDirPlaceholder">留空則使用執行檔所在目錄</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RunAdminLabel">始終以系統管理員身分執行</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RunAdminDesc">啟動時請求系統管理員權限提權</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SingleInstanceLabel">單實例運行</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SingleInstanceDesc">防止重複多開，再次啟動時自動喚醒已有視窗</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectExeTitle">選擇執行檔</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExeFilter">執行檔 (*.exe;*.bat;*.cmd;*.lnk)|*.exe;*.bat;*.cmd;*.lnk|所有檔案 (*.*)|*.*</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectIconTitle">選擇自訂圖示</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_IconFilter">圖示檔案 (*.ico;*.png;*.exe)|*.ico;*.png;*.exe|所有檔案 (*.*)|*.*</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NameRequired">請輸入軟體名稱。</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExePathRequired">請選擇執行檔路徑。</sys:String>
+    <sys:String x:Key="Loc_CatDialog_NameRequired">請輸入分類名稱。</sys:String>
+    <sys:String x:Key="Loc_ModernDialog_ConfirmTitle">確認操作</sys:String>
+    <sys:String x:Key="Loc_Tip_Warning">警告</sys:String>
+    <sys:String x:Key="Loc_Tip_Error">錯誤</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_Placeholder">搜尋軟體、拼音或按 ↑↓ 選擇，Enter 啟動，Esc 退出...</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_OpenMain">開啟主介面</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_NoResults">未找到相符的軟體</sys:String>
+    <sys:String x:Key="Loc_Settings_SaveSuccess">設定已儲存</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectBackupPath">選擇備份檔案匯出路徑</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupFilter">JSON 備份檔案 (*.json)|*.json</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectRestorePath">選擇備份檔案進行還原</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupSuccess">資料備份成功！</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupFailed">備份失敗：{0}</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreConfirm">還原備份將覆蓋目前所有分類與軟體資料，確定要繼續？</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreSuccess">資料還原成功，已重新載入！</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreFailed">還原失敗：{0}</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportDirTitle">匯出目錄</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectPortableRootTitle">選擇可攜式根目錄</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectSoftwareDirTitle">選擇軟體目錄</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsConfirm">確定要清除所有歷史備份檔案嗎？</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsSuccess">已清理歷史備份檔案</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsFailed">清理失敗：{0}</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenTitle">掃描失效路徑</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenNone">未發現失效路徑</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenFound">共發現 {0} 個失效軟體路徑</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportBrokenTitle">匯出失效清單</sys:String>
+    <sys:String x:Key="Loc_Settings_TextFilter">文字檔案 (*.txt)|*.txt</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportSuccess">匯出成功</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportFailed">匯出失敗：{0}</sys:String>
+    <sys:String x:Key="Loc_Main_Title">Portable Hub - 可攜式軟體啟動中心</sys:String>
+    <sys:String x:Key="Loc_Main_SelectExeRelocate">選擇新的執行檔路徑</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteSoftware">確定要從清單中移除「{0}」嗎？(不會刪除磁碟檔案)</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteCategory">確定要刪除分類「{0}」嗎？其下的軟體將移至未分類。</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteBatch">確定要從清單中移除選取的 {0} 個軟體嗎？</sys:String>
+    <sys:String x:Key="Loc_Main_ShortcutCreated">桌面捷徑建立成功</sys:String>
+    <sys:String x:Key="Loc_Main_ShortcutFailed">建立桌面捷徑失敗</sys:String>
+    <sys:String x:Key="Loc_Main_PathCopied">路徑已複製到剪貼簿</sys:String>
+    <sys:String x:Key="Loc_Main_AddCategoryPrompt">請輸入新分類名稱：</sys:String>
+    <sys:String x:Key="Loc_Main_AddCategoryTitle">新建分類</sys:String>
+    <sys:String x:Key="Loc_Main_DefaultCategoryUncategorized">未分類</sys:String>
+    <sys:String x:Key="Loc_Tray_ShowMain">顯示主面板</sys:String>
+    <sys:String x:Key="Loc_Tray_QuickLaunch">快速啟動框</sys:String>
+    <sys:String x:Key="Loc_Tray_Settings">設定</sys:String>
+    <sys:String x:Key="Loc_Tray_Exit">退出程式</sys:String>
+    <sys:String x:Key="Loc_Tray_LaunchFailed">啟動失敗: {0}</sys:String>
+    <sys:String x:Key="Loc_Tray_LaunchSuccess">啟動成功</sys:String>
+    <sys:String x:Key="Loc_Launch_FileNotFound">執行檔不存在或路徑無效：{0}</sys:String>
+    <sys:String x:Key="Loc_Launch_FailedFormat">啟動失敗: {0}</sys:String>
+    <sys:String x:Key="Loc_App_StartupFailedTitle">Portable Hub 啟動失敗</sys:String>
+    <sys:String x:Key="Loc_App_StartupFailed">程式啟動發生嚴重例外狀況，即將結束：{0}</sys:String>
+    <sys:String x:Key="Loc_App_RuntimeError">系統執行階段例外狀況：{0}</sys:String>
+    <sys:String x:Key="Loc_App_FatalError">發生未攔截的嚴重錯誤：{0}</sys:String>
+
+    <!-- 聯動啟動 (Linked Launch) -->
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppsLabel">聯動啟動 (最多5個)</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppsDesc">啟動當前應用時，將同時自動啟動以下關聯程式（具備防循環死鎖與上限保護）</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_AddLinkedApp">選擇要聯動的應用...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppMaxLimit">已達到聯動數量上限（5個）</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NoLinkedApps">暫無聯動啟動項，可從下方下拉框選擇添加</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RemoveLinkedApp">移除此聯動</sys:String>
 </ResourceDictionary>

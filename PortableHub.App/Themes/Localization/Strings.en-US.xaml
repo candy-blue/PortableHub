@@ -2,7 +2,12 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Application & General -->
+    <!-- ========================================================================== -->
+    <!-- Portable Hub Localization Dictionary - Culture: en-US                  -->
+    <!-- Total Symmetric Keys: 193                                               -->
+    <!-- ========================================================================== -->
+
+    <!-- 1. Base Existing Keys (89 keys) -->
     <sys:String x:Key="Loc_AppName">Portable Hub</sys:String>
     <sys:String x:Key="Loc_AppTagline">Lightweight, modern unified launcher and manager for Windows portable apps</sys:String>
     <sys:String x:Key="Loc_Btn_Cancel">Cancel</sys:String>
@@ -16,8 +21,6 @@
     <sys:String x:Key="Loc_Btn_Add">Add</sys:String>
     <sys:String x:Key="Loc_Tip_Prompt">Prompt</sys:String>
     <sys:String x:Key="Loc_Tip_Success">Success</sys:String>
-
-    <!-- Sidebar Navigation -->
     <sys:String x:Key="Loc_Nav_Title">Navigation</sys:String>
     <sys:String x:Key="Loc_Nav_Home">Home</sys:String>
     <sys:String x:Key="Loc_Nav_All">All Software</sys:String>
@@ -28,8 +31,6 @@
     <sys:String x:Key="Loc_Nav_ScanSoftware">Scan Software</sys:String>
     <sys:String x:Key="Loc_Nav_AddSoftware">Add Software</sys:String>
     <sys:String x:Key="Loc_Nav_Settings">Settings</sys:String>
-
-    <!-- Toolbar & Search -->
     <sys:String x:Key="Loc_Search_Placeholder">Search by name, pinyin, or category...</sys:String>
     <sys:String x:Key="Loc_Sort_Custom">Custom Order</sys:String>
     <sys:String x:Key="Loc_Sort_NameAZ">Name (A-Z)</sys:String>
@@ -39,8 +40,6 @@
     <sys:String x:Key="Loc_Sort_LaunchCount">Launch Count</sys:String>
     <sys:String x:Key="Loc_View_Grid">Grid View</sys:String>
     <sys:String x:Key="Loc_View_List">List View</sys:String>
-
-    <!-- Context Menus & Software Operations -->
     <sys:String x:Key="Loc_Action_Launch">Launch</sys:String>
     <sys:String x:Key="Loc_Action_LaunchAdmin">Run as Administrator</sys:String>
     <sys:String x:Key="Loc_Action_ToggleFavorite">Toggle Favorite</sys:String>
@@ -56,14 +55,16 @@
     <sys:String x:Key="Loc_Action_More">More Actions</sys:String>
     <sys:String x:Key="Loc_Status_Running">Running</sys:String>
     <sys:String x:Key="Loc_Status_Invalid">Invalid</sys:String>
-
-    <!-- Empty State & Drag Drop -->
     <sys:String x:Key="Loc_Empty_NoSoftware">No software yet</sys:String>
     <sys:String x:Key="Loc_Empty_DragHint">Drag portable apps here, or click the button below to add</sys:String>
+    <sys:String x:Key="Loc_Search_Clear">Clear Search</sys:String>
+    <sys:String x:Key="Loc_Search_ClearBtn">Clear Search Filters</sys:String>
+    <sys:String x:Key="Loc_Search_NoResult">No matching applications</sys:String>
+    <sys:String x:Key="Loc_Search_NoResultHint">Please check your spelling, shorten keywords, or try pinyin initials</sys:String>
+    <sys:String x:Key="Loc_QuickLaunch_NoResult">No matching software</sys:String>
+    <sys:String x:Key="Loc_QuickLaunch_NoResultHint">Press Esc to exit, or add/scan software in the main window</sys:String>
     <sys:String x:Key="Loc_Drag_Title">Drop here to add to software list</sys:String>
     <sys:String x:Key="Loc_Drag_Subtitle">Supports .exe programs, .lnk shortcuts, batch files, and software folders</sys:String>
-
-    <!-- Settings Navigation -->
     <sys:String x:Key="Loc_Settings_Title">Settings</sys:String>
     <sys:String x:Key="Loc_Settings_Appearance">Appearance</sys:String>
     <sys:String x:Key="Loc_Settings_Startup">Startup &amp; Tray</sys:String>
@@ -71,8 +72,6 @@
     <sys:String x:Key="Loc_Settings_Data">Data &amp; Backup</sys:String>
     <sys:String x:Key="Loc_Settings_Roots">Root Directories</sys:String>
     <sys:String x:Key="Loc_Settings_Diagnostics">About &amp; Updates</sys:String>
-
-    <!-- Settings Content: Appearance -->
     <sys:String x:Key="Loc_Settings_ThemeTitle">Application Theme</sys:String>
     <sys:String x:Key="Loc_Settings_ThemeDesc">Choose color mode and backdrop effect for Portable Hub</sys:String>
     <sys:String x:Key="Loc_Settings_ThemeSystem">System</sys:String>
@@ -85,12 +84,16 @@
     <sys:String x:Key="Loc_Settings_CardSmall">Compact (Small)</sys:String>
     <sys:String x:Key="Loc_Settings_CardMedium">Standard (Medium)</sys:String>
     <sys:String x:Key="Loc_Settings_CardLarge">Comfortable (Large)</sys:String>
+    <sys:String x:Key="Loc_Settings_ViewModeTitle">Default View Mode</sys:String>
+    <sys:String x:Key="Loc_Settings_ViewModeDesc">Choose default layout for application items in main workspace</sys:String>
     <sys:String x:Key="Loc_Settings_LaunchModeTitle">Launch Interaction</sys:String>
     <sys:String x:Key="Loc_Settings_LaunchModeDesc">Choose mouse click action to launch apps</sys:String>
     <sys:String x:Key="Loc_Settings_DoubleClick">Double Click</sys:String>
     <sys:String x:Key="Loc_Settings_SingleClick">Single Click</sys:String>
-
-    <!-- Settings Content: Updates & About -->
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleTitle">Hotkey Launch Style</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleDesc">Choose which window appears when the global hotkey is pressed</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleGrid">Grid Panel (Main Window)</sys:String>
+    <sys:String x:Key="Loc_Settings_HotkeyOpenStyleSearch">Quick Search Bar</sys:String>
     <sys:String x:Key="Loc_Updates_Title">Updates &amp; About</sys:String>
     <sys:String x:Key="Loc_Updates_CurrentVersion">Current Version</sys:String>
     <sys:String x:Key="Loc_Updates_CheckBtn">Check for Updates</sys:String>
@@ -100,12 +103,127 @@
     <sys:String x:Key="Loc_Updates_DownloadBtn">Download Update</sys:String>
     <sys:String x:Key="Loc_Updates_Failed">Failed to check for updates. Please try again later or visit GitHub.</sys:String>
     <sys:String x:Key="Loc_About_Repo">GitHub Repository</sys:String>
-
-    <!-- Category Dialog -->
     <sys:String x:Key="Loc_CatDialog_Title">Category Manager</sys:String>
     <sys:String x:Key="Loc_CatDialog_NameLabel">Category Name *</sys:String>
     <sys:String x:Key="Loc_CatDialog_NamePlaceholder">e.g., Development, Utilities, Media...</sys:String>
     <sys:String x:Key="Loc_CatDialog_IconLabel">Category Icon</sys:String>
     <sys:String x:Key="Loc_CatDialog_ColorLabel">Accent Color</sys:String>
     <sys:String x:Key="Loc_CatDialog_PickColorBtn">Advanced Palette...</sys:String>
+
+    <!-- 2. Newly Added Keys (104 keys) -->
+    <sys:String x:Key="Loc_State_Off">Off</sys:String>
+    <sys:String x:Key="Loc_State_On">On</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_Title">Color Palette</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_PresetColors">Preset Colors</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_CustomColor">Custom Color (HEX)</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_Apply">Apply Color</sys:String>
+    <sys:String x:Key="Loc_ColorPicker_InvalidHex">Please enter a valid HEX color code (e.g. #0078D4)</sys:String>
+    <sys:String x:Key="Loc_Scanner_Title">Software Scan &amp; Batch Import</sys:String>
+    <sys:String x:Key="Loc_Scanner_Subtitle">Scan directories for portable executables (.exe) and batch import into Portable Hub</sys:String>
+    <sys:String x:Key="Loc_Scanner_ScanDirLabel">Scan Directory</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectFolder">Select Folder</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectFolderDialogTitle">Select Scan Directory</sys:String>
+    <sys:String x:Key="Loc_Scanner_StartScan">Start Scan</sys:String>
+    <sys:String x:Key="Loc_Scanner_Scanning">Scanning...</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectAll">Select All</sys:String>
+    <sys:String x:Key="Loc_Scanner_DeselectAll">Deselect All</sys:String>
+    <sys:String x:Key="Loc_Scanner_DefaultCategory">Default Category:</sys:String>
+    <sys:String x:Key="Loc_Scanner_FoundCountFormat">Found {0} software</sys:String>
+    <sys:String x:Key="Loc_Scanner_SelectedCountFormat">Selected {0}</sys:String>
+    <sys:String x:Key="Loc_Scanner_ColName">Name</sys:String>
+    <sys:String x:Key="Loc_Scanner_ColPath">Executable Path</sys:String>
+    <sys:String x:Key="Loc_Scanner_ImportSelected">Import Selected</sys:String>
+    <sys:String x:Key="Loc_Scanner_PathEmptyWarning">Please select or enter a valid scan directory</sys:String>
+    <sys:String x:Key="Loc_Scanner_ScanningWarning">Scan is in progress, please wait</sys:String>
+    <sys:String x:Key="Loc_Scanner_ImportSuccessFormat">Successfully imported {0} software!</sys:String>
+    <sys:String x:Key="Loc_Scanner_NoSoftwareSelected">Please select software to import</sys:String>
+    <sys:String x:Key="Loc_Scanner_DirNotFound">Specified directory does not exist</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TitleAdd">Add Software</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TitleEdit">Edit Software</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TabBasic">Basic Info</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_TabAdv">Advanced Options</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NameLabel">Software Name *</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NamePlaceholder">e.g. Visual Studio Code</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExeLabel">Executable File *</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExePlaceholder">Select executable (.exe) or script...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_CategoryLabel">Category</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_DescLabel">Description</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_DescPlaceholder">Optional short description of the software...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_IconLabel">Software Icon</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectCustomIcon">Choose Custom Icon...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RestoreDefaultIcon">Restore Default Icon</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ArgsLabel">Arguments</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ArgsPlaceholder">e.g. --portable --user-data-dir ./data</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_WorkDirLabel">Working Directory</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_WorkDirPlaceholder">Leave empty to use executable directory</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RunAdminLabel">Always run as administrator</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RunAdminDesc">Always request elevated administrator privileges when launching</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SingleInstanceLabel">Single Instance</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SingleInstanceDesc">Prevent multiple instances, activate existing window on launch</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectExeTitle">Select Executable File</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExeFilter">Executables (*.exe;*.bat;*.cmd;*.lnk)|*.exe;*.bat;*.cmd;*.lnk|All Files (*.*)|*.*</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_SelectIconTitle">Select Custom Icon</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_IconFilter">Icon Files (*.ico;*.png;*.exe)|*.ico;*.png;*.exe|All Files (*.*)|*.*</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NameRequired">Please enter software name.</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_ExePathRequired">Please select executable file path.</sys:String>
+    <sys:String x:Key="Loc_CatDialog_NameRequired">Please enter category name.</sys:String>
+    <sys:String x:Key="Loc_ModernDialog_ConfirmTitle">Confirmation</sys:String>
+    <sys:String x:Key="Loc_Tip_Warning">Warning</sys:String>
+    <sys:String x:Key="Loc_Tip_Error">Error</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_Placeholder">Search software, pinyin, or press ↑↓ to select, Enter to launch, Esc to exit...</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_OpenMain">Open Main Window</sys:String>
+    <sys:String x:Key="Loc_QuickLauncher_NoResults">No matching software found</sys:String>
+    <sys:String x:Key="Loc_Settings_SaveSuccess">Settings saved successfully</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectBackupPath">Select Backup Export Path</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupFilter">JSON Backup File (*.json)|*.json</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectRestorePath">Select Backup File to Restore</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupSuccess">Data backup completed successfully!</sys:String>
+    <sys:String x:Key="Loc_Settings_BackupFailed">Backup failed: {0}</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreConfirm">Restoring backup will overwrite all current categories and software data. Continue?</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreSuccess">Data restore completed successfully and reloaded!</sys:String>
+    <sys:String x:Key="Loc_Settings_RestoreFailed">Restore failed: {0}</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportDirTitle">Export Directory</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectPortableRootTitle">Select Portable Root Directory</sys:String>
+    <sys:String x:Key="Loc_Settings_SelectSoftwareDirTitle">Select Software Directory</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsConfirm">Are you sure you want to clean all historical backup files?</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsSuccess">Historical backup files cleaned</sys:String>
+    <sys:String x:Key="Loc_Settings_CleanBackupsFailed">Cleanup failed: {0}</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenTitle">Scan Broken Paths</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenNone">No broken paths found</sys:String>
+    <sys:String x:Key="Loc_Settings_ScanBrokenFound">Found {0} broken software paths</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportBrokenTitle">Export Broken List</sys:String>
+    <sys:String x:Key="Loc_Settings_TextFilter">Text Files (*.txt)|*.txt</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportSuccess">Export completed successfully</sys:String>
+    <sys:String x:Key="Loc_Settings_ExportFailed">Export failed: {0}</sys:String>
+    <sys:String x:Key="Loc_Main_Title">Portable Hub - Portable Software Hub</sys:String>
+    <sys:String x:Key="Loc_Main_SelectExeRelocate">Select New Executable Path</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteSoftware">Are you sure you want to remove &quot;{0}&quot; from the list? (Disk files will not be deleted)</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteCategory">Are you sure you want to delete category &quot;{0}&quot;? Associated software will be moved to Uncategorized.</sys:String>
+    <sys:String x:Key="Loc_Main_ConfirmDeleteBatch">Are you sure you want to remove {0} selected software from the list?</sys:String>
+    <sys:String x:Key="Loc_Main_ShortcutCreated">Desktop shortcut created successfully</sys:String>
+    <sys:String x:Key="Loc_Main_ShortcutFailed">Failed to create desktop shortcut</sys:String>
+    <sys:String x:Key="Loc_Main_PathCopied">Path copied to clipboard</sys:String>
+    <sys:String x:Key="Loc_Main_AddCategoryPrompt">Please enter new category name:</sys:String>
+    <sys:String x:Key="Loc_Main_AddCategoryTitle">Create Category</sys:String>
+    <sys:String x:Key="Loc_Main_DefaultCategoryUncategorized">Uncategorized</sys:String>
+    <sys:String x:Key="Loc_Tray_ShowMain">Show Main Panel</sys:String>
+    <sys:String x:Key="Loc_Tray_QuickLaunch">Quick Launcher</sys:String>
+    <sys:String x:Key="Loc_Tray_Settings">Settings</sys:String>
+    <sys:String x:Key="Loc_Tray_Exit">Exit</sys:String>
+    <sys:String x:Key="Loc_Tray_LaunchFailed">Launch failed: {0}</sys:String>
+    <sys:String x:Key="Loc_Tray_LaunchSuccess">Launch success</sys:String>
+    <sys:String x:Key="Loc_Launch_FileNotFound">Executable file does not exist or path is invalid: {0}</sys:String>
+    <sys:String x:Key="Loc_Launch_FailedFormat">Launch failed: {0}</sys:String>
+    <sys:String x:Key="Loc_App_StartupFailedTitle">Portable Hub Startup Failed</sys:String>
+    <sys:String x:Key="Loc_App_StartupFailed">Fatal error during startup, exiting: {0}</sys:String>
+    <sys:String x:Key="Loc_App_RuntimeError">Runtime exception: {0}</sys:String>
+    <sys:String x:Key="Loc_App_FatalError">Uncaught fatal error: {0}</sys:String>
+
+    <!-- Linked Launch -->
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppsLabel">Linked Launch (Max 5)</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppsDesc">When launching this app, automatically launch the following linked apps (with loop guard)</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_AddLinkedApp">Select an app to link...</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_LinkedAppMaxLimit">Maximum linked apps limit reached (5)</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_NoLinkedApps">No linked apps configured. Select below to add.</sys:String>
+    <sys:String x:Key="Loc_SoftwareEdit_RemoveLinkedApp">Remove link</sys:String>
 </ResourceDictionary>

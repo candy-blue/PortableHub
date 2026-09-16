@@ -22,4 +22,5 @@ public class AppSettings
     public string ViewMode { get; set; } = "Grid"; // Grid, List
     public string LaunchClickMode { get; set; } = "DoubleClick"; // DoubleClick, SingleClick
     public bool AutoRelocateMissing { get; set; } = true;
+    public string HotkeyOpenStyle { get; set; } = "Grid"; // Grid, Search
 }

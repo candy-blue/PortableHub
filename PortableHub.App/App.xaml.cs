@@ -55,6 +55,11 @@ public partial class App : System.Windows.Application
                 MessageBox.Show($"Portable Hub 严重错误: {ex.Message}\n\n{ex}", "Portable Hub", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         };
+        TaskScheduler.UnobservedTaskException += (s, args) =>
+        {
+            LogStartup($"TaskScheduler UnobservedTaskException: {args.Exception}");
+            args.SetObserved();
+        };
 
         try
         {
@@ -126,7 +131,17 @@ public partial class App : System.Windows.Application
             _trayService.Initialize(
                 onShowWindow: () => Dispatcher.Invoke(() => _mainWindow.ShowAndActivate()),
                 onShowQuickLauncher: () => Dispatcher.Invoke(() => _quickLauncherWindow.Summon()),
-                onOpenSettings: () => Dispatcher.Invoke(async () => await ShowSettingsDialogAsync()),
+                onOpenSettings: () => _ = Dispatcher.InvokeAsync(async () =>
+                {
+                    try
+                    {
+                        await ShowSettingsDialogAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogStartup($"Error showing settings dialog: {ex}");
+                    }
+                }),
                 onExit: () => Dispatcher.Invoke(() =>
                 {
                     _mainWindow.ForceExit();
@@ -139,7 +154,21 @@ public partial class App : System.Windows.Application
                               .OrderByDescending(s => s.LastLaunchedAt)
                               .ToList();
                 },
-                onLaunchSoftware: (s) => Dispatcher.Invoke(async () => await launchService.LaunchAsync(s))
+                onLaunchSoftware: (s) => _ = Dispatcher.InvokeAsync(async () =>
+                {
+                    try
+                    {
+                        var res = await launchService.LaunchAsync(s);
+                        if (!res.Success)
+                        {
+                            Views.ModernDialog.ShowError(res.ErrorMessage ?? "启动失败", "错误");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Views.ModernDialog.ShowError($"启动异常: {ex.Message}", "错误");
+                    }
+                })
             );
             LogStartup("TrayService initialized.");
 
@@ -147,6 +176,7 @@ public partial class App : System.Windows.Application
             var helper = new WindowInteropHelper(_mainWindow);
             helper.EnsureHandle();
             var hwnd = helper.Handle;
+            SingleInstanceManager.AllowUipiMessage(hwnd);
 
             _hotkeyService = (WindowsHotkeyService)_serviceProvider.GetRequiredService<IHotkeyService>();
             var source = HwndSource.FromHwnd(hwnd);
@@ -184,7 +214,18 @@ public partial class App : System.Windows.Application
 
             _hotkeyService.HotkeyPressed += (s, ev) =>
             {
-                Dispatcher.Invoke(() => _quickLauncherWindow.Summon());
+                Dispatcher.Invoke(() =>
+                {
+                    var openStyle = settingsService.CurrentSettings.HotkeyOpenStyle;
+                    if (string.Equals(openStyle, "Search", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _quickLauncherWindow.Summon();
+                    }
+                    else
+                    {
+                        _mainWindow.ToggleShowHide();
+                    }
+                });
             };
 
             var hotkeyRegistered = _hotkeyService.Register(settingsService.CurrentSettings.GlobalHotkey, hwnd);
@@ -203,7 +244,26 @@ public partial class App : System.Windows.Application
         catch (Exception ex)
         {
             LogStartup($"Fatal error during OnStartup: {ex}");
-            MessageBox.Show($"Portable Hub 启动失败:\n\n{ex.Message}\n\n{ex.StackTrace}", "启动失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            try
+            {
+                MessageBox.Show($"Portable Hub 启动失败:\n\n{ex.Message}\n\n{ex.StackTrace}", "启动失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch
+            {
+                // Defensive: In headless or session-ending environments, MessageBox might fail
+            }
+            finally
+            {
+                try
+                {
+                    _singleInstanceManager?.Dispose();
+                }
+                catch
+                {
+                    // Ignored
+                }
+                Shutdown(1);
+            }
         }
     }
 
@@ -311,6 +371,16 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        try
+        {
+            var settingsService = _serviceProvider?.GetService<ISettingsService>();
+            settingsService?.SaveSettings();
+        }
+        catch
+        {
+            // Ignored
+        }
+
         _hotkeyService?.Dispose();
         _trayService?.Dispose();
         _singleInstanceManager?.Dispose();

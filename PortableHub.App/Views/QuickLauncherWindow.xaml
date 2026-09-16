@@ -47,7 +47,7 @@
                 <TextBox x:Name="SearchBox"
                          Style="{StaticResource ModernTextBox}"
                          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
-                         ui:ControlHelper.PlaceholderText="输入软件名称、分类或标签..."
+                         ui:ControlHelper.PlaceholderText="{DynamicResource Loc_QuickLaunch_Placeholder}"
                          FontSize="16"
                          Height="48"
                          Padding="40,0,12,0"
@@ -65,13 +65,17 @@
                      BorderThickness="0"
                      MaxHeight="360"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     Visibility="{Binding HasNoResults, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="Margin" Value="0,3" />
                         <Setter Property="Background" Value="Transparent" />
                         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <EventSetter Event="MouseDoubleClick" Handler="ResultsListBoxItem_MouseDoubleClick" />
+                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ResultsListBoxItem_PreviewMouseLeftButtonUp" />
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
@@ -122,39 +126,51 @@
                             </StackPanel>
 
                             <!-- Launch Hint -->
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                                        Cursor="Hand" ToolTip="点击或按 Enter 启动"
+                                        MouseLeftButtonUp="LaunchBadge_MouseLeftButtonUp">
                                 <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,6,0">
                                     <TextBlock Text="Enter" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </Border>
-                                <TextBlock Text="启动" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Loc_QuickLaunch_ActionLaunch}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
+            <!-- No Results Empty State -->
+            <Border Grid.Row="1" Margin="0,16,0,16" Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Visibility="{Binding HasNoResults, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center">
+                    <ui:SymbolIcon Symbol="Find" FontSize="28" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,10" />
+                    <TextBlock Text="{DynamicResource Loc_QuickLaunch_NoResult}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc_QuickLaunch_NoResultHint}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
+
             <!-- Bottom shortcuts info bar with WinUI 3 keycap badges -->
             <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,8,0,0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
+                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
                         <TextBlock Text="↑ ↓" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="切换" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc_QuickLaunch_HintSwitch}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
 
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
+                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
                         <TextBlock Text="Enter" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="启动" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc_QuickLaunch_HintLaunch}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
 
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
+                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
                         <TextBlock Text="Ctrl + 1..9" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="直达" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc_QuickLaunch_HintDirect}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,14,0" VerticalAlignment="Center" />
 
-                    <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,4,0">
+                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
                         <TextBlock Text="Esc" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <TextBlock Text="关闭" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc_QuickLaunch_HintClose}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
         </Grid>

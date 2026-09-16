@@ -1,5 +1,6 @@
 using PortableHub.Core.Interfaces;
 using PortableHub.Core.Models;
+using PortableHub.Infrastructure.Windows;
 
 namespace PortableHub.Infrastructure.Services;
 
@@ -17,30 +18,44 @@ public class PathRepairService : IPathRepairService
         if (string.IsNullOrWhiteSpace(fullPath) || string.IsNullOrWhiteSpace(rootPath))
             return fullPath;
 
-        var normalizedFull = Path.GetFullPath(fullPath);
-        var normalizedRoot = Path.GetFullPath(rootPath);
-
-        if (!normalizedRoot.EndsWith(Path.DirectorySeparatorChar.ToString()))
+        try
         {
-            normalizedRoot += Path.DirectorySeparatorChar;
-        }
+            var normalizedFull = Path.GetFullPath(fullPath);
+            var normalizedRoot = Path.GetFullPath(rootPath);
 
-        if (normalizedFull.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+            if (!normalizedRoot.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                normalizedRoot += Path.DirectorySeparatorChar;
+            }
+
+            if (normalizedFull.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                return normalizedFull[normalizedRoot.Length..];
+            }
+
+            return fullPath;
+        }
+        catch
         {
-            return normalizedFull[normalizedRoot.Length..];
+            return fullPath;
         }
-
-        return fullPath;
     }
 
     public string ResolveFullPath(string? relativePath, string? rootPath, string fallbackExePath)
     {
         if (!string.IsNullOrWhiteSpace(relativePath) && !string.IsNullOrWhiteSpace(rootPath))
         {
-            var combined = Path.Combine(rootPath, relativePath);
-            if (File.Exists(combined))
+            try
             {
-                return Path.GetFullPath(combined);
+                var combined = Path.Combine(rootPath, relativePath);
+                if (File.Exists(combined))
+                {
+                    return Path.GetFullPath(combined);
+                }
+            }
+            catch
+            {
+                // Fall back to fallbackExePath
             }
         }
 
@@ -54,33 +69,65 @@ public class PathRepairService : IPathRepairService
             return software.ExePath;
         }
 
-        var fileName = Path.GetFileName(software.ExePath);
+        if (string.IsNullOrWhiteSpace(software.ExePath))
+        {
+            return null;
+        }
+
+        string fileName;
+        try
+        {
+            fileName = Path.GetFileName(software.ExePath);
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+        }
+        catch
+        {
+            return null;
+        }
+
         var relative = software.RelativePath;
 
         foreach (var root in roots)
         {
-            if (!Directory.Exists(root.Path))
+            if (string.IsNullOrWhiteSpace(root.Path) || !Directory.Exists(root.Path))
                 continue;
 
             // 1. Try matching relative path in root
             if (!string.IsNullOrWhiteSpace(relative))
             {
-                var candidate = Path.Combine(root.Path, relative);
-                if (File.Exists(candidate))
+                try
                 {
-                    var resolved = Path.GetFullPath(candidate);
-                    await _softwareRepository.UpdatePathAsync(software.Id, resolved, root.Id, relative);
-                    return resolved;
+                    var candidate = Path.Combine(root.Path, relative);
+                    if (File.Exists(candidate))
+                    {
+                        var resolved = Path.GetFullPath(candidate);
+                        await _softwareRepository.UpdatePathAsync(software.Id, resolved, root.Id, relative);
+                        return resolved;
+                    }
+                }
+                catch
+                {
+                    // Fall back to searching
                 }
             }
 
             // 2. Try searching for identical filename in root directory (shallow/medium depth)
+            // Guard against scanning entire drive root when path is a volume root (e.g. D:\)
             try
             {
-                var matches = Directory.GetFiles(root.Path, fileName, SearchOption.AllDirectories);
+                var isDrive = ShortcutHelper.IsDriveRoot(root.Path);
+                var options = new EnumerationOptions
+                {
+                    IgnoreInaccessible = true,
+                    RecurseSubdirectories = !isDrive,
+                    MaxRecursionDepth = isDrive ? 0 : 3
+                };
+
+                var matches = Directory.GetFiles(root.Path, fileName, options);
                 if (matches.Length > 0)
                 {
-                    var matched = matches[0];
+                    var matched = Path.GetFullPath(matches[0]);
                     var newRelative = ComputeRelativePath(matched, root.Path);
                     await _softwareRepository.UpdatePathAsync(software.Id, matched, root.Id, newRelative);
                     return matched;
@@ -88,7 +135,7 @@ public class PathRepairService : IPathRepairService
             }
             catch
             {
-                // Ignore search exceptions for individual inaccessible folders
+                // Ignore search exceptions for individual inaccessible folders or invalid roots
             }
         }
 

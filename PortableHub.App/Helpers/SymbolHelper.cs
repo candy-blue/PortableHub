@@ -5,8 +5,8 @@ using Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol;
 namespace PortableHub.App.Helpers;
 
 /// <summary>
-/// Resolves icon names, including legacy WPF-UI SymbolRegular names, to iNKORE modern symbols.
-/// Guarantees backward compatibility with persisted categories and historical databases (Section 3.1 & 50).
+/// Resolves icon names, aliases, and historical symbol keys to iNKORE.UI.WPF.Modern symbols.
+/// Guarantees backward compatibility with persisted categories and historical databases (Section 3.1 &amp; 50).
 /// </summary>
 public static class SymbolHelper
 {

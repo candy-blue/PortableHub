@@ -19,8 +19,27 @@ public class Software
     public bool RunAsAdmin { get; set; }
     public bool SingleInstance { get; set; } = true;
     public string? Tags { get; set; }
+    public string? LinkedSoftwareIds { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Gets the list of linked software IDs (up to 5, non-zero, distinct, excluding self).
+    /// </summary>
+    public List<int> GetLinkedSoftwareIdList()
+    {
+        if (string.IsNullOrWhiteSpace(LinkedSoftwareIds))
+            return [];
+
+        return LinkedSoftwareIds
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(s => int.TryParse(s, out var id) ? id : (int?)null)
+            .Where(id => id.HasValue && id.Value > 0 && id.Value != Id)
+            .Select(id => id!.Value)
+            .Distinct()
+            .Take(5)
+            .ToList();
+    }
 
     // Runtime state (not stored directly in DB table)
     public bool IsMissing { get; set; }

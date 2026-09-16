@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
-        Title="软件配置"
+        xmlns:helpers="clr-namespace:PortableHub.App.Helpers"
+        Title="{DynamicResource Loc_SoftwareEdit_TitleEdit}"
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
-        Height="650" Width="540"
+        Height="740" Width="540"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         ui:WindowHelper.UseModernWindowStyle="True"
@@ -24,8 +25,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- TitleBar (Section 24) -->
-        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="软件配置 - Portable Hub" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True" />
+        <!-- TitleBar (Section 24: Standardized Fluent TitleBar with collapsed client caption buttons) -->
+        <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="{DynamicResource Loc_SoftwareEdit_TitleEdit}" Height="44" FontSize="20" FontWeight="SemiBold" Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" IsIconVisible="True"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            helpers:TitleBarHelper.RemoveCaptionButtons="True" />
 
         <!-- Form (Scrollable) -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,12,24,16">
@@ -44,30 +47,30 @@
                             <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" 
                                    Width="48" Height="48" Stretch="Uniform" />
                         </Border>
-                        <Button Style="{StaticResource ModernButton}" Content="更换图标" Command="{Binding BrowseIconCommand}" 
+                        <Button Style="{StaticResource ModernButton}" Content="{DynamicResource Loc_SoftwareEdit_SelectCustomIcon}" Command="{Binding BrowseIconCommand}" 
                                 FontSize="12" Padding="6,3" Margin="0,6,0,0" Height="28" HorizontalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Software Name -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="软件名称 *" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="请输入软件展示名称" Height="36" Style="{StaticResource ModernTextBox}" />
+                        <TextBlock Text="{DynamicResource Loc_SoftwareEdit_NameLabel}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="{DynamicResource Loc_SoftwareEdit_NamePlaceholder}" Height="36" Style="{StaticResource ModernTextBox}" />
                     </StackPanel>
                 </Grid>
 
                 <!-- Exe Path -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="可执行文件路径 (.exe) *" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBlock Text="{DynamicResource Loc_SoftwareEdit_ExeLabel}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Text="{Binding ExePath, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="请选择或输入便携软件 .exe 完整路径" Height="36" Style="{StaticResource ModernTextBox}" />
+                        <TextBox Text="{Binding ExePath, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="{DynamicResource Loc_SoftwareEdit_ExePlaceholder}" Height="36" Style="{StaticResource ModernTextBox}" />
                         <Button Grid.Column="1" Style="{StaticResource ModernButton}" Command="{Binding BrowseExeCommand}" Margin="8,0,0,0" Height="36">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <ui:SymbolIcon Symbol="Folder" FontSize="18" Margin="0,0,6,0" />
-                                <TextBlock Text="浏览..." VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Loc_Btn_Browse}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -75,7 +78,7 @@
 
                 <!-- Category (Section 13.2: MinWidth 140) -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="所属分类 *" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBlock Text="{DynamicResource Loc_SoftwareEdit_CategoryLabel}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
                     <ComboBox ItemsSource="{Binding Categories}" 
                               SelectedItem="{Binding SelectedCategory}" 
                               DisplayMemberPath="Name"
@@ -85,48 +88,141 @@
 
                 <!-- Arguments -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="启动参数 (可选，例如: --portable --minimized)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <TextBox Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="例如: --portable" Height="36" Style="{StaticResource ModernTextBox}" />
+                    <TextBlock Text="{DynamicResource Loc_SoftwareEdit_ArgsLabel}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBox Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="{DynamicResource Loc_SoftwareEdit_ArgsPlaceholder}" Height="36" Style="{StaticResource ModernTextBox}" />
                 </StackPanel>
 
                 <!-- Working Directory -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="工作目录 (留空默认为 EXE 所在目录)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <TextBox Text="{Binding WorkingDirectory, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="默认自动设为程序所在目录" Height="36" Style="{StaticResource ModernTextBox}" />
+                    <TextBlock Text="{DynamicResource Loc_SoftwareEdit_WorkDirLabel}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBox Text="{Binding WorkingDirectory, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="{DynamicResource Loc_SoftwareEdit_WorkDirPlaceholder}" Height="36" Style="{StaticResource ModernTextBox}" />
                 </StackPanel>
 
                 <!-- Description -->
                 <StackPanel Margin="0,0,0,14">
-                    <TextBlock Text="软件描述 / 备注" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="简短用途说明" Height="36" Style="{StaticResource ModernTextBox}" />
+                    <TextBlock Text="{DynamicResource Loc_SoftwareEdit_DescLabel}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="{DynamicResource Loc_SoftwareEdit_DescPlaceholder}" Height="36" Style="{StaticResource ModernTextBox}" />
                 </StackPanel>
 
                 <!-- Tags -->
                 <StackPanel Margin="0,0,0,16">
-                    <TextBlock Text="标签 (空格分隔，例如: #搜索 #开发 #网络)" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
-                    <TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" ui:ControlHelper.PlaceholderText="输入标签便于快速检索" Height="36" Style="{StaticResource ModernTextBox}" />
+                    <TextBlock Text="Tags" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Height="36" Style="{StaticResource ModernTextBox}" />
                 </StackPanel>
 
                 <!-- Launch Options -->
                 <Border Style="{StaticResource ModernCard}" Padding="14,10" Margin="0,0,0,10">
                     <StackPanel>
+                        <Grid Background="Transparent" Cursor="Hand" Margin="0,0,0,6" Focusable="True"
+                              MouseLeftButtonUp="OnRunAsAdminRowClicked" KeyDown="OnRunAsAdminRowKeyDown">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                <TextBlock Text="{DynamicResource Loc_SoftwareEdit_RunAdminLabel}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{DynamicResource Loc_SoftwareEdit_RunAdminDesc}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding RunAsAdmin, Mode=TwoWay}" VerticalAlignment="Center"
+                                             IsHitTestVisible="False" OnContent="{x:Null}" OffContent="{x:Null}" />
+                        </Grid>
+                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="0,4" Height="1" />
+                        <Grid Background="Transparent" Cursor="Hand" Margin="0,4,0,0" Focusable="True"
+                              MouseLeftButtonUp="OnSingleInstanceRowClicked" KeyDown="OnSingleInstanceRowKeyDown">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                <TextBlock Text="{DynamicResource Loc_SoftwareEdit_SingleInstanceLabel}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{DynamicResource Loc_SoftwareEdit_SingleInstanceDesc}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding SingleInstance, Mode=TwoWay}" VerticalAlignment="Center"
+                                             IsHitTestVisible="False" OnContent="{x:Null}" OffContent="{x:Null}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Linked Launch (联动启动: 最大5个) -->
+                <Border Style="{StaticResource ModernCard}" Padding="14,12" Margin="0,0,0,10">
+                    <StackPanel>
+                        <!-- Header -->
                         <Grid Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="以管理员权限运行" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                            <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding RunAsAdmin}" />
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="Link" FontSize="18" Margin="0,0,8,0" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource Loc_SoftwareEdit_LinkedAppsLabel}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <!-- Count badge: e.g. 2 / 5 -->
+                            <Border Grid.Column="1" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding LinkedApps.Count}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                    <TextBlock Text=" / 5" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </Border>
                         </Grid>
-                        <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="0,4" Height="1" />
-                        <Grid Margin="0,4,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="单实例运行 (重复打开时自动激活现有窗口)" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                            <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding SingleInstance}" />
+
+                        <TextBlock Text="{DynamicResource Loc_SoftwareEdit_LinkedAppsDesc}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+                        <!-- Currently Linked Apps List -->
+                        <ItemsControl ItemsSource="{Binding LinkedApps}" Margin="0,0,0,8">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" Width="20" Height="20" Stretch="Uniform" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding ExePath}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Style="{StaticResource SubtleIconButton}" 
+                                                    Command="{Binding DataContext.RemoveLinkedAppCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                    CommandParameter="{Binding}"
+                                                    Width="30" Height="30" Padding="0"
+                                                    ToolTip="{DynamicResource Loc_SoftwareEdit_RemoveLinkedApp}"
+                                                    VerticalAlignment="Center">
+                                                <ui:SymbolIcon Symbol="Delete" FontSize="16" Foreground="{DynamicResource BrushDanger}" />
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Add Linked App Selector (Disabled when reached 5) -->
+                        <Grid>
+                            <ComboBox ItemsSource="{Binding AvailableCandidates}"
+                                      SelectedItem="{Binding SelectedCandidateToAdd, Mode=TwoWay}"
+                                      IsEnabled="{Binding CanAddMoreLinkedApps}"
+                                      Height="36"
+                                      ui:ControlHelper.PlaceholderText="{DynamicResource Loc_SoftwareEdit_AddLinkedApp}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{Binding IconPath, Converter={StaticResource StringToImageSourceConverter}}" Width="18" Height="18" Margin="0,0,8,0" Stretch="Uniform" />
+                                            <TextBlock Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </Grid>
+
+                        <!-- Reached Max Limit Text -->
+                        <TextBlock Text="{DynamicResource Loc_SoftwareEdit_LinkedAppMaxLimit}" 
+                                   FontSize="12" Foreground="{DynamicResource BrushWarning}" 
+                                   Margin="0,6,0,0"
+                                   Visibility="{Binding CanAddMoreLinkedApps, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -135,8 +231,8 @@
         <!-- Actions (Section 24) -->
         <Border Grid.Row="2" Style="{StaticResource DialogFooterBarStyle}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource ModernButton}" Content="取消" Command="{Binding CancelCommand}" Width="80" Height="36" Margin="0,0,8,0" />
-                <Button Style="{StaticResource PrimaryButton}" Foreground="#FFFFFF" Content="保存" Command="{Binding SaveCommand}" Width="80" Height="36" />
+                <Button Style="{StaticResource ModernButton}" Content="{DynamicResource Loc_Btn_Cancel}" Command="{Binding CancelCommand}" Width="80" Height="36" Margin="0,0,8,0" />
+                <Button Style="{StaticResource PrimaryButton}" Foreground="#FFFFFF" Content="{DynamicResource Loc_Btn_Save}" Command="{Binding SaveCommand}" Width="80" Height="36" />
             </StackPanel>
         </Border>
     </Grid>

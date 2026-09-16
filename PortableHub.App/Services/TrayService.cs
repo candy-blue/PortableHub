@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using PortableHub.Core.Interfaces;
 using PortableHub.Core.Models;
@@ -9,7 +10,9 @@ public class TrayService : IDisposable
 {
     private readonly NotifyIcon _notifyIcon;
     private readonly ContextMenuStrip _contextMenu;
+    private readonly ToolStripMenuItem _recentHeader;
     private readonly ToolStripSeparator _recentSeparator;
+    private bool _isRefreshingRecent;
     private Action? _onShowWindow;
     private Action? _onShowQuickLauncher;
     private Action? _onOpenSettings;
@@ -17,9 +20,14 @@ public class TrayService : IDisposable
     private Func<Task<IReadOnlyList<Software>>>? _getRecentSoftware;
     private Action<Software>? _onLaunchSoftware;
 
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyIcon(IntPtr hIcon);
+
     public TrayService()
     {
         _contextMenu = new ContextMenuStrip();
+        _recentHeader = new ToolStripMenuItem("最近使用") { Enabled = false };
         _recentSeparator = new ToolStripSeparator();
 
         _notifyIcon = new NotifyIcon
@@ -75,9 +83,7 @@ public class TrayService : IDisposable
         _contextMenu.Items.Add(new ToolStripSeparator());
 
         // Recent section header
-        var recentHeader = new ToolStripMenuItem("最近使用") { Enabled = false };
-        _contextMenu.Items.Add(recentHeader);
-
+        _contextMenu.Items.Add(_recentHeader);
         _contextMenu.Items.Add(_recentSeparator);
 
         var settingsItem = new ToolStripMenuItem("设置", null, (s, e) => _onOpenSettings?.Invoke());
@@ -94,7 +100,17 @@ public class TrayService : IDisposable
         var exitItem = new ToolStripMenuItem("退出", null, (s, e) => _onExit?.Invoke());
         _contextMenu.Items.Add(exitItem);
 
-        _contextMenu.Opening += async (s, e) => await RefreshRecentItemsAsync();
+        _contextMenu.Opening += async (s, e) =>
+        {
+            try
+            {
+                await RefreshRecentItemsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error refreshing tray recent items: {ex}");
+            }
+        };
     }
 
     private async Task RefreshRecentItemsAsync()
@@ -102,23 +118,35 @@ public class TrayService : IDisposable
         if (_getRecentSoftware == null || _onLaunchSoftware == null)
             return;
 
+        if (_isRefreshingRecent) return;
+        _isRefreshingRecent = true;
+
         try
         {
             var recentList = await _getRecentSoftware();
-            var headerIndex = _contextMenu.Items.IndexOf(_recentSeparator);
 
-            // Remove previous dynamic items between recent header and separator
-            while (headerIndex > 0 && _contextMenu.Items[headerIndex - 1] is ToolStripMenuItem item && item.Tag is Software)
+            var startIndex = _contextMenu.Items.IndexOf(_recentHeader);
+            var endIndex = _contextMenu.Items.IndexOf(_recentSeparator);
+
+            if (startIndex >= 0 && endIndex > startIndex)
             {
-                _contextMenu.Items.RemoveAt(headerIndex - 1);
-                headerIndex--;
+                for (int i = endIndex - 1; i > startIndex; i--)
+                {
+                    _contextMenu.Items.RemoveAt(i);
+                }
             }
 
+            var insertIndex = _contextMenu.Items.IndexOf(_recentHeader) + 1;
             var top8 = recentList.Take(8).ToList();
+
             if (top8.Count == 0)
             {
-                var emptyItem = new ToolStripMenuItem("(无最近记录)") { Enabled = false };
-                _contextMenu.Items.Insert(headerIndex, emptyItem);
+                var emptyItem = new ToolStripMenuItem("(无最近记录)")
+                {
+                    Enabled = false,
+                    Tag = "RecentEmpty"
+                };
+                _contextMenu.Items.Insert(insertIndex, emptyItem);
             }
             else
             {
@@ -128,14 +156,17 @@ public class TrayService : IDisposable
                     {
                         Tag = sw
                     };
-                    _contextMenu.Items.Insert(headerIndex, item);
-                    headerIndex++;
+                    _contextMenu.Items.Insert(insertIndex++, item);
                 }
             }
         }
         catch
         {
             // Ignore UI update error on menu opening
+        }
+        finally
+        {
+            _isRefreshingRecent = false;
         }
     }
 
@@ -187,7 +218,16 @@ public class TrayService : IDisposable
         g.DrawLine(pen, 5, 8, 11, 8);
         g.DrawLine(pen, 8, 5, 8, 11);
 
-        return Icon.FromHandle(bmp.GetHicon());
+        var hIcon = bmp.GetHicon();
+        try
+        {
+            using var tempIcon = Icon.FromHandle(hIcon);
+            return (Icon)tempIcon.Clone();
+        }
+        finally
+        {
+            DestroyIcon(hIcon);
+        }
     }
 
     public void ShowNotification(string title, string message, ToolTipIcon icon = ToolTipIcon.Info)
@@ -198,6 +238,7 @@ public class TrayService : IDisposable
     public void Dispose()
     {
         _notifyIcon.Visible = false;
+        _notifyIcon.Icon?.Dispose();
         _notifyIcon.Dispose();
         _contextMenu.Dispose();
         GC.SuppressFinalize(this);

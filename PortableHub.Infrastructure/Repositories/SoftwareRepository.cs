@@ -23,7 +23,7 @@ public class SoftwareRepository : ISoftwareRepository
             SELECT s.Id, s.RootId, s.Name, s.ExePath, s.RelativePath, s.Description, s.Arguments,
                    s.WorkingDirectory, s.IconPath, s.CategoryId, s.IsFavorite, s.LaunchCount,
                    s.LastLaunchedAt, s.SortOrder, s.RunAsAdmin, s.SingleInstance, s.Tags,
-                   s.CreatedAt, s.UpdatedAt, COALESCE(c.Name, '') AS CategoryName
+                   s.LinkedSoftwareIds, s.CreatedAt, s.UpdatedAt, COALESCE(c.Name, '') AS CategoryName
             FROM Software s
             LEFT JOIN Category c ON s.CategoryId = c.Id
             ORDER BY s.SortOrder ASC, s.Id ASC;
@@ -42,7 +42,7 @@ public class SoftwareRepository : ISoftwareRepository
             SELECT s.Id, s.RootId, s.Name, s.ExePath, s.RelativePath, s.Description, s.Arguments,
                    s.WorkingDirectory, s.IconPath, s.CategoryId, s.IsFavorite, s.LaunchCount,
                    s.LastLaunchedAt, s.SortOrder, s.RunAsAdmin, s.SingleInstance, s.Tags,
-                   s.CreatedAt, s.UpdatedAt, COALESCE(c.Name, '') AS CategoryName
+                   s.LinkedSoftwareIds, s.CreatedAt, s.UpdatedAt, COALESCE(c.Name, '') AS CategoryName
             FROM Software s
             LEFT JOIN Category c ON s.CategoryId = c.Id
             WHERE s.Id = @Id;
@@ -64,12 +64,12 @@ public class SoftwareRepository : ISoftwareRepository
                 RootId, Name, ExePath, RelativePath, Description, Arguments,
                 WorkingDirectory, IconPath, CategoryId, IsFavorite, LaunchCount,
                 LastLaunchedAt, SortOrder, RunAsAdmin, SingleInstance, Tags,
-                CreatedAt, UpdatedAt
+                LinkedSoftwareIds, CreatedAt, UpdatedAt
             ) VALUES (
                 @RootId, @Name, @ExePath, @RelativePath, @Description, @Arguments,
                 @WorkingDirectory, @IconPath, @CategoryId, @IsFavorite, @LaunchCount,
                 @LastLaunchedAt, @SortOrder, @RunAsAdmin, @SingleInstance, @Tags,
-                @CreatedAt, @UpdatedAt
+                @LinkedSoftwareIds, @CreatedAt, @UpdatedAt
             );
             SELECT last_insert_rowid();
         ";
@@ -101,6 +101,7 @@ public class SoftwareRepository : ISoftwareRepository
                 RunAsAdmin = @RunAsAdmin,
                 SingleInstance = @SingleInstance,
                 Tags = @Tags,
+                LinkedSoftwareIds = @LinkedSoftwareIds,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id;
         ";

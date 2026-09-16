@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:vm="clr-namespace:PortableHub.App.ViewModels"
+        xmlns:helpers="clr-namespace:PortableHub.App.Helpers"
         Title="Portable Hub" 
         Icon="pack://application:,,,/PortableHub.App;component/Assets/app.ico"
         Height="760" Width="1200"
-        MinHeight="600" MinWidth="920"
+        MinHeight="600" MinWidth="1050"
         WindowStartupLocation="CenterScreen"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.SystemBackdropType="Mica"
@@ -60,7 +61,7 @@
                 </MenuItem.Icon>
             </MenuItem>
             <Separator />
-            <MenuItem x:Name="MoveToCategoryMenuItem" Header="{DynamicResource Loc_Action_MoveToCategory}">
+            <MenuItem x:Name="MoveToCategoryMenuItem" Tag="MoveToCategory" Header="{DynamicResource Loc_Action_MoveToCategory}">
                 <MenuItem.Icon>
                     <ui:SymbolIcon Symbol="Folder" FontSize="16" />
                 </MenuItem.Icon>
@@ -92,9 +93,11 @@
 
         <!-- Clean Modern TitleBar (Design Doc Section 132) -->
         <ui:TitleBarControl x:Name="AppTitleBar" Grid.Row="0" Title="Portable Hub" 
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                             Icon="pack://application:,,,/PortableHub.App;component/Assets/app.png" 
                             IsIconVisible="True"
-                            Height="36" />
+                            Height="36"
+                            helpers:TitleBarHelper.RemoveCaptionButtons="True" />
 
         <!-- Main Workspace (Sidebar + Software Area) -->
         <Grid Grid.Row="1">
@@ -114,7 +117,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- Sidebar Header with Fixed-Left Collapse Toggle Button (28px Center Spine) -->
-                    <Grid Grid.Row="0" Margin="0,0,0,6" Height="40">
+                    <Grid Grid.Row="0" Margin="0,0,0,6" Height="40" Width="208" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="40" />
                             <ColumnDefinition Width="*" />
@@ -125,8 +128,7 @@
                             <ui:SymbolIcon Symbol="GlobalNavigationButton" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Button>
                         <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Nav_Title}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="8,0,0,0"
-                                   TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
-                                   Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                   TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
                     </Grid>
 
                     <!-- Nav Items & Custom Categories (Single Outer ScrollViewer, Zero Nested ScrollViewers) -->
@@ -159,7 +161,7 @@
                                 </ListBox.Template>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Height="40" ClipToBounds="True">
+                                        <Grid Height="40" Width="208" HorizontalAlignment="Left" ClipToBounds="True" ToolTip="{Binding Name}">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="40" />
                                                 <ColumnDefinition Width="*" />
@@ -167,10 +169,8 @@
                                             </Grid.ColumnDefinitions>
                                             <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Symbol}" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,4,0" VerticalAlignment="Center"
-                                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
-                                                       Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0"
-                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0">
                                                 <TextBlock Text="{Binding Count}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             </Border>
                                         </Grid>
@@ -181,7 +181,8 @@
                             <Separator Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="4,6" Height="1" />
 
                             <!-- Category Header with Add Button -->
-                            <Grid Margin="10,2,6,4" Height="32" Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <Grid x:Name="CategoriesHeaderArea" Margin="10,2,6,4" Height="32" Width="198" HorizontalAlignment="Left"
+                                  Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                 <TextBlock Text="{DynamicResource Loc_Nav_CategoriesHeader}" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
                                 <Button Style="{StaticResource IconButtonSmall}" Command="{Binding AddCategoryCommand}" 
                                         Width="28" Height="28" Padding="0" 
@@ -210,7 +211,8 @@
                                 </ListBox.Template>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Height="40" Background="Transparent" ClipToBounds="True"
+                                        <Grid Height="40" Width="208" HorizontalAlignment="Left" Background="Transparent" ClipToBounds="True"
+                                              ToolTip="{Binding Name}"
                                               Tag="{Binding}"
                                               PreviewMouseLeftButtonDown="CategoryItem_PreviewMouseLeftButtonDown"
                                               PreviewMouseRightButtonDown="CategoryItem_PreviewMouseRightButtonDown"
@@ -243,11 +245,9 @@
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
 
                                             <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,4,0" VerticalAlignment="Center"
-                                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
-                                                       Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
 
-                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0"
-                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="10" Padding="7,1" VerticalAlignment="Center" Margin="0,0,8,0">
                                                 <TextBlock Text="{Binding Count}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             </Border>
                                         </Grid>
@@ -264,30 +264,28 @@
                         <Button Style="{StaticResource SidebarActionButtonStyle}" Command="{Binding AddSoftwareCommand}" 
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
                                 Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="{DynamicResource Loc_Nav_AddSoftware}">
-                            <Grid Height="40" ClipToBounds="True">
+                            <Grid Height="40" Width="208" HorizontalAlignment="Left" ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Grid.Column="0" Symbol="Add" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Nav_AddSoftware}" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center"
-                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
-                                           Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </Button>
 
                         <Button Style="{StaticResource SidebarActionButtonStyle}" Command="{Binding OpenScannerCommand}" 
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
                                 Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="{DynamicResource Loc_Nav_ScanSoftware}">
-                            <Grid Height="40" ClipToBounds="True">
+                            <Grid Height="40" Width="208" HorizontalAlignment="Left" ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Grid.Column="0" Symbol="Find" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Nav_ScanSoftware}" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center"
-                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
-                                           Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </Button>
 
@@ -296,15 +294,14 @@
                         <Button Style="{StaticResource SidebarActionButtonStyle}" Command="{Binding OpenSettingsCommand}" 
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
                                 Height="40" Padding="0" Margin="0,1" Cursor="Hand" ToolTip="{DynamicResource Loc_Nav_Settings}">
-                            <Grid Height="40" ClipToBounds="True">
+                            <Grid Height="40" Width="208" HorizontalAlignment="Left" ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Grid.Column="0" Symbol="Setting" FontSize="20" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Text="{DynamicResource Loc_Nav_Settings}" FontSize="14" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center"
-                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
-                                           Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </Button>
                     </StackPanel>
@@ -335,7 +332,7 @@
 
                         <!-- Toolbar: Search + Sort + View Mode Switch + Add -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <!-- SearchBox (Ctrl+F) (Design Doc Section 20 & 28) -->
+                            <!-- SearchBox (Ctrl+F with Clear Button) (Design Doc Section 20 & 28) -->
                             <Grid Margin="0,0,12,0">
                                 <TextBox x:Name="TopSearchBox"
                                          Style="{StaticResource ModernTextBox}"
@@ -345,10 +342,24 @@
                                          Width="260"
                                          Height="40"
                                          FontSize="14"
-                                         Padding="36,0,12,0"
+                                         Padding="36,0,36,0"
                                          VerticalContentAlignment="Center" />
-                                <ui:SymbolIcon Symbol="Find" FontSize="20" Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                <ui:SymbolIcon Symbol="Find" FontSize="18" Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False" />
+                                <!-- Ctrl+F Badge (Visible when search text is empty) -->
+                                <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" IsHitTestVisible="False"
+                                        Visibility="{Binding IsSearchActive, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                    <TextBlock Text="Ctrl+F" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                </Border>
+                                <!-- Clear Button (Visible when search text is active) -->
+                                <Button Style="{StaticResource SubtleIconButton}" Command="{Binding ClearSearchCommand}"
+                                        Width="28" Height="28" Padding="0" Margin="0,0,6,0"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        ToolTip="{DynamicResource Loc_Search_Clear}"
+                                        Visibility="{Binding IsSearchActive, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        Focusable="False">
+                                    <ui:SymbolIcon Symbol="Cancel" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </Button>
                             </Grid>
 
                             <!-- Sort Selection (Design Doc Section 13) -->
@@ -412,19 +423,44 @@
                     </Grid>
                 </Border>
 
-                <!-- Empty State (Design Doc Section 39) -->
+                <!-- 1. Completely Empty Library / Category State -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Visibility="{Binding FilteredSoftware.Count, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
-                    <Border Width="68" Height="68" CornerRadius="34" Background="{DynamicResource SubtleFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,16">
-                        <ui:SymbolIcon Symbol="Folder" FontSize="32" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            Visibility="{Binding IsEmptyLibraryState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border Width="72" Height="72" CornerRadius="36" Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <ui:SymbolIcon Symbol="Folder" FontSize="32" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="{DynamicResource Loc_Empty_NoSoftware}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
                     <TextBlock Text="{DynamicResource Loc_Empty_DragHint}" 
                                FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,8,0,18" />
-                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding AddSoftwareCommand}" HorizontalAlignment="Center" Height="36" Padding="16,0" FontSize="14">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding AddSoftwareCommand}" Height="36" Padding="16,0" FontSize="14" Margin="0,0,10,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="Add" FontSize="18" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <TextBlock Text="{DynamicResource Loc_Nav_AddSoftware}" Foreground="#FFFFFF" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource ModernButton}" Command="{Binding OpenScannerCommand}" Height="36" Padding="16,0" FontSize="14">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="Find" FontSize="18" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <TextBlock Text="{DynamicResource Loc_Nav_ScanSoftware}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 2. Search Yields No Results State -->
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding IsSearchEmptyState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border Width="72" Height="72" CornerRadius="36" Background="{DynamicResource SubtleFillColorSecondaryBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <ui:SymbolIcon Symbol="Find" FontSize="32" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="{DynamicResource Loc_Search_NoResult}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc_Search_NoResultHint}" 
+                               FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" Margin="0,8,0,18" />
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding ClearSearchCommand}" HorizontalAlignment="Center" Height="36" Padding="18,0" FontSize="14">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:SymbolIcon Symbol="Add" FontSize="20" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="{DynamicResource Loc_Nav_AddSoftware}" Foreground="#FFFFFF" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <ui:SymbolIcon Symbol="Cancel" FontSize="16" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="{DynamicResource Loc_Search_ClearBtn}" Foreground="#FFFFFF" FontWeight="SemiBold" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -664,15 +700,15 @@
                                             </StackPanel>
 
                                             <!-- Last Used Status -->
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="16,0,16,0" MinWidth="90">
-                                                <TextBlock Text="{DynamicResource Loc_Sort_RecentLaunch}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                                                <TextBlock Text="{Binding LastLaunchedDisplay}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,1,0,0" />
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,16,0" MinWidth="110" ToolTip="{DynamicResource Loc_Sort_RecentLaunch}">
+                                                <ui:SymbolIcon Symbol="Clock" FontSize="14" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding LastLaunchedDisplay}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                             </StackPanel>
 
                                             <!-- Launch Count -->
-                                            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,20,0" MinWidth="60">
-                                                <TextBlock Text="{DynamicResource Loc_Sort_LaunchCount}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                                                <TextBlock Text="{Binding LaunchCount, StringFormat='{}{0}'}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,1,0,0" />
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0" MinWidth="70" ToolTip="{DynamicResource Loc_Sort_LaunchCount}">
+                                                <ui:SymbolIcon Symbol="Play" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding LaunchCount, StringFormat='{}{0} 次'}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                             </StackPanel>
 
                                             <!-- Quick Action Buttons -->

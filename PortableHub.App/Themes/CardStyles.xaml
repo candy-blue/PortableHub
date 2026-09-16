@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern">
 
     <!-- Fluent 2 Modern Card (Section 17 & 18: CornerRadius 10~12, Padding 16, MinHeight 96, Hover highlight) -->
     <Style x:Key="ModernCard" TargetType="Border">
@@ -36,4 +37,22 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
     </Style>
 
+
+    <!-- Native iNKORE SettingsCard Style -->
+    <Style TargetType="{x:Type ui:SettingsCard}">
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="18,14" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        <Setter Property="ui:ControlHelper.CornerRadius" Value="{DynamicResource CornerRadiusCard}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorSecondaryBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>

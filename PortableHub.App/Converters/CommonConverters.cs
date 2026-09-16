@@ -26,7 +26,11 @@ public class NullToVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var isNullOrEmpty = value == null || (value is string s && string.IsNullOrWhiteSpace(s));
+        var isNullOrEmpty = value == null 
+            || (value is string s && string.IsNullOrWhiteSpace(s))
+            || (value is int i && i == 0)
+            || (value is long l && l == 0)
+            || (value is System.Collections.ICollection coll && coll.Count == 0);
         var inverse = parameter as string == "Inverse";
 
         if (inverse)
