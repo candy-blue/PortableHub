@@ -323,7 +323,9 @@ public class ViewLoadingTests : IClassFixture<StaTestFixture>
                 rtb.Render(window);
                 var enc = new System.Windows.Media.Imaging.PngBitmapEncoder();
                 enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
-                var outPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_output", "settings_window.png");
+                var outDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_output");
+                Directory.CreateDirectory(outDir);
+                var outPath = Path.Combine(outDir, "settings_window.png");
                 using var fs = File.Create(outPath);
                 enc.Save(fs);
             }
