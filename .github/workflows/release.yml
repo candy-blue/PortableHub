@@ -1,0 +1,73 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag (e.g. v1.1.0)'
+        required: false
+        default: 'v1.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Run Tests
+        run: dotnet test PortableHub.Tests/PortableHub.Tests.csproj -c Release --verbosity normal
+
+      - name: Publish Single-File Executable
+        shell: pwsh
+        run: |
+          dotnet publish PortableHub.App/PortableHub.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o build_singlefile
+          Copy-Item "build_singlefile\PortableHub.App.exe" "PortableHub.exe"
+
+      - name: Publish Standalone Portable Package
+        shell: pwsh
+        run: |
+          dotnet publish PortableHub.App/PortableHub.App.csproj -c Release -r win-x64 --self-contained true -o build_standalone
+          Copy-Item "build_standalone\PortableHub.App.exe" "build_standalone\PortableHub.exe"
+          Copy-Item "build_standalone\PortableHub.App.runtimeconfig.json" "build_standalone\PortableHub.runtimeconfig.json"
+          Copy-Item "build_standalone\PortableHub.App.deps.json" "build_standalone\PortableHub.deps.json"
+          Compress-Archive -Path "build_standalone\*" -DestinationPath "PortableHub-Portable.zip" -CompressionLevel Optimal
+
+      - name: Determine Release Tag
+        id: get_tag
+        shell: pwsh
+        run: |
+          $tag = ""
+          if ($env:GITHUB_REF -like "refs/tags/*") {
+            $tag = $env:GITHUB_REF.Substring("refs/tags/".Length)
+          } elseif ("${{ inputs.tag_name }}") {
+            $tag = "${{ inputs.tag_name }}"
+          } else {
+            $tag = "v1.1.0"
+          }
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Publish Release to GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          files: |
+            PortableHub.exe
+            PortableHub-Portable.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
