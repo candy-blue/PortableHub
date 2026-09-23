@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using PortableHub.Core.Models;
 using PortableHub.Infrastructure.Services;
 using Xunit;
@@ -6,7 +9,12 @@ namespace PortableHub.Tests;
 
 public class LinkedLaunchTests
 {
-    private readonly string _cmdPath = Path.Combine(Environment.SystemDirectory, "cmd.exe");
+    private static string CreateDummyExe(TestEnvironment env, string name)
+    {
+        var dummyPath = Path.Combine(env.TempDirectory, name);
+        File.WriteAllText(dummyPath, "MZ");
+        return dummyPath;
+    }
 
     [Fact]
     public async Task LaunchAsync_ShouldCascadeLaunchLinkedSoftware()
@@ -17,27 +25,28 @@ public class LinkedLaunchTests
         var categories = await env.CategoryRepository.GetAllAsync();
         var catId = categories[0].Id;
 
+        var subExe = CreateDummyExe(env, "SubApp.exe");
         var subApp = new Software
         {
             Name = "Sub App",
-            ExePath = _cmdPath,
-            Arguments = "/c exit",
+            ExePath = subExe,
             CategoryId = catId
         };
         var subId = await env.SoftwareRepository.AddAsync(subApp);
 
+        var mainExe = CreateDummyExe(env, "MainApp.exe");
         var mainApp = new Software
         {
             Name = "Main App",
-            ExePath = _cmdPath,
-            Arguments = "/c exit",
+            ExePath = mainExe,
             CategoryId = catId,
             LinkedSoftwareIds = subId.ToString()
         };
         var mainId = await env.SoftwareRepository.AddAsync(mainApp);
         mainApp.Id = mainId;
 
-        var launchService = new LaunchService(env.SoftwareRepository);
+        // Mock launcher prevents spawning external OS processes during tests
+        var launchService = new LaunchService(env.SoftwareRepository, psi => null);
         var result = await launchService.LaunchAsync(mainApp);
 
         Assert.True(result.Success);
@@ -58,12 +67,14 @@ public class LinkedLaunchTests
         var categories = await env.CategoryRepository.GetAllAsync();
         var catId = categories[0].Id;
 
+        var exeA = CreateDummyExe(env, "AppA.exe");
+        var exeB = CreateDummyExe(env, "AppB.exe");
+
         // App A links to App B, and App B links to App A
         var appA = new Software
         {
             Name = "App A",
-            ExePath = _cmdPath,
-            Arguments = "/c exit",
+            ExePath = exeA,
             CategoryId = catId
         };
         var idA = await env.SoftwareRepository.AddAsync(appA);
@@ -71,8 +82,7 @@ public class LinkedLaunchTests
         var appB = new Software
         {
             Name = "App B",
-            ExePath = _cmdPath,
-            Arguments = "/c exit",
+            ExePath = exeB,
             CategoryId = catId,
             LinkedSoftwareIds = idA.ToString()
         };
@@ -83,7 +93,7 @@ public class LinkedLaunchTests
         appA.LinkedSoftwareIds = idB.ToString();
         await env.SoftwareRepository.UpdateAsync(appA);
 
-        var launchService = new LaunchService(env.SoftwareRepository);
+        var launchService = new LaunchService(env.SoftwareRepository, psi => null);
         var result = await launchService.LaunchAsync(appA);
 
         Assert.True(result.Success);
@@ -108,28 +118,28 @@ public class LinkedLaunchTests
         var linkedIds = new List<int>();
         for (int i = 1; i <= 7; i++)
         {
+            var exe = CreateDummyExe(env, $"LinkedApp{i}.exe");
             var app = new Software
             {
                 Name = $"Linked App {i}",
-                ExePath = _cmdPath,
-                Arguments = "/c exit",
+                ExePath = exe,
                 CategoryId = catId
             };
             linkedIds.Add(await env.SoftwareRepository.AddAsync(app));
         }
 
+        var mainExe = CreateDummyExe(env, "MainAppWithLinks.exe");
         var mainApp = new Software
         {
             Name = "Main App",
-            ExePath = _cmdPath,
-            Arguments = "/c exit",
+            ExePath = mainExe,
             CategoryId = catId,
             LinkedSoftwareIds = string.Join(",", linkedIds)
         };
         var mainId = await env.SoftwareRepository.AddAsync(mainApp);
         mainApp.Id = mainId;
 
-        var launchService = new LaunchService(env.SoftwareRepository);
+        var launchService = new LaunchService(env.SoftwareRepository, psi => null);
         var result = await launchService.LaunchAsync(mainApp);
 
         Assert.True(result.Success);

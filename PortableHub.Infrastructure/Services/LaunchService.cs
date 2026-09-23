@@ -9,10 +9,12 @@ namespace PortableHub.Infrastructure.Services;
 public class LaunchService : ILaunchService
 {
     private readonly ISoftwareRepository _softwareRepository;
+    private readonly Func<ProcessStartInfo, Process?> _processLauncher;
 
-    public LaunchService(ISoftwareRepository softwareRepository)
+    public LaunchService(ISoftwareRepository softwareRepository, Func<ProcessStartInfo, Process?>? processLauncher = null)
     {
         _softwareRepository = softwareRepository;
+        _processLauncher = processLauncher ?? (psi => Process.Start(psi));
     }
 
     public bool IsRunning(Software software)
@@ -192,10 +194,10 @@ public class LaunchService : ILaunchService
                 startInfo.Verb = "runas";
             }
 
-            using var process = Process.Start(startInfo);
+            using var process = _processLauncher(startInfo);
+            int? processId = null;
             if (process != null)
             {
-                int? processId = null;
                 try
                 {
                     processId = process.Id;
@@ -204,15 +206,13 @@ public class LaunchService : ILaunchService
                 {
                     // ShellExecute might not expose Id in all execution scenarios
                 }
-
-                if (_softwareRepository != null)
-                {
-                    await _softwareRepository.IncrementLaunchCountAsync(software.Id, DateTime.UtcNow);
-                }
-                return LaunchResult.Ok(processId);
             }
 
-            return LaunchResult.Fail("启动失败：进程未能成功创建。");
+            if (_softwareRepository != null)
+            {
+                await _softwareRepository.IncrementLaunchCountAsync(software.Id, DateTime.UtcNow);
+            }
+            return LaunchResult.Ok(processId);
         }
         catch (Win32Exception winEx) when (winEx.NativeErrorCode == 1223)
         {
