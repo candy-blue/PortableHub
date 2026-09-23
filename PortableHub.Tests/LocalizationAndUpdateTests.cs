@@ -201,14 +201,13 @@ public class LocalizationAndUpdateTests
     [Fact]
     public async Task GithubUpdateService_Live_CanCheckForUpdatesWithoutThrowing()
     {
-        var service = new GithubUpdateService();
+        // Override version to 1.0.0 so that version bumps in Directory.Build.props don't break the test
+        var service = new GithubUpdateService(currentVersionOverride: new Version(1, 0, 0));
         var result = await service.CheckForUpdatesAsync();
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.LatestVersion));
-        // ErrorMessage should be null since Atom fallback succeeds even if REST API is 403
         Assert.Null(result.ErrorMessage);
         Assert.True(result.HasUpdate);
-        Assert.Equal("v1.1.0", result.LatestVersion);
     }
 
 
