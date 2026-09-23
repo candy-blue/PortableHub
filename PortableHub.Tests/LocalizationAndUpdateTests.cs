@@ -83,6 +83,136 @@ public class LocalizationAndUpdateTests
     }
 
     [Fact]
+    public void GithubUpdateService_StripHtml_RemovesTagsAndDecodesEntities()
+    {
+        string html = "<h3>Portable Hub &amp; Tool</h3><p>Line 1</p><br/><ul><li>Feature &lt;A&gt;</li></ul>";
+        string result = GithubUpdateService.StripHtml(html);
+        Assert.DoesNotContain("<h3>", result);
+        Assert.DoesNotContain("<li>", result);
+        Assert.DoesNotContain("&amp;", result);
+        Assert.Contains("Portable Hub & Tool", result);
+        Assert.Contains("Feature <A>", result);
+    }
+
+    [Fact]
+    public void GithubUpdateService_ParseAtomFeed_ExtractsLatestReleaseCorrectly()
+    {
+        string atomXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<feed xmlns=""http://www.w3.org/2005/Atom"">
+  <entry>
+    <id>tag:github.com,2008:Repository/123/v1.1.0</id>
+    <updated>2026-09-18T15:32:56Z</updated>
+    <link rel=""alternate"" type=""text/html"" href=""https://github.com/candy-blue/PortableHub/releases/tag/v1.1.0""/>
+    <title>Portable Hub v1.1.0</title>
+    <content type=""html"">&lt;p&gt;Bug fixes &amp;amp; enhancements&lt;/p&gt;</content>
+  </entry>
+</feed>";
+
+        var currentVer = new Version(1, 0, 0);
+        var updateInfo = GithubUpdateService.ParseAtomFeed(atomXml, currentVer, "v1.0.0");
+
+        Assert.NotNull(updateInfo);
+        Assert.True(updateInfo.HasUpdate);
+        Assert.Equal("v1.1.0", updateInfo.LatestVersion);
+        Assert.Equal("Portable Hub v1.1.0", updateInfo.ReleaseTitle);
+        Assert.Equal("https://github.com/candy-blue/PortableHub/releases/tag/v1.1.0", updateInfo.ReleaseUrl);
+        Assert.Contains("Bug fixes & enhancements", updateInfo.ReleaseNotes);
+        Assert.NotNull(updateInfo.PublishedAt);
+    }
+
+    private class MockHttpMessageHandler : System.Net.Http.HttpMessageHandler
+    {
+        private readonly Func<System.Net.Http.HttpRequestMessage, System.Net.Http.HttpResponseMessage> _handler;
+        public MockHttpMessageHandler(Func<System.Net.Http.HttpRequestMessage, System.Net.Http.HttpResponseMessage> handler)
+        {
+            _handler = handler;
+        }
+
+        protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(
+            System.Net.Http.HttpRequestMessage request, 
+            System.Threading.CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_handler(request));
+        }
+    }
+
+    [Fact]
+    public async Task GithubUpdateService_CheckForUpdatesAsync_FallsBackToAtomWhenRestApiReturns403()
+    {
+        GithubUpdateService.ResetRateLimitCache();
+
+        string atomXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<feed xmlns=""http://www.w3.org/2005/Atom"">
+  <entry>
+    <id>tag:github.com,2008:Repository/123/v1.1.0</id>
+    <updated>2026-09-18T15:32:56Z</updated>
+    <link rel=""alternate"" type=""text/html"" href=""https://github.com/candy-blue/PortableHub/releases/tag/v1.1.0""/>
+    <title>Portable Hub v1.1.0</title>
+    <content type=""html"">Update notes</content>
+  </entry>
+</feed>";
+
+        int restApiCallCount = 0;
+        int atomCallCount = 0;
+
+        var handler = new MockHttpMessageHandler(req =>
+        {
+            if (req.RequestUri!.ToString().Contains("api.github.com"))
+            {
+                restApiCallCount++;
+                var resp = new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
+                {
+                    ReasonPhrase = "rate limit exceeded"
+                };
+                resp.Headers.Add("X-RateLimit-Reset", DateTimeOffset.UtcNow.AddMinutes(40).ToUnixTimeSeconds().ToString());
+                return resp;
+            }
+            if (req.RequestUri.ToString().Contains("releases.atom"))
+            {
+                atomCallCount++;
+                var resp = new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new System.Net.Http.StringContent(atomXml, System.Text.Encoding.UTF8, "application/atom+xml")
+                };
+                return resp;
+            }
+            return new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.NotFound);
+        });
+
+        var client = new System.Net.Http.HttpClient(handler);
+        var service = new GithubUpdateService(client);
+
+        var result = await service.CheckForUpdatesAsync();
+
+        Assert.NotNull(result);
+        Assert.Equal("v1.1.0", result.LatestVersion);
+        Assert.Null(result.ErrorMessage);
+        Assert.Equal(1, restApiCallCount);
+        Assert.Equal(1, atomCallCount);
+        Assert.NotNull(GithubUpdateService.ApiRateLimitedUntil);
+
+        // Second call should skip REST API because of cooldown
+        var result2 = await service.CheckForUpdatesAsync();
+        Assert.NotNull(result2);
+        Assert.Equal(1, restApiCallCount); // REST API was NOT called again
+        Assert.Equal(2, atomCallCount);
+    }
+
+    [Fact]
+    public async Task GithubUpdateService_Live_CanCheckForUpdatesWithoutThrowing()
+    {
+        var service = new GithubUpdateService();
+        var result = await service.CheckForUpdatesAsync();
+        Assert.NotNull(result);
+        Assert.False(string.IsNullOrWhiteSpace(result.LatestVersion));
+        // ErrorMessage should be null since Atom fallback succeeds even if REST API is 403
+        Assert.Null(result.ErrorMessage);
+        Assert.True(result.HasUpdate);
+        Assert.Equal("v1.1.0", result.LatestVersion);
+    }
+
+
+    [Fact]
     public void CategoryEditViewModel_IconOptions_PopulatedAndSelectable()
     {
         var vm = new CategoryEditViewModel();

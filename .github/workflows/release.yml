@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release Tag (e.g. v1.1.0)'
+        description: 'Release Tag (e.g. v1.2.0)'
         required: false
-        default: 'v1.1.0'
+        default: 'v1.2.0'
 
 permissions:
   contents: write
@@ -45,6 +45,25 @@ jobs:
           Copy-Item "build_standalone\PortableHub.App.deps.json" "build_standalone\PortableHub.deps.json"
           Compress-Archive -Path "build_standalone\*" -DestinationPath "PortableHub-Portable.zip" -CompressionLevel Optimal
 
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y
+
+      - name: Build Installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $clean_ver = "1.2.0"
+          if ($env:GITHUB_REF -like "refs/tags/v*") {
+            $clean_ver = $env:GITHUB_REF.Substring("refs/tags/v".Length)
+          } elseif ($env:GITHUB_REF -like "refs/tags/*") {
+            $clean_ver = $env:GITHUB_REF.Substring("refs/tags/".Length)
+          } elseif ("${{ inputs.tag_name }}") {
+            $clean_ver = "${{ inputs.tag_name }}".TrimStart("v").TrimStart("V")
+          }
+          $iscc = if (Get-Command iscc -ErrorAction SilentlyContinue) { "iscc" } else { "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DMyAppVersion=$clean_ver" "installer\PortableHub.iss"
+          Copy-Item "release\PortableHub-Setup-x64.exe" "PortableHub-Setup-x64.exe"
+
       - name: Determine Release Tag
         id: get_tag
         shell: pwsh
@@ -55,7 +74,7 @@ jobs:
           } elseif ("${{ inputs.tag_name }}") {
             $tag = "${{ inputs.tag_name }}"
           } else {
-            $tag = "v1.1.0"
+            $tag = "v1.2.0"
           }
           echo "tag=$tag" >> $env:GITHUB_OUTPUT
 
@@ -66,8 +85,10 @@ jobs:
           files: |
             PortableHub.exe
             PortableHub-Portable.zip
+            PortableHub-Setup-x64.exe
           generate_release_notes: true
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

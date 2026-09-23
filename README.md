@@ -13,7 +13,7 @@
 ![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20LTS-512BD4?logo=dotnet&logoColor=white)
 ![UI](https://img.shields.io/badge/UI-iNKORE.UI.WPF.Modern%20(WinUI%203)-blue)
 ![Database](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-189%20Passed-success)
+![Tests](https://img.shields.io/badge/Tests-193%20Passed-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 [✨ 核心特性](#-核心特性) • [📦 下载安装](#-下载与安装) • [🚀 编译构建](#-编译与构建) • [🏗️ 技术架构](#-技术架构) • [📄 开源许可](#-开源许可)
@@ -28,11 +28,13 @@
 
 | 发布版本 | 文件名 | 说明 | 运行需求 |
 | :--- | :--- | :--- | :--- |
-| **独立单文件版** (推荐) | [`PortableHub.exe`](https://github.com/candy-blue/PortableHub/releases/latest) | 单文件便携版，内嵌完整运行时，双击直接运行 | 仅需 64 位 Windows 10/11 |
-| **标准便携压缩包** | [`PortableHub-Portable.zip`](https://github.com/candy-blue/PortableHub/releases/latest) | 包含完整依赖与免安装绿色目录，解压即可使用 | 仅需 64 位 Windows 10/11 |
+| **标准安装版 (Setup)** (推荐) | [`PortableHub-Setup-x64.exe`](https://github.com/candy-blue/PortableHub/releases/latest) | Windows 标准向导安装包，支持双模权限、桌面与开始菜单快捷方式及数据保护卸载 | 仅需 64 位 Windows 10/11 |
+| **独立单文件版** | [`PortableHub.exe`](https://github.com/candy-blue/PortableHub/releases/latest) | 单文件便携版，内嵌完整运行时，免安装双击直接运行 | 仅需 64 位 Windows 10/11 |
+| **标准便携压缩包** | [`PortableHub-Portable.zip`](https://github.com/candy-blue/PortableHub/releases/latest) | 包含完整依赖与免安装绿色目录，解压即可随身携带使用 | 仅需 64 位 Windows 10/11 |
 
 > [!TIP]
-> Portable Hub 是完全绿色纯净的软件，解压后即可放在任何目录（支持 U 盘或移动硬盘随身携带），所有数据默认保存在本地 `data/` 目录中。
+> - **安装版**：数据存放于 `%LocalAppData%\PortableHub`，卸载时会贴心弹窗询问是否保留个人软件库数据库与配置，防误删。
+> - **便携版/单文件版**：完全绿色纯净，解压后可放在任何目录（支持 U 盘或移动硬盘随身携带），所有数据默认保存在本地 `data/` 目录中。
 
 ---
 
@@ -94,7 +96,7 @@ PortableHub
 │   ├── Repositories          # Dapper 高性能仓储实现
 │   ├── Services              # 启动、图标提取、备份、热键、更新与自动路径修复服务
 │   └── Windows               # Windows 原生 Win32 API 交互与快捷方式解析
-└── PortableHub.Tests          # 自动化单元测试与 UI 测试套件（189+ 项全量覆盖，100% 通过）
+└── PortableHub.Tests          # 自动化单元测试与 UI 测试套件（193+ 项全量覆盖，100% 通过）
 ```
 
 ---
