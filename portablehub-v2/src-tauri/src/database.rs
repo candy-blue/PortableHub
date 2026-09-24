@@ -126,11 +126,22 @@ impl DbState {
 
         if category_count == 0 {
             let now = Utc::now().to_rfc3339();
-            conn.execute(
-                "INSERT INTO Category (Name, Icon, Color, SortOrder, IsSystem, CreatedAt, UpdatedAt)
-                 VALUES ('其他', 'Apps24', '#6B7280', 1, 1, ?1, ?2);",
-                params![now, now],
-            )?;
+            let defaults = [
+                ("常用软件", "Star", "#3B82F6", 1, 0),
+                ("开发工具", "Code", "#10B981", 2, 0),
+                ("办公效率", "Briefcase", "#8B5CF6", 3, 0),
+                ("系统工具", "Wrench", "#F59E0B", 4, 0),
+                ("网络应用", "Globe", "#06B6D4", 5, 0),
+                ("多媒体", "Play", "#EC4899", 6, 0),
+                ("其他", "Box", "#6B7280", 99, 1),
+            ];
+            for (name, icon, color, sort_order, is_system) in defaults {
+                conn.execute(
+                    "INSERT INTO Category (Name, Icon, Color, SortOrder, IsSystem, CreatedAt, UpdatedAt)
+                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);",
+                    params![name, icon, color, sort_order, is_system, now, now],
+                )?;
+            }
         }
 
         let now = Utc::now().to_rfc3339();
@@ -310,5 +321,161 @@ impl DbState {
         let conn = self.conn.lock().unwrap();
         conn.execute("DELETE FROM Software WHERE Id = ?1;", params![id])?;
         Ok(())
+    }
+
+    pub fn add_software(&self, mut software: Software) -> Result<Software> {
+        let conn = self.conn.lock().unwrap();
+        let now = Utc::now().to_rfc3339();
+        software.created_at = now.clone();
+        software.updated_at = now.clone();
+
+        conn.execute(
+            "INSERT INTO Software (
+                RootId, Name, ExePath, RelativePath, Description, Arguments,
+                WorkingDirectory, IconPath, CategoryId, IsFavorite, LaunchCount,
+                LastLaunchedAt, SortOrder, RunAsAdmin, SingleInstance, Tags,
+                LinkedSoftwareIds, CreatedAt, UpdatedAt
+            ) VALUES (
+                ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19
+            );",
+            params![
+                software.root_id,
+                software.name,
+                software.exe_path,
+                software.relative_path,
+                software.description,
+                software.arguments,
+                software.working_directory,
+                software.icon_path,
+                software.category_id,
+                if software.is_favorite { 1 } else { 0 },
+                software.launch_count,
+                software.last_launched_at,
+                software.sort_order,
+                if software.run_as_admin { 1 } else { 0 },
+                if software.single_instance { 1 } else { 0 },
+                software.tags,
+                software.linked_software_ids,
+                software.created_at,
+                software.updated_at,
+            ],
+        )?;
+
+        let id = conn.last_insert_rowid();
+        software.id = id;
+        software.is_missing = !Path::new(&software.exe_path).exists();
+        Ok(software)
+    }
+
+    pub fn update_software(&self, mut software: Software) -> Result<Software> {
+        let conn = self.conn.lock().unwrap();
+        let now = Utc::now().to_rfc3339();
+        software.updated_at = now.clone();
+
+        conn.execute(
+            "UPDATE Software SET
+                Name = ?1, ExePath = ?2, Description = ?3, Arguments = ?4,
+                WorkingDirectory = ?5, IconPath = ?6, CategoryId = ?7,
+                IsFavorite = ?8, RunAsAdmin = ?9, SingleInstance = ?10,
+                Tags = ?11, UpdatedAt = ?12
+             WHERE Id = ?13;",
+            params![
+                software.name,
+                software.exe_path,
+                software.description,
+                software.arguments,
+                software.working_directory,
+                software.icon_path,
+                software.category_id,
+                if software.is_favorite { 1 } else { 0 },
+                if software.run_as_admin { 1 } else { 0 },
+                if software.single_instance { 1 } else { 0 },
+                software.tags,
+                software.updated_at,
+                software.id,
+            ],
+        )?;
+
+        software.is_missing = !Path::new(&software.exe_path).exists();
+        Ok(software)
+    }
+
+    pub fn add_category(&self, mut category: Category) -> Result<Category> {
+        let conn = self.conn.lock().unwrap();
+        let now = Utc::now().to_rfc3339();
+        category.created_at = now.clone();
+        category.updated_at = now.clone();
+
+        conn.execute(
+            "INSERT INTO Category (Name, Icon, Color, SortOrder, IsSystem, CreatedAt, UpdatedAt)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);",
+            params![
+                category.name,
+                category.icon,
+                category.color,
+                category.sort_order,
+                if category.is_system { 1 } else { 0 },
+                category.created_at,
+                category.updated_at,
+            ],
+        )?;
+
+        let id = conn.last_insert_rowid();
+        category.id = id;
+        Ok(category)
+    }
+
+    pub fn delete_category(&self, id: i64) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        let is_system: i64 = conn.query_row(
+            "SELECT IsSystem FROM Category WHERE Id = ?1;",
+            params![id],
+            |r| r.get(0),
+        ).unwrap_or(0);
+
+        if is_system != 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+
+        let fallback_cat_id: i64 = conn.query_row(
+            "SELECT Id FROM Category WHERE Id != ?1 ORDER BY SortOrder ASC, Id ASC LIMIT 1;",
+            params![id],
+            |r| r.get(0),
+        ).unwrap_or(1);
+
+        conn.execute(
+            "UPDATE Software SET CategoryId = ?1 WHERE CategoryId = ?2;",
+            params![fallback_cat_id, id],
+        )?;
+
+        conn.execute("DELETE FROM Category WHERE Id = ?1;", params![id])?;
+        Ok(())
+    }
+
+    pub fn batch_add_software(&self, candidates: Vec<crate::models::SoftwareScanCandidate>) -> Result<usize> {
+        let conn = self.conn.lock().unwrap();
+        let now = Utc::now().to_rfc3339();
+        let mut count = 0;
+
+        for c in candidates {
+            let exists: i64 = conn.query_row(
+                "SELECT COUNT(*) FROM Software WHERE ExePath = ?1;",
+                params![c.exe_path],
+                |r| r.get(0),
+            ).unwrap_or(0);
+
+            if exists == 0 {
+                conn.execute(
+                    "INSERT INTO Software (
+                        Name, ExePath, CategoryId, IsFavorite, LaunchCount,
+                        RunAsAdmin, SingleInstance, CreatedAt, UpdatedAt
+                    ) VALUES (?1, ?2, ?3, 0, 0, 0, 1, ?4, ?4);",
+                    params![c.name, c.exe_path, c.suggested_category_id, now],
+                )?;
+                count += 1;
+            }
+        }
+
+        Ok(count)
     }
 }

@@ -43,6 +43,57 @@ fn scan_directory(dir_path: String, default_category_id: i64) -> Vec<SoftwareSca
     scanner::scan_directory(&dir_path, default_category_id)
 }
 
+#[tauri::command]
+fn add_software(db: State<'_, DbState>, software: Software) -> Result<Software, String> {
+    db.add_software(software).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn update_software(db: State<'_, DbState>, software: Software) -> Result<Software, String> {
+    db.update_software(software).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn add_category(db: State<'_, DbState>, category: Category) -> Result<Category, String> {
+    db.add_category(category).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn delete_category(db: State<'_, DbState>, id: i64) -> Result<(), String> {
+    db.delete_category(id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn batch_add_software(db: State<'_, DbState>, candidates: Vec<SoftwareScanCandidate>) -> Result<usize, String> {
+    db.batch_add_software(candidates).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn open_folder(path: String) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        use std::process::Command;
+        let p = std::path::Path::new(&path);
+        if p.is_file() {
+            let _ = Command::new("explorer").arg(format!("/select,\"{}\"", path)).spawn();
+            return Ok(());
+        }
+        let target_dir = if p.is_dir() {
+            p
+        } else if let Some(parent) = p.parent() {
+            parent
+        } else {
+            p
+        };
+        let _ = Command::new("explorer").arg(target_dir.as_os_str()).spawn();
+        Ok(())
+    }
+    #[cfg(not(windows))]
+    {
+        Ok(())
+    }
+}
+
 fn resolve_db_path(app: &tauri::AppHandle) -> PathBuf {
     // 1. Check local portable directory next to executable
     if let Ok(exe_dir) = std::env::current_exe().map(|p| p.parent().unwrap_or(&p).to_path_buf()) {
@@ -73,10 +124,16 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_categories,
             get_all_software,
+            add_software,
+            update_software,
             toggle_favorite,
             delete_software,
             launch_software,
             scan_directory,
+            batch_add_software,
+            add_category,
+            delete_category,
+            open_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -21,7 +21,7 @@
         "center": true,
         "decorations": false,
         "shadow": true,
-        "transparent": true
+        "transparent": false
       }
     ],
     "security": {
@@ -40,4 +40,5 @@
     ]
   }
 }
+
 

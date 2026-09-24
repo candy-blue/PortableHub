@@ -3,15 +3,35 @@
     <!-- Empty State -->
     <div
       v-if="softwareList.length === 0"
-      class="h-64 flex flex-col items-center justify-center text-center p-6 rounded-2xl border border-dashed border-[var(--border-subtle)]"
+      class="h-80 flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-card)]/50"
     >
-      <div class="w-12 h-12 rounded-full bg-[var(--bg-card)] flex items-center justify-center text-[var(--text-muted)] mb-3 shadow-xs">
-        <PackageOpen class="w-6 h-6" />
+      <div class="w-14 h-14 rounded-full bg-[var(--bg-surface)] flex items-center justify-center text-[var(--accent-primary)] mb-3 shadow-sm border border-[var(--border-subtle)]">
+        <FolderOpen class="w-7 h-7" />
       </div>
-      <h4 class="text-sm font-semibold text-[var(--text-primary)]">未找到匹配软件</h4>
-      <p class="text-xs text-[var(--text-muted)] mt-1 max-w-xs">
-        当前筛选或搜索条件下无软件。尝试清空搜索词，或点击下方按钮添加新应用。
+      <h4 class="text-sm font-semibold text-[var(--text-primary)]">
+        {{ libraryStore.searchQuery ? '未找到匹配软件' : '暂无便携软件' }}
+      </h4>
+      <p class="text-xs text-[var(--text-muted)] mt-1.5 max-w-sm leading-relaxed">
+        {{ libraryStore.searchQuery ? '尝试清空搜索关键字或切换分类。' : '您可以手动登记便携应用，或一键扫描本地目录自动识别导入。' }}
       </p>
+
+      <div class="flex items-center gap-3 mt-5">
+        <button
+          @click="libraryStore.openAddModal"
+          class="h-8 px-4 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white text-xs font-medium flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span>添加应用</span>
+        </button>
+
+        <button
+          @click="libraryStore.isScannerModalOpen = true"
+          class="h-8 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-medium flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+        >
+          <FolderSearch class="w-3.5 h-3.5 text-[var(--accent-primary)]" />
+          <span>扫描目录</span>
+        </button>
+      </div>
     </div>
 
     <!-- Grid Cards -->
@@ -33,10 +53,13 @@
 
 <script setup lang="ts">
 import type { Software } from "@/types";
-import { PackageOpen } from "@lucide/vue";
+import { FolderOpen, Plus, FolderSearch } from "@lucide/vue";
 import SoftwareCard from "./SoftwareCard.vue";
+import { useLibraryStore } from "@/stores/library";
 
 defineProps<{
   softwareList: Software[];
 }>();
+
+const libraryStore = useLibraryStore();
 </script>

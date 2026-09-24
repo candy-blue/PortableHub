@@ -1,53 +1,59 @@
 <template>
   <header
-    data-tauri-drag-region
-    class="h-12 w-full flex items-center justify-between px-3 select-none border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] z-30 transition-colors"
+    class="h-10 w-full flex items-center justify-between pl-3 pr-0 select-none border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] shrink-0 z-30"
   >
-    <!-- Left: App Brand & Breadcrumb -->
-    <div class="flex items-center gap-3" data-tauri-drag-region>
-      <div class="flex items-center gap-2" data-tauri-drag-region>
-        <div class="w-6 h-6 rounded-md bg-[var(--accent-primary)] flex items-center justify-center text-white shadow-sm font-bold text-xs tracking-tighter">
-          PH
-        </div>
-        <span class="font-semibold text-sm tracking-tight text-[var(--text-primary)]">PortableHub</span>
-        <span class="text-xs px-1.5 py-0.5 rounded font-mono bg-[var(--accent-primary-subtle)] text-[var(--accent-primary)]">2.0</span>
+    <!-- Left: App Brand & Breadcrumb (Draggable) -->
+    <div
+      class="flex items-center gap-2.5 h-full cursor-default"
+      data-tauri-drag-region
+      @dblclick="toggleMaximize"
+    >
+      <div class="w-5 h-5 rounded bg-[var(--accent-primary)] flex items-center justify-center text-white font-bold text-[11px] shadow-xs pointer-events-none">
+        PH
       </div>
+      <span class="font-semibold text-xs tracking-tight text-[var(--text-primary)] pointer-events-none">PortableHub</span>
+      <span class="text-[10px] px-1 py-0.2 rounded font-mono bg-[var(--accent-primary-subtle)] text-[var(--accent-primary)] pointer-events-none">v2.0</span>
 
-      <!-- Current Location Tag -->
-      <div class="hidden sm:flex items-center text-xs text-[var(--text-muted)] gap-1 pl-2 border-l border-[var(--border-subtle)]" data-tauri-drag-region>
+      <div class="hidden sm:flex items-center text-xs text-[var(--text-muted)] gap-1 pl-2 border-l border-[var(--border-subtle)] pointer-events-none">
         <span>/</span>
         <span class="text-[var(--text-secondary)] font-medium">{{ currentViewTitle }}</span>
       </div>
     </div>
 
-    <!-- Center: Search Bar Trigger (Quick Launcher preview) -->
+    <!-- Center: Search Bar Trigger (Embedded in draggable spacer) -->
     <div
-      @click="libraryStore.isCommandPaletteOpen = true"
-      class="flex-1 max-w-sm mx-4 h-8 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-strong)] flex items-center justify-between text-xs text-[var(--text-muted)] cursor-pointer transition-all shadow-xs"
+      class="flex-1 h-full flex items-center justify-center px-4 cursor-default"
+      data-tauri-drag-region
+      @dblclick="toggleMaximize"
     >
-      <div class="flex items-center gap-2">
-        <Search class="w-3.5 h-3.5" />
-        <span>搜索便携软件、分类、拼音...</span>
+      <div
+        @click.stop="libraryStore.isCommandPaletteOpen = true"
+        class="w-full max-w-sm h-7 px-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-strong)] flex items-center justify-between text-xs text-[var(--text-muted)] cursor-pointer transition-all shadow-xs"
+      >
+        <div class="flex items-center gap-2 pointer-events-none">
+          <Search class="w-3.5 h-3.5" />
+          <span>搜索便携软件、分类、拼音...</span>
+        </div>
+        <kbd class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-secondary)] pointer-events-none">Ctrl K</kbd>
       </div>
-      <kbd class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">Ctrl K</kbd>
     </div>
 
-    <!-- Right: Actions & Window Controls -->
-    <div class="flex items-center gap-1">
+    <!-- Right: Actions & Native-style Window Caption Controls (NOT draggable) -->
+    <div class="flex items-center h-full">
       <!-- Theme Switcher -->
       <button
-        @click="themeStore.toggleTheme"
-        class="w-8 h-8 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors"
+        @click.stop="themeStore.toggleTheme"
+        class="w-9 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
         :title="themeStore.isDark ? '切换至浅色模式' : '切换至深色模式'"
       >
-        <Sun v-if="themeStore.isDark" class="w-4 h-4" />
-        <Moon v-else class="w-4 h-4" />
+        <Sun v-if="themeStore.isDark" class="w-3.5 h-3.5" />
+        <Moon v-else class="w-3.5 h-3.5" />
       </button>
 
       <!-- Window Minimize -->
       <button
-        @click="minimizeWindow"
-        class="w-8 h-8 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors"
+        @click.stop="minimizeWindow"
+        class="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
         title="最小化"
       >
         <Minus class="w-3.5 h-3.5" />
@@ -55,8 +61,8 @@
 
       <!-- Window Maximize / Restore -->
       <button
-        @click="toggleMaximize"
-        class="w-8 h-8 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors"
+        @click.stop="toggleMaximize"
+        class="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
         title="最大化 / 还原"
       >
         <Square class="w-3.5 h-3.5" />
@@ -64,8 +70,8 @@
 
       <!-- Window Close -->
       <button
-        @click="closeWindow"
-        class="w-8 h-8 rounded-md flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[var(--status-danger)] transition-colors"
+        @click.stop="closeWindow"
+        class="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[#e81123] transition-colors cursor-pointer"
         title="关闭"
       >
         <X class="w-4 h-4" />
@@ -98,8 +104,8 @@ async function minimizeWindow() {
   try {
     const win = getCurrentWindow();
     await win.minimize();
-  } catch {
-    // In browser preview
+  } catch (e) {
+    console.error("Window minimize error:", e);
   }
 }
 
@@ -107,8 +113,8 @@ async function toggleMaximize() {
   try {
     const win = getCurrentWindow();
     await win.toggleMaximize();
-  } catch {
-    // In browser preview
+  } catch (e) {
+    console.error("Window toggleMaximize error:", e);
   }
 }
 
@@ -116,8 +122,8 @@ async function closeWindow() {
   try {
     const win = getCurrentWindow();
     await win.close();
-  } catch {
-    // In browser preview
+  } catch (e) {
+    console.error("Window close error:", e);
   }
 }
 </script>

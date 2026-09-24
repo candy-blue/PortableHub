@@ -163,6 +163,11 @@ export const useLibraryStore = defineStore("library", () => {
   const cardSize = ref<"Small" | "Medium" | "Large">("Medium");
   const sortBy = ref<"Custom" | "Name" | "LaunchCount" | "LastLaunchedAt">("Custom");
   const isCommandPaletteOpen = ref(false);
+  const isAddEditModalOpen = ref(false);
+  const editingSoftware = ref<Software | null>(null);
+  const isScannerModalOpen = ref(false);
+  const isCategoryModalOpen = ref(false);
+  const isSettingsModalOpen = ref(false);
   const isNative = ref(false);
 
   // Synchronize with Rust SQLite backend
@@ -174,7 +179,7 @@ export const useLibraryStore = defineStore("library", () => {
         isNative.value = true;
       }
       const software = await invoke<Software[]>("get_all_software");
-      if (software && software.length > 0) {
+      if (Array.isArray(software) && isNative.value) {
         softwareList.value = software;
       }
     } catch {
@@ -281,6 +286,113 @@ export const useLibraryStore = defineStore("library", () => {
     }
   }
 
+  async function addSoftware(payload: Partial<Software>): Promise<Software | null> {
+    const newSoftware: Software = {
+      id: 0,
+      name: payload.name || "未命名应用",
+      exePath: payload.exePath || "",
+      description: payload.description || "",
+      arguments: payload.arguments || "",
+      workingDirectory: payload.workingDirectory || "",
+      iconPath: payload.iconPath || "",
+      categoryId: payload.categoryId || (categories.value[0]?.id || 1),
+      categoryName: categories.value.find(c => c.id === payload.categoryId)?.name || "默认",
+      isFavorite: payload.isFavorite || false,
+      launchCount: 0,
+      lastLaunchedAt: null,
+      sortOrder: softwareList.value.length + 1,
+      runAsAdmin: payload.runAsAdmin || false,
+      singleInstance: payload.singleInstance !== false,
+      tags: payload.tags || "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isMissing: false,
+      isRunning: false,
+    };
+
+    try {
+      const created = await invoke<Software>("add_software", { software: newSoftware });
+      softwareList.value.push(created);
+      return created;
+    } catch (e) {
+      console.error("Failed to add software:", e);
+      newSoftware.id = Date.now();
+      softwareList.value.push(newSoftware);
+      return newSoftware;
+    }
+  }
+
+  async function updateSoftware(software: Software): Promise<boolean> {
+    try {
+      const updated = await invoke<Software>("update_software", { software });
+      const idx = softwareList.value.findIndex(s => s.id === software.id);
+      if (idx !== -1) {
+        softwareList.value[idx] = updated;
+      }
+      return true;
+    } catch (e) {
+      console.error("Failed to update software:", e);
+      const idx = softwareList.value.findIndex(s => s.id === software.id);
+      if (idx !== -1) {
+        softwareList.value[idx] = { ...software, updatedAt: new Date().toISOString() };
+      }
+      return true;
+    }
+  }
+
+  async function addCategory(payload: Partial<Category>): Promise<Category | null> {
+    const newCat: Category = {
+      id: 0,
+      name: payload.name || "新分类",
+      icon: payload.icon || "Folder",
+      color: payload.color || "#3b82f6",
+      sortOrder: categories.value.length + 1,
+      isSystem: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      const created = await invoke<Category>("add_category", { category: newCat });
+      categories.value.push(created);
+      return created;
+    } catch (e) {
+      console.error("Failed to add category:", e);
+      newCat.id = Date.now();
+      categories.value.push(newCat);
+      return newCat;
+    }
+  }
+
+  async function batchAddSoftware(candidates: SoftwareScanCandidate[]): Promise<number> {
+    try {
+      const count = await invoke<number>("batch_add_software", { candidates });
+      await loadFromBackend();
+      return count;
+    } catch (e) {
+      console.error("Failed to batch add software:", e);
+      return 0;
+    }
+  }
+
+  async function openFolder(path: string) {
+    try {
+      await invoke("open_folder", { path });
+    } catch (err) {
+      console.warn("Failed to open folder:", err);
+    }
+  }
+
+  function openAddModal() {
+    editingSoftware.value = null;
+    isAddEditModalOpen.value = true;
+  }
+
+  function openEditModal(software: Software) {
+    editingSoftware.value = { ...software };
+    isAddEditModalOpen.value = true;
+  }
+
   function selectNav(nav: "all" | "recent" | "favorites") {
     selectedNav.value = nav;
     selectedCategoryId.value = null;
@@ -301,6 +413,11 @@ export const useLibraryStore = defineStore("library", () => {
     cardSize,
     sortBy,
     isCommandPaletteOpen,
+    isAddEditModalOpen,
+    editingSoftware,
+    isScannerModalOpen,
+    isCategoryModalOpen,
+    isSettingsModalOpen,
     isNative,
     categoryCounts,
     favoritesCount,
@@ -310,7 +427,14 @@ export const useLibraryStore = defineStore("library", () => {
     toggleFavorite,
     launchSoftware,
     deleteSoftware,
+    addSoftware,
+    updateSoftware,
+    addCategory,
     scanDirectory,
+    batchAddSoftware,
+    openFolder,
+    openAddModal,
+    openEditModal,
     selectNav,
     selectCategory,
   };
