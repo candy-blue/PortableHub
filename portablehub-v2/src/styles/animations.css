@@ -1,0 +1,100 @@
+/* PortableHub Unified Animation System */
+
+/* Standard smooth transition helper */
+.transition-smooth {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: var(--ease-smooth);
+  transition-duration: var(--duration-normal);
+}
+
+.transition-fast {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-timing-function: var(--ease-smooth);
+  transition-duration: var(--duration-fast);
+}
+
+/* Card Interaction Animation */
+.software-card-interactive {
+  transition: transform var(--duration-fast) var(--ease-smooth),
+              box-shadow var(--duration-fast) var(--ease-smooth),
+              border-color var(--duration-fast) var(--ease-smooth),
+              background-color var(--duration-fast) var(--ease-smooth);
+  will-change: transform, box-shadow;
+}
+
+.software-card-interactive:hover {
+  transform: translateY(-2px) scale(1.012);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.software-card-interactive:active {
+  transform: scale(0.975);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Page & Stagger Fade-in */
+@keyframes content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: content-fade-in var(--duration-normal) var(--ease-smooth) both;
+}
+
+/* Stagger item entrance */
+.stagger-item {
+  animation: content-fade-in var(--duration-normal) var(--ease-smooth) both;
+  animation-delay: calc(var(--stagger-index, 0) * 14ms);
+}
+
+/* Command Palette Overlay Animation */
+@keyframes palette-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes palette-modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-palette-backdrop {
+  animation: palette-backdrop-enter var(--duration-fast) var(--ease-smooth) both;
+}
+
+.animate-palette-modal {
+  animation: palette-modal-enter var(--duration-fast) var(--ease-smooth) both;
+}
+
+/* Sidebar Width Transition */
+.sidebar-transition {
+  transition: width var(--duration-normal) var(--ease-smooth);
+}
+
+/* Accessibility / Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .software-card-interactive:hover,
+  .software-card-interactive:active {
+    transform: none !important;
+  }
+}
