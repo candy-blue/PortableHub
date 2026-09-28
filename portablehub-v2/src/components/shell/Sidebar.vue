@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { computed, h } from "vue";
-import { NBadge, NMenu, NScrollbar, NButton, type MenuOption } from "naive-ui";
+import { NMenu, NScrollbar, NButton, type MenuOption } from "naive-ui";
 import {
   Grid,
   Star,
@@ -70,7 +70,7 @@ function renderIcon(icon: any, color?: string) {
 function renderLabelWithBadge(label: string, count: number, showBadge: boolean) {
   return () => h("div", { class: "flex items-center justify-between w-full" }, [
     h("span", { class: "text-xs font-medium truncate" }, label),
-    (showBadge && !props.collapsed) ? h(NBadge, { value: count, max: 999, type: 'info', showZero: true }) : null
+    (showBadge && !props.collapsed) ? h("span", { class: "text-[11px] font-mono text-[var(--n-text-color)] opacity-40 group-hover:opacity-80 transition-opacity" }, count.toString()) : null
   ]);
 }
 

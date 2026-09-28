@@ -7,37 +7,23 @@
   transition-duration: var(--duration-normal);
 }
 
-.transition-fast {
+.transition-quick {
   transition-property: color, background-color, border-color, opacity, transform;
   transition-timing-function: var(--ease-smooth);
-  transition-duration: var(--duration-fast);
+  transition-duration: var(--duration-quick);
 }
 
-/* Card Interaction Animation */
-.software-card-interactive {
-  transition: transform var(--duration-fast) var(--ease-smooth),
-              box-shadow var(--duration-fast) var(--ease-smooth),
-              border-color var(--duration-fast) var(--ease-smooth),
-              background-color var(--duration-fast) var(--ease-smooth);
-  will-change: transform, box-shadow;
-}
-
-.software-card-interactive:hover {
-  transform: translateY(-2px) scale(1.012);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-strong);
-}
-
-.software-card-interactive:active {
-  transform: scale(0.975);
-  box-shadow: var(--shadow-sm);
+.transition-instant {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-timing-function: var(--ease-smooth);
+  transition-duration: var(--duration-instant);
 }
 
 /* Page & Stagger Fade-in */
 @keyframes content-fade-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -64,20 +50,20 @@
 @keyframes palette-modal-enter {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(-8px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(0);
   }
 }
 
 .animate-palette-backdrop {
-  animation: palette-backdrop-enter var(--duration-fast) var(--ease-smooth) both;
+  animation: palette-backdrop-enter var(--duration-quick) var(--ease-smooth) both;
 }
 
 .animate-palette-modal {
-  animation: palette-modal-enter var(--duration-fast) var(--ease-smooth) both;
+  animation: palette-modal-enter var(--duration-quick) var(--ease-smooth) both;
 }
 
 /* Sidebar Width Transition */
@@ -92,9 +78,5 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  .software-card-interactive:hover,
-  .software-card-interactive:active {
-    transform: none !important;
   }
 }

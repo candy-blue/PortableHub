@@ -30,13 +30,12 @@
     >
       <button
         @click.stop="libraryStore.isCommandPaletteOpen = true"
-        class="w-full max-w-sm h-7 px-3 rounded-md border border-[var(--n-border-color)] bg-[var(--n-color)] hover:bg-[var(--n-color-modal)] flex items-center justify-between text-xs text-[var(--n-text-color)] opacity-80 cursor-pointer transition-all shadow-xs"
+        class="w-[320px] max-w-full h-8 px-3 rounded-md border border-transparent bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 flex items-center justify-between text-xs text-[var(--n-text-color)] opacity-80 cursor-pointer transition-colors"
       >
         <div class="flex items-center gap-2 pointer-events-none">
           <Search class="w-3.5 h-3.5 opacity-70" />
-          <span>搜索便携软件、分类、拼音...</span>
+          <span>搜索软件或输入关键词...</span>
         </div>
-        <kbd class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--n-color-modal)] border border-[var(--n-border-color)] pointer-events-none">Ctrl K</kbd>
       </button>
     </div>
 

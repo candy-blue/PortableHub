@@ -21,10 +21,10 @@
   --radius-full: 9999px;
 
   /* Animation Timings */
-  --duration-instant: 70ms;
-  --duration-fast: 120ms;
-  --duration-normal: 180ms;
-  --duration-slow: 240ms;
+  --duration-instant: 80ms;
+  --duration-quick: 150ms;
+  --duration-normal: 220ms;
+  --duration-slow: 300ms;
 
   /* Easing */
   --ease-smooth: cubic-bezier(0.1, 0.9, 0.2, 1);

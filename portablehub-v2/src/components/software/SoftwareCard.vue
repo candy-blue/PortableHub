@@ -1,96 +1,13 @@
 <template>
-  <NCard
-    hoverable
-    size="small"
-    class="cursor-pointer group select-none transition-all duration-150"
-    :class="{ 'opacity-60 border-dashed border-amber-500': software.isMissing }"
+  <div
+    class="cursor-pointer group relative flex flex-col h-[156px] rounded-xl bg-[var(--n-color)] border border-transparent hover:border-[var(--n-border-color)] transition-quick transform hover:-translate-y-[1px] p-4 select-none"
+    :class="{ 'opacity-60 grayscale': software.isMissing }"
     @click="handleCardClick"
     @contextmenu.prevent="handleContextMenu"
   >
-    <!-- Top Action Row: Running Indicator, Category Badge, Favorite Star, More Menu -->
-    <div class="flex items-center justify-between gap-1 mb-2.5">
-      <!-- Status Badges -->
-      <div class="flex items-center gap-1.5 min-w-0">
-        <span
-          v-if="software.isRunning"
-          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          运行中
-        </span>
-
-        <NTag
-          v-else-if="software.isMissing"
-          size="tiny"
-          type="warning"
-          :bordered="false"
-          round
-        >
-          <template #icon>
-            <AlertCircle class="w-3 h-3" />
-          </template>
-          路径缺失
-        </NTag>
-
-        <NTag
-          v-else
-          size="tiny"
-          :bordered="false"
-          round
-          type="default"
-          class="text-[10px] truncate max-w-[90px]"
-        >
-          {{ software.categoryName || '默认' }}
-        </NTag>
-
-        <Shield
-          v-if="software.runAsAdmin"
-          class="w-3 h-3 text-[var(--n-primary-color)] shrink-0"
-          title="默认以管理员身份运行"
-        />
-      </div>
-
-      <!-- Favorite & Dropdown Menu -->
-      <div class="flex items-center gap-0.5" @click.stop>
-        <NButton
-          quaternary
-          circle
-          size="tiny"
-          @click.stop="libraryStore.toggleFavorite(software.id)"
-          :title="software.isFavorite ? '取消收藏' : '添加收藏'"
-        >
-          <template #icon>
-            <Star
-              class="w-3.5 h-3.5 transition-colors"
-              :class="software.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[var(--n-text-color)] opacity-60'"
-            />
-          </template>
-        </NButton>
-
-        <NDropdown
-          trigger="click"
-          :options="dropdownOptions"
-          @select="handleMenuSelect"
-        >
-          <NButton
-            quaternary
-            circle
-            size="tiny"
-            class="opacity-0 group-hover:opacity-100 transition-opacity"
-            title="更多操作"
-          >
-            <template #icon>
-              <MoreVertical class="w-3.5 h-3.5 text-[var(--n-text-color)] opacity-60" />
-            </template>
-          </NButton>
-        </NDropdown>
-      </div>
-    </div>
-
-    <!-- Middle: App Icon + Name + Description -->
-    <div class="flex items-start gap-3 my-1">
-      <!-- App Icon -->
-      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-xs shrink-0 overflow-hidden">
+    <!-- Top Row: Icon & Actions -->
+    <div class="flex items-start justify-between">
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg text-white shadow-sm overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 shrink-0">
         <img
           v-if="software.iconPath"
           :src="software.iconPath"
@@ -100,33 +17,70 @@
         <span v-else>{{ software.name.slice(0, 1).toUpperCase() }}</span>
       </div>
 
-      <!-- Texts -->
-      <div class="flex-1 min-w-0">
-        <h3 class="text-xs font-semibold text-[var(--n-text-color)] truncate group-hover:text-[var(--n-primary-color)] transition-colors">
-          {{ software.name }}
-        </h3>
-        <p class="text-[11px] text-[var(--n-text-color)] opacity-60 truncate mt-0.5" :title="software.description || software.exePath">
-          {{ software.description || software.exePath }}
-        </p>
+      <div class="flex items-center gap-1">
+        <!-- Always visible if favorited -->
+        <button
+          v-if="software.isFavorite"
+          @click.stop="libraryStore.toggleFavorite(software.id)"
+          class="p-1 rounded-full hover:bg-[var(--n-border-color)] transition-colors cursor-pointer"
+          title="取消收藏"
+        >
+          <Star class="w-4 h-4 text-amber-500 fill-amber-500" />
+        </button>
+        
+        <!-- Only visible on hover -->
+        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            v-if="!software.isFavorite"
+            @click.stop="libraryStore.toggleFavorite(software.id)"
+            class="p-1 rounded-full hover:bg-[var(--n-border-color)] transition-colors cursor-pointer"
+            title="添加收藏"
+          >
+            <Star class="w-4 h-4 text-[var(--n-text-color)] opacity-40" />
+          </button>
+
+          <NDropdown trigger="click" :options="dropdownOptions" @select="handleMenuSelect">
+            <button
+              class="p-1 rounded-full hover:bg-[var(--n-border-color)] transition-colors cursor-pointer"
+              title="更多操作"
+              @click.stop
+            >
+              <MoreVertical class="w-4 h-4 text-[var(--n-text-color)] opacity-60" />
+            </button>
+          </NDropdown>
+        </div>
       </div>
     </div>
 
-    <!-- Bottom Meta: Launch Count & Quick Launch Action -->
-    <div class="mt-3 pt-2 border-t border-[var(--n-border-color)] flex items-center justify-between text-[11px] text-[var(--n-text-color)] opacity-70">
-      <span>启动 {{ software.launchCount }} 次</span>
+    <!-- Spacer -->
+    <div class="flex-1"></div>
 
-      <!-- Quick Launch Hover Button -->
-      <NButton
-        type="primary"
-        size="tiny"
-        class="opacity-0 group-hover:opacity-100 transition-opacity"
-        @click.stop="handleLaunch(false)"
-      >
-        <template #icon>
-          <Play class="w-3 h-3 fill-current" />
-        </template>
-        <span>启动</span>
-      </NButton>
+    <!-- Bottom Row: Title, Category & Status -->
+    <div class="relative min-w-0 pr-4">
+      <h3 class="text-sm font-medium text-[var(--n-text-color)] truncate group-hover:text-[var(--n-primary-color)] transition-colors">
+        {{ software.name }}
+      </h3>
+      <div class="flex items-center gap-1.5 mt-0.5">
+        <span class="text-xs text-[var(--n-text-color)] opacity-50 truncate">
+          {{ software.categoryName || '默认分类' }}
+        </span>
+        <Shield v-if="software.runAsAdmin" class="w-3 h-3 text-[var(--n-primary-color)] opacity-70 shrink-0" />
+      </div>
+      
+      <!-- Running Dot Absolute -->
+      <div
+        v-if="software.isRunning"
+        class="absolute right-0 bottom-1 w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+        title="运行中"
+      ></div>
+    </div>
+
+    <!-- Missing Overlay -->
+    <div v-if="software.isMissing" class="absolute inset-0 bg-[var(--n-color-modal)]/40 flex items-center justify-center rounded-xl backdrop-blur-[1px] pointer-events-none">
+      <div class="bg-black/70 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-1">
+        <AlertCircle class="w-3 h-3" />
+        缺失
+      </div>
     </div>
 
     <!-- Right-click Context Menu -->
@@ -140,32 +94,14 @@
       :on-clickoutside="() => showContextMenu = false"
       @select="handleMenuSelect"
     />
-  </NCard>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, h, nextTick } from "vue";
 import type { Software } from "@/types";
-import {
-  NCard,
-  NTag,
-  NButton,
-  NDropdown,
-  useDialog,
-  useMessage,
-  type DropdownOption,
-} from "naive-ui";
-import {
-  Star,
-  MoreVertical,
-  Play,
-  AlertCircle,
-  Shield,
-  FolderOpen,
-  Copy,
-  Edit3,
-  Trash2,
-} from "@lucide/vue";
+import { NDropdown, useDialog, useMessage, type DropdownOption } from "naive-ui";
+import { Star, MoreVertical, Play, AlertCircle, Shield, FolderOpen, Copy, Edit3, Trash2 } from "@lucide/vue";
 import { useLibraryStore } from "@/stores/library";
 
 const props = defineProps<{

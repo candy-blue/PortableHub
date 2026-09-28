@@ -3,24 +3,24 @@
     <!-- Empty State -->
     <div v-if="softwareList.length === 0" class="h-full flex items-center justify-center">
       <NEmpty
-        class="h-72 flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-[var(--n-border-color)] bg-[var(--n-color-modal)] opacity-80"
-        :description="libraryStore.searchQuery ? '未找到匹配软件' : '暂无便携软件'"
-        size="large"
+        class="flex flex-col items-center justify-center p-8 rounded-xl bg-transparent"
+        :description="libraryStore.searchQuery ? '未找到匹配软件' : '还没添加任何便携软件'"
+        size="huge"
       >
         <template #extra>
-          <div class="flex items-center gap-3 mt-2">
-            <NButton type="primary" size="small" @click="libraryStore.openAddModal">
+          <div class="flex items-center gap-3 mt-4">
+            <NButton type="primary" @click="libraryStore.openAddModal">
               <template #icon>
-                <Plus class="w-3.5 h-3.5" />
+                <Plus class="w-4 h-4" />
               </template>
-              <span>添加应用</span>
+              <span>手动添加</span>
             </NButton>
 
-            <NButton secondary size="small" @click="libraryStore.isScannerModalOpen = true">
+            <NButton secondary @click="libraryStore.isScannerModalOpen = true">
               <template #icon>
-                <FolderSearch class="w-3.5 h-3.5" />
+                <FolderSearch class="w-4 h-4" />
               </template>
-              <span>扫描导入</span>
+              <span>扫描目录</span>
             </NButton>
           </div>
         </template>
@@ -28,12 +28,12 @@
     </div>
 
     <!-- Rows List -->
-    <div v-else class="space-y-1.5">
+    <div v-else class="space-y-1">
       <div
         v-for="(item, index) in softwareList"
         :key="item.id"
-        class="stagger-item group flex items-center justify-between p-2 rounded-lg border border-transparent hover:border-[var(--n-border-color)] bg-[var(--n-color)] hover:bg-[var(--n-color-modal)] transition-all cursor-pointer select-none shadow-sm"
-        :style="{ '--stagger-index': Math.min(index, 12) }"
+        class="stagger-item group flex items-center justify-between p-2 rounded-lg border border-transparent hover:bg-[var(--n-hover-color)] transition-quick cursor-pointer select-none"
+        :style="{ '--stagger-index': Math.min(index, 15) }"
         @click="libraryStore.launchSoftware(item.id)"
         @contextmenu.prevent="handleContextMenu($event, item)"
       >
@@ -46,79 +46,62 @@
 
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold text-[var(--n-text-color)] group-hover:text-[var(--n-primary-color)] truncate transition-colors">
+              <span class="text-[13px] font-medium text-[var(--n-text-color)] group-hover:text-[var(--n-primary-color)] truncate transition-colors">
                 {{ item.name }}
               </span>
-              <span v-if="item.isRunning" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <NTag v-if="item.isMissing" size="tiny" type="warning" :bordered="false" round>
-                缺失
-              </NTag>
+              <span v-if="item.isRunning" class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span v-if="item.isMissing" class="text-[10px] text-amber-500">缺失</span>
             </div>
-            <div class="text-[11px] text-[var(--n-text-color)] opacity-60 truncate flex items-center gap-2 mt-0.5">
-              <NTag size="tiny" :bordered="false" class="text-[10px]">
-                {{ item.categoryName || '默认' }}
-              </NTag>
-              <span class="truncate font-mono">{{ item.exePath }}</span>
+            <div class="text-[11px] text-[var(--n-text-color)] opacity-60 truncate flex items-center gap-1 mt-0.5">
+              <span>{{ item.categoryName || '默认分类' }}</span>
+              <span>·</span>
+              <span class="truncate font-mono" :title="'启动次数: ' + item.launchCount">{{ item.exePath }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Right: Meta & Actions -->
-        <div class="flex items-center gap-1.5 shrink-0" @click.stop>
-          <span class="text-[11px] text-[var(--n-text-color)] opacity-60 hidden sm:inline mr-2">启动 {{ item.launchCount }} 次</span>
-
-          <NButton
-            quaternary
-            circle
-            size="tiny"
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-1 shrink-0">
+          <button
+            v-if="item.isFavorite"
             @click.stop="libraryStore.toggleFavorite(item.id)"
-            :title="item.isFavorite ? '取消收藏' : '添加收藏'"
+            class="p-1.5 rounded-full hover:bg-[var(--n-border-color)] transition-colors cursor-pointer mr-1"
+            title="取消收藏"
           >
-            <template #icon>
-              <Star
-                class="w-3.5 h-3.5 transition-colors"
-                :class="item.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[var(--n-text-color)] opacity-60'"
-              />
-            </template>
-          </NButton>
+            <Star class="w-4 h-4 text-amber-500 fill-amber-500" />
+          </button>
 
-          <NButton
-            quaternary
-            circle
-            size="tiny"
-            class="opacity-0 group-hover:opacity-100 transition-opacity"
-            @click.stop="libraryStore.openFolder(item.exePath)"
-            title="打开所在目录"
-          >
-            <template #icon>
-              <FolderOpen class="w-3.5 h-3.5 text-[var(--n-text-color)] opacity-60" />
-            </template>
-          </NButton>
-
-          <NButton
-            quaternary
-            circle
-            size="tiny"
-            class="opacity-0 group-hover:opacity-100 transition-opacity"
-            @click.stop="libraryStore.openEditModal(item)"
-            title="编辑应用"
-          >
-            <template #icon>
-              <Edit3 class="w-3.5 h-3.5 text-[var(--n-text-color)] opacity-60" />
-            </template>
-          </NButton>
-
-          <NButton
-            type="primary"
-            size="tiny"
-            class="opacity-0 group-hover:opacity-100 transition-opacity"
-            @click.stop="libraryStore.launchSoftware(item.id)"
-          >
-            <template #icon>
-              <Play class="w-3 h-3 fill-current" />
-            </template>
-            <span>启动</span>
-          </NButton>
+          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              v-if="!item.isFavorite"
+              @click.stop="libraryStore.toggleFavorite(item.id)"
+              class="p-1.5 rounded-full hover:bg-[var(--n-border-color)] transition-colors cursor-pointer"
+              title="添加收藏"
+            >
+              <Star class="w-4 h-4 text-[var(--n-text-color)] opacity-40" />
+            </button>
+            <button
+              @click.stop="libraryStore.openFolder(item.exePath)"
+              class="p-1.5 rounded-full hover:bg-[var(--n-border-color)] transition-colors cursor-pointer"
+              title="打开目录"
+            >
+              <FolderOpen class="w-4 h-4 text-[var(--n-text-color)] opacity-60" />
+            </button>
+            <button
+              @click.stop="libraryStore.openEditModal(item)"
+              class="p-1.5 rounded-full hover:bg-[var(--n-border-color)] transition-colors cursor-pointer"
+              title="编辑应用"
+            >
+              <Edit3 class="w-4 h-4 text-[var(--n-text-color)] opacity-60" />
+            </button>
+            <button
+              @click.stop="libraryStore.launchSoftware(item.id)"
+              class="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              title="启动应用"
+            >
+              <Play class="w-4 h-4 text-[var(--n-primary-color)] fill-[var(--n-primary-color)]" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -142,7 +125,6 @@ import { ref, h, nextTick } from "vue";
 import type { Software } from "@/types";
 import {
   NEmpty,
-  NTag,
   NButton,
   NDropdown,
   useDialog,

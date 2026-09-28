@@ -11,7 +11,7 @@
 
     <!-- Modal Box -->
     <div
-      class="animate-palette-modal relative w-full max-w-xl rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface-elevated)] shadow-[var(--shadow-palette)] overflow-hidden z-10 flex flex-col"
+      class="animate-palette-modal relative w-full max-w-xl rounded-2xl border border-[var(--n-border-color)] bg-[var(--n-color-modal)] shadow-xl overflow-hidden z-10 flex flex-col"
     >
       <!-- Search Input Area -->
       <div class="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--n-border-color)] bg-transparent">
@@ -21,7 +21,7 @@
           v-model="query"
           type="text"
           placeholder="快速搜索便携软件、分类、拼音首字母..."
-          class="w-full bg-transparent text-sm text-[var(--n-text-color)] placeholder-[var(--text-muted)] outline-none"
+          class="w-full bg-transparent text-sm text-[var(--n-text-color)] placeholder:text-[var(--n-text-color)] placeholder:opacity-40 outline-none"
           @keydown.down.prevent="navigate(1)"
           @keydown.up.prevent="navigate(-1)"
           @keydown.enter.prevent="handleEnter"
@@ -30,7 +30,7 @@
         <button
           v-if="query"
           @click="query = ''"
-          class="text-[var(--n-text-color)] opacity-60 hover:text-[var(--n-text-color)] p-1 rounded-md"
+          class="text-[var(--n-text-color)] opacity-60 hover:opacity-100 p-1 rounded-md transition-opacity cursor-pointer"
         >
           <X class="w-4 h-4" />
         </button>
@@ -38,7 +38,7 @@
       </div>
 
       <!-- Results List -->
-      <div class="max-h-80 overflow-y-auto p-2 space-y-1">
+      <div class="max-h-80 overflow-y-auto p-2 space-y-0.5">
         <div
           v-if="results.length === 0"
           class="py-10 text-center text-xs text-[var(--n-text-color)] opacity-60"
@@ -51,16 +51,15 @@
           :key="item.id"
           @click="selectAndLaunch(item)"
           @mouseenter="selectedIndex = index"
-          class="flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all"
+          class="flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-colors"
           :class="selectedIndex === index
-            ? 'bg-[var(--n-primary-color)] text-white shadow-xs'
-            : 'hover:bg-[var(--bg-card-hover)] text-[var(--n-text-color)]'"
+            ? 'bg-[var(--n-primary-color)] bg-opacity-10 dark:bg-opacity-20'
+            : 'hover:bg-black/5 dark:hover:bg-white/10 text-[var(--n-text-color)]'"
         >
           <!-- Left: App Icon + Name + Category -->
           <div class="flex items-center gap-3 min-w-0 flex-1">
             <div
-              class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-xs"
-              :class="selectedIndex === index ? 'bg-white/20 text-white' : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'"
+              class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
             >
               <img v-if="item.iconPath" :src="item.iconPath" :alt="item.name" class="w-full h-full object-cover" />
               <span v-else>{{ item.name.slice(0, 1).toUpperCase() }}</span>
@@ -68,21 +67,23 @@
 
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <span class="text-xs font-semibold truncate">{{ item.name }}</span>
+                <span 
+                  class="text-xs font-medium truncate"
+                  :class="selectedIndex === index ? 'text-[var(--n-primary-color)]' : 'text-[var(--n-text-color)]'"
+                >{{ item.name }}</span>
                 <span
                   v-if="item.isFavorite"
                   class="text-[10px]"
-                  :class="selectedIndex === index ? 'text-amber-200' : 'text-amber-500'"
+                  :class="selectedIndex === index ? 'text-amber-500 opacity-100' : 'text-amber-500 opacity-60'"
                 >★</span>
                 <span
                   v-if="item.isRunning"
-                  class="w-1.5 h-1.5 rounded-full"
-                  :class="selectedIndex === index ? 'bg-white' : 'bg-[var(--status-running)]'"
+                  class="w-1.5 h-1.5 rounded-full bg-emerald-500"
                 ></span>
               </div>
               <p
-                class="text-[11px] truncate mt-0.5"
-                :class="selectedIndex === index ? 'text-white/80' : 'text-[var(--n-text-color)] opacity-60'"
+                class="text-[11px] truncate mt-0.5 transition-colors"
+                :class="selectedIndex === index ? 'text-[var(--n-primary-color)] opacity-80' : 'text-[var(--n-text-color)] opacity-50'"
               >
                 {{ item.description || item.exePath }}
               </p>
@@ -90,16 +91,16 @@
           </div>
 
           <!-- Right: Category Tag & Return Action -->
-          <div class="flex items-center gap-2 pl-3 shrink-0">
+          <div class="flex items-center gap-3 pl-3 shrink-0">
             <span
-              class="text-[10px] px-2 py-0.5 rounded-md font-mono"
-              :class="selectedIndex === index ? 'bg-white/20 text-white' : 'bg-transparent text-[var(--n-text-color)] opacity-80'"
+              class="text-[10px] truncate"
+              :class="selectedIndex === index ? 'text-[var(--n-primary-color)] opacity-80' : 'text-[var(--n-text-color)] opacity-40'"
             >
               {{ item.categoryName }}
             </span>
             <div
               v-if="selectedIndex === index"
-              class="flex items-center gap-1 text-[10px] text-white/90"
+              class="flex items-center gap-1 text-[10px] text-[var(--n-primary-color)] font-medium"
             >
               <CornerDownLeft class="w-3 h-3" />
               <span>启动</span>

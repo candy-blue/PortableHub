@@ -3,24 +3,24 @@
     <!-- Empty State -->
     <div v-if="softwareList.length === 0" class="h-full flex items-center justify-center">
       <NEmpty
-        class="h-72 flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-[var(--n-border-color)] bg-[var(--n-color-modal)] opacity-80"
-        :description="libraryStore.searchQuery ? '未找到匹配软件' : '暂无便携软件'"
-        size="large"
+        class="flex flex-col items-center justify-center p-8 rounded-xl bg-transparent"
+        :description="libraryStore.searchQuery ? '未找到匹配软件' : '还没添加任何便携软件'"
+        size="huge"
       >
         <template #extra>
-          <div class="flex items-center gap-3 mt-2">
-            <NButton type="primary" size="small" @click="libraryStore.openAddModal">
+          <div class="flex items-center gap-3 mt-4">
+            <NButton type="primary" @click="libraryStore.openAddModal">
               <template #icon>
-                <Plus class="w-3.5 h-3.5" />
+                <Plus class="w-4 h-4" />
               </template>
-              <span>添加应用</span>
+              <span>手动添加</span>
             </NButton>
 
-            <NButton secondary size="small" @click="libraryStore.isScannerModalOpen = true">
+            <NButton secondary @click="libraryStore.isScannerModalOpen = true">
               <template #icon>
-                <FolderSearch class="w-3.5 h-3.5" />
+                <FolderSearch class="w-4 h-4" />
               </template>
-              <span>扫描导入</span>
+              <span>扫描目录</span>
             </NButton>
           </div>
         </template>
@@ -28,12 +28,12 @@
     </div>
 
     <!-- Cards Grid -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+    <div v-else class="grid gap-3 grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
       <SoftwareCard
         v-for="(item, index) in softwareList"
         :key="item.id"
         :software="item"
-        class="stagger-item shadow-sm hover:shadow-md transition-shadow"
+        class="stagger-item"
         :style="{ '--stagger-index': Math.min(index, 20) }"
       />
     </div>

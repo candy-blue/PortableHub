@@ -17,7 +17,7 @@
         bordered
         collapse-mode="width"
         :collapsed-width="64"
-        :width="220"
+        :width="208"
         :collapsed="isCollapsed"
         show-trigger="bar"
         @update:collapsed="isCollapsed = $event"
