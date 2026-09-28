@@ -1,35 +1,47 @@
 <template>
-  <div
-    class="software-card-interactive relative flex flex-col justify-between p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] cursor-pointer group select-none overflow-visible"
-    :class="{ 'opacity-70 border-dashed border-[var(--status-missing)]': software.isMissing }"
+  <NCard
+    hoverable
+    size="small"
+    class="cursor-pointer group select-none transition-all duration-150 border-[var(--border-subtle)]"
+    :class="{ 'opacity-60 border-dashed border-amber-500': software.isMissing }"
     @click="handleCardClick"
+    @contextmenu.prevent="handleContextMenu"
   >
     <!-- Top Action Row: Running Indicator, Category Badge, Favorite Star, More Menu -->
-    <div class="flex items-center justify-between gap-1 mb-2">
-      <!-- Status Badge -->
+    <div class="flex items-center justify-between gap-1 mb-2.5">
+      <!-- Status Badges -->
       <div class="flex items-center gap-1.5 min-w-0">
         <span
           v-if="software.isRunning"
-          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--status-running-bg)] text-[var(--status-running)]"
+          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-[var(--status-running)] animate-pulse"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
           运行中
         </span>
 
-        <span
+        <NTag
           v-else-if="software.isMissing"
-          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--status-missing-bg)] text-[var(--status-missing)]"
+          size="tiny"
+          type="warning"
+          :bordered="false"
+          round
         >
-          <AlertCircle class="w-3 h-3" />
+          <template #icon>
+            <AlertCircle class="w-3 h-3" />
+          </template>
           路径缺失
-        </span>
+        </NTag>
 
-        <span
+        <NTag
           v-else
-          class="text-[10px] px-1.5 py-0.5 rounded-md font-medium bg-[var(--bg-app)] text-[var(--text-secondary)] truncate max-w-[90px]"
+          size="tiny"
+          :bordered="false"
+          round
+          type="default"
+          class="text-[10px] truncate max-w-[90px]"
         >
           {{ software.categoryName || '默认' }}
-        </span>
+        </NTag>
 
         <Shield
           v-if="software.runAsAdmin"
@@ -38,90 +50,47 @@
         />
       </div>
 
-      <!-- Favorite & More Buttons -->
-      <div class="flex items-center gap-0.5 relative">
-        <button
+      <!-- Favorite & Dropdown Menu -->
+      <div class="flex items-center gap-0.5" @click.stop>
+        <NButton
+          quaternary
+          circle
+          size="tiny"
           @click.stop="libraryStore.toggleFavorite(software.id)"
-          class="w-6 h-6 rounded-md flex items-center justify-center transition-colors cursor-pointer"
-          :class="software.isFavorite ? 'text-amber-400 hover:text-amber-500' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] opacity-0 group-hover:opacity-100'"
-          title="收藏软件"
+          :title="software.isFavorite ? '取消收藏' : '添加收藏'"
         >
-          <Star class="w-3.5 h-3.5" :fill="software.isFavorite ? 'currentColor' : 'none'" />
-        </button>
+          <template #icon>
+            <Star
+              class="w-3.5 h-3.5 transition-colors"
+              :class="software.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[var(--text-muted)]'"
+            />
+          </template>
+        </NButton>
 
-        <div class="relative">
-          <button
-            @click.stop="isMenuOpen = !isMenuOpen"
-            class="w-6 h-6 rounded-md flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-app)] opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+        <NDropdown
+          trigger="click"
+          :options="dropdownOptions"
+          @select="handleMenuSelect"
+        >
+          <NButton
+            quaternary
+            circle
+            size="tiny"
+            class="opacity-0 group-hover:opacity-100 transition-opacity"
             title="更多操作"
           >
-            <MoreVertical class="w-3.5 h-3.5" />
-          </button>
-
-          <!-- Dropdown Menu -->
-          <div
-            v-if="isMenuOpen"
-            class="absolute right-0 top-7 w-36 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface-elevated)] shadow-xl py-1 z-50 text-xs animate-fade-in"
-            @click.stop
-          >
-            <button
-              @click="handleLaunch(false)"
-              class="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] cursor-pointer"
-            >
-              <Play class="w-3.5 h-3.5 text-[var(--accent-primary)]" />
-              <span>启动软件</span>
-            </button>
-
-            <button
-              @click="handleLaunch(true)"
-              class="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] cursor-pointer"
-            >
-              <Shield class="w-3.5 h-3.5 text-amber-500" />
-              <span>以管理员运行</span>
-            </button>
-
-            <button
-              @click="handleOpenFolder"
-              class="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] cursor-pointer"
-            >
-              <FolderOpen class="w-3.5 h-3.5 text-[var(--text-muted)]" />
-              <span>打开所在目录</span>
-            </button>
-
-            <button
-              @click="handleCopyPath"
-              class="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] cursor-pointer"
-            >
-              <Copy class="w-3.5 h-3.5 text-[var(--text-muted)]" />
-              <span>复制路径</span>
-            </button>
-
-            <div class="my-1 border-t border-[var(--border-subtle)]"></div>
-
-            <button
-              @click="handleEdit"
-              class="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] cursor-pointer"
-            >
-              <Edit3 class="w-3.5 h-3.5 text-[var(--text-muted)]" />
-              <span>编辑应用</span>
-            </button>
-
-            <button
-              @click="handleDelete"
-              class="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-rose-500/10 text-rose-500 cursor-pointer"
-            >
-              <Trash2 class="w-3.5 h-3.5" />
-              <span>从库中删除</span>
-            </button>
-          </div>
-        </div>
+            <template #icon>
+              <MoreVertical class="w-3.5 h-3.5" />
+            </template>
+          </NButton>
+        </NDropdown>
       </div>
     </div>
 
     <!-- Middle: App Icon + Name + Description -->
     <div class="flex items-start gap-3 my-1">
-      <!-- Icon -->
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0 overflow-hidden">
+      <!-- App Icon -->
+      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-xs shrink-0 overflow-hidden">
         <img
           v-if="software.iconPath"
           :src="software.iconPath"
@@ -144,25 +113,48 @@
 
     <!-- Bottom Meta: Launch Count & Quick Launch Action -->
     <div class="mt-3 pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-      <div class="flex items-center gap-1">
-        <span>启动 {{ software.launchCount }} 次</span>
-      </div>
+      <span>启动 {{ software.launchCount }} 次</span>
 
       <!-- Quick Launch Hover Button -->
-      <button
+      <NButton
+        type="primary"
+        size="tiny"
+        class="opacity-0 group-hover:opacity-100 transition-opacity"
         @click.stop="handleLaunch(false)"
-        class="h-6 px-2.5 rounded-md bg-[var(--accent-primary)] text-white text-[11px] font-medium flex items-center gap-1 shadow-xs hover:bg-[var(--accent-primary-hover)] transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
       >
-        <Play class="w-3 h-3 fill-current" />
+        <template #icon>
+          <Play class="w-3 h-3 fill-current" />
+        </template>
         <span>启动</span>
-      </button>
+      </NButton>
     </div>
-  </div>
+
+    <!-- Right-click Context Menu -->
+    <NDropdown
+      placement="bottom-start"
+      trigger="manual"
+      :x="contextX"
+      :y="contextY"
+      :options="dropdownOptions"
+      :show="showContextMenu"
+      :on-clickoutside="() => showContextMenu = false"
+      @select="handleMenuSelect"
+    />
+  </NCard>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, h, nextTick } from "vue";
 import type { Software } from "@/types";
+import {
+  NCard,
+  NTag,
+  NButton,
+  NDropdown,
+  useDialog,
+  useMessage,
+  type DropdownOption,
+} from "naive-ui";
 import {
   Star,
   MoreVertical,
@@ -181,48 +173,103 @@ const props = defineProps<{
 }>();
 
 const libraryStore = useLibraryStore();
-const isMenuOpen = ref(false);
+const dialog = useDialog();
+const message = useMessage();
+
+const showContextMenu = ref(false);
+const contextX = ref(0);
+const contextY = ref(0);
+
+const dropdownOptions: DropdownOption[] = [
+  {
+    label: "启动应用",
+    key: "launch",
+    icon: () => h(Play, { class: "w-4 h-4 text-blue-500" }),
+  },
+  {
+    label: "以管理员身份运行",
+    key: "launch-admin",
+    icon: () => h(Shield, { class: "w-4 h-4 text-amber-500" }),
+  },
+  {
+    type: "divider",
+    key: "d1",
+  },
+  {
+    label: "打开所在目录",
+    key: "open-folder",
+    icon: () => h(FolderOpen, { class: "w-4 h-4" }),
+  },
+  {
+    label: "复制程序路径",
+    key: "copy-path",
+    icon: () => h(Copy, { class: "w-4 h-4" }),
+  },
+  {
+    type: "divider",
+    key: "d2",
+  },
+  {
+    label: "编辑应用信息",
+    key: "edit",
+    icon: () => h(Edit3, { class: "w-4 h-4" }),
+  },
+  {
+    label: "从库中移除",
+    key: "delete",
+    icon: () => h(Trash2, { class: "w-4 h-4 text-rose-500" }),
+  },
+];
 
 function handleCardClick() {
   handleLaunch(false);
 }
 
 function handleLaunch(forceAdmin: boolean) {
-  isMenuOpen.value = false;
+  showContextMenu.value = false;
   libraryStore.launchSoftware(props.software.id, forceAdmin);
 }
 
-function handleOpenFolder() {
-  isMenuOpen.value = false;
-  libraryStore.openFolder(props.software.exePath);
+function handleContextMenu(e: MouseEvent) {
+  showContextMenu.value = false;
+  nextTick(() => {
+    contextX.value = e.clientX;
+    contextY.value = e.clientY;
+    showContextMenu.value = true;
+  });
 }
 
-function handleCopyPath() {
-  isMenuOpen.value = false;
-  navigator.clipboard.writeText(props.software.exePath);
-}
-
-function handleEdit() {
-  isMenuOpen.value = false;
-  libraryStore.openEditModal(props.software);
-}
-
-function handleDelete() {
-  isMenuOpen.value = false;
-  if (confirm(`确定要从库中移除应用 "${props.software.name}" 吗？（不会删除磁盘文件）`)) {
-    libraryStore.deleteSoftware(props.software.id);
+function handleMenuSelect(key: string | number) {
+  showContextMenu.value = false;
+  switch (key) {
+    case "launch":
+      handleLaunch(false);
+      break;
+    case "launch-admin":
+      handleLaunch(true);
+      break;
+    case "open-folder":
+      libraryStore.openFolder(props.software.exePath);
+      break;
+    case "copy-path":
+      navigator.clipboard.writeText(props.software.exePath);
+      message.success("程序路径已复制到剪贴板");
+      break;
+    case "edit":
+      libraryStore.openEditModal(props.software);
+      break;
+    case "delete":
+      dialog.warning({
+        title: "从库中移除",
+        content: `确定要从软件库中移除应用 "${props.software.name}" 吗？（注意：这不会删除您硬盘上的原始文件）`,
+        positiveText: "确认移除",
+        negativeText: "取消",
+        onPositiveClick: () => {
+          libraryStore.deleteSoftware(props.software.id);
+          message.info(`已移除 "${props.software.name}"`);
+        },
+      });
+      break;
   }
 }
-
-function closeDropdown(_e: MouseEvent) {
-  isMenuOpen.value = false;
-}
-
-onMounted(() => {
-  window.addEventListener("click", closeDropdown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("click", closeDropdown);
-});
 </script>

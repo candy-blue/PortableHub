@@ -136,7 +136,8 @@ try {
     }
 }
 finally {
-    Set-Content -Path $tauriConfPath -Value $originalConfContent -Encoding UTF8
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($tauriConfPath, $originalConfContent, $utf8NoBom)
     Write-Host "`nTauri configuration verified." -ForegroundColor Gray
 }
 

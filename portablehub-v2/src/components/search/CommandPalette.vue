@@ -185,8 +185,8 @@ function handleEnter(e: KeyboardEvent) {
   }
 }
 
-function selectAndLaunch(software: Software, _asAdmin = false) {
-  libraryStore.launchSoftware(software.id);
+function selectAndLaunch(software: Software, asAdmin = false) {
+  libraryStore.launchSoftware(software.id, asAdmin);
   close();
 }
 

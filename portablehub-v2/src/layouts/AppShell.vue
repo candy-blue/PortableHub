@@ -18,59 +18,61 @@
         <!-- Subheader Toolbar -->
         <div class="h-11 px-5 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] shrink-0">
           <!-- Left: Filter Title & Count -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2.5">
             <h2 class="text-xs font-bold text-[var(--text-primary)]">
               {{ currentTitle }}
             </h2>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-app)] text-[var(--text-muted)] font-mono">
+            <NTag round :bordered="false" size="small" type="default" class="text-[11px] font-mono">
               {{ libraryStore.filteredSoftware.length }} 个应用
-            </span>
+            </NTag>
           </div>
 
           <!-- Right: View Controls (Sort, View Mode, Add App) -->
-          <div class="flex items-center gap-2">
-            <!-- Sort dropdown -->
-            <div class="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
-              <ArrowDownUp class="w-3.5 h-3.5 text-[var(--text-muted)]" />
-              <select
-                v-model="libraryStore.sortBy"
-                class="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-md px-2 py-1 text-xs text-[var(--text-primary)] outline-none cursor-pointer hover:border-[var(--border-strong)] transition-colors"
-              >
-                <option value="Custom">默认排序</option>
-                <option value="Name">名称字母 (A-Z)</option>
-                <option value="LaunchCount">启动频率</option>
-                <option value="LastLaunchedAt">最近使用</option>
-              </select>
+          <div class="flex items-center gap-3">
+            <!-- Sort dropdown via Naive UI NSelect -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs text-[var(--text-muted)]">排序:</span>
+              <NSelect
+                v-model:value="libraryStore.sortBy"
+                size="small"
+                :options="sortOptions"
+                style="width: 130px"
+              />
             </div>
 
-            <!-- View Switcher (Grid / List) -->
-            <div class="flex items-center p-0.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)]">
-              <button
+            <!-- View Switcher (Grid / List) via NButtonGroup -->
+            <NButtonGroup size="small">
+              <NButton
+                :type="libraryStore.viewMode === 'Grid' ? 'primary' : 'default'"
                 @click="libraryStore.viewMode = 'Grid'"
-                class="w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer"
-                :class="libraryStore.viewMode === 'Grid' ? 'bg-[var(--accent-primary)] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'"
                 title="网格视图"
               >
-                <LayoutGrid class="w-3.5 h-3.5" />
-              </button>
-              <button
+                <template #icon>
+                  <LayoutGrid class="w-3.5 h-3.5" />
+                </template>
+              </NButton>
+              <NButton
+                :type="libraryStore.viewMode === 'List' ? 'primary' : 'default'"
                 @click="libraryStore.viewMode = 'List'"
-                class="w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer"
-                :class="libraryStore.viewMode === 'List' ? 'bg-[var(--accent-primary)] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'"
                 title="列表视图"
               >
-                <List class="w-3.5 h-3.5" />
-              </button>
-            </div>
+                <template #icon>
+                  <List class="w-3.5 h-3.5" />
+                </template>
+              </NButton>
+            </NButtonGroup>
 
-            <!-- Add Application Button -->
-            <button
+            <!-- Add Application Primary Button via NButton -->
+            <NButton
+              type="primary"
+              size="small"
               @click="libraryStore.openAddModal"
-              class="h-7 px-3 rounded-lg bg-[var(--accent-primary)] text-white text-xs font-medium flex items-center gap-1.5 shadow-xs hover:bg-[var(--accent-primary-hover)] transition-all cursor-pointer"
             >
-              <Plus class="w-3.5 h-3.5" />
+              <template #icon>
+                <Plus class="w-3.5 h-3.5" />
+              </template>
               <span>添加应用</span>
-            </button>
+            </NButton>
           </div>
         </div>
 
@@ -103,6 +105,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { NTag, NSelect, NButtonGroup, NButton } from "naive-ui";
 import TopBar from "@/components/shell/TopBar.vue";
 import Sidebar from "@/components/shell/Sidebar.vue";
 import SoftwareGrid from "@/components/software/SoftwareGrid.vue";
@@ -112,10 +115,17 @@ import AddEditSoftwareModal from "@/components/modals/AddEditSoftwareModal.vue";
 import ScannerModal from "@/components/modals/ScannerModal.vue";
 import CategoryModal from "@/components/modals/CategoryModal.vue";
 import SettingsModal from "@/components/modals/SettingsModal.vue";
-import { ArrowDownUp, LayoutGrid, List, Plus } from "@lucide/vue";
+import { LayoutGrid, List, Plus } from "@lucide/vue";
 import { useLibraryStore } from "@/stores/library";
 
 const libraryStore = useLibraryStore();
+
+const sortOptions = [
+  { label: "默认排序", value: "Custom" },
+  { label: "名称 (A-Z)", value: "Name" },
+  { label: "启动频率", value: "LaunchCount" },
+  { label: "最近启动", value: "LastLaunchedAt" },
+];
 
 const currentTitle = computed(() => {
   if (libraryStore.selectedNav === "favorites") return "我的收藏";
@@ -132,7 +142,6 @@ function handleFileDrop(e: DragEvent) {
   if (!files || files.length === 0) return;
 
   const file = files[0];
-  // In Tauri, file may have path property
   const filePath = (file as any).path || file.name;
   if (filePath.toLowerCase().endsWith(".exe")) {
     const baseName = file.name.replace(/\.exe$/i, "");

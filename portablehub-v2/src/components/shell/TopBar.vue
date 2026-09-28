@@ -2,7 +2,7 @@
   <header
     class="h-10 w-full flex items-center justify-between pl-3 pr-0 select-none border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] shrink-0 z-30"
   >
-    <!-- Left: App Brand & Breadcrumb (Draggable) -->
+    <!-- Left: App Brand & Breadcrumb (Draggable region) -->
     <div
       class="flex items-center gap-2.5 h-full cursor-default"
       data-tauri-drag-region
@@ -12,7 +12,9 @@
         PH
       </div>
       <span class="font-semibold text-xs tracking-tight text-[var(--text-primary)] pointer-events-none">PortableHub</span>
-      <span class="text-[10px] px-1 py-0.2 rounded font-mono bg-[var(--accent-primary-subtle)] text-[var(--accent-primary)] pointer-events-none">v2.0</span>
+      <NTag size="small" :bordered="false" round type="info" class="text-[10px] pointer-events-none font-mono">
+        v2.0
+      </NTag>
 
       <div class="hidden sm:flex items-center text-xs text-[var(--text-muted)] gap-1 pl-2 border-l border-[var(--border-subtle)] pointer-events-none">
         <span>/</span>
@@ -20,13 +22,13 @@
       </div>
     </div>
 
-    <!-- Center: Search Bar Trigger (Embedded in draggable spacer) -->
+    <!-- Center: Search Bar Trigger (Draggable space around it) -->
     <div
       class="flex-1 h-full flex items-center justify-center px-4 cursor-default"
       data-tauri-drag-region
       @dblclick="toggleMaximize"
     >
-      <div
+      <button
         @click.stop="libraryStore.isCommandPaletteOpen = true"
         class="w-full max-w-sm h-7 px-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-strong)] flex items-center justify-between text-xs text-[var(--text-muted)] cursor-pointer transition-all shadow-xs"
       >
@@ -35,10 +37,10 @@
           <span>搜索便携软件、分类、拼音...</span>
         </div>
         <kbd class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-secondary)] pointer-events-none">Ctrl K</kbd>
-      </div>
+      </button>
     </div>
 
-    <!-- Right: Actions & Native-style Window Caption Controls (NOT draggable) -->
+    <!-- Right: Actions & Windows Native Caption Buttons (NOT draggable) -->
     <div class="flex items-center h-full">
       <!-- Theme Switcher -->
       <button
@@ -82,6 +84,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { NTag } from "naive-ui";
 import { Search, Sun, Moon, Minus, Square, X } from "@lucide/vue";
 import { useLibraryStore } from "@/stores/library";
 import { useThemeStore } from "@/stores/theme";
