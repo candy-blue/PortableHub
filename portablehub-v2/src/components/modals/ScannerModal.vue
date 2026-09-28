@@ -10,8 +10,8 @@
   >
     <div class="space-y-4">
       <!-- Input Group -->
-      <div class="space-y-2 p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-app)]">
-        <label class="block text-xs font-medium text-[var(--text-secondary)]">
+      <div class="space-y-2 p-3 rounded-lg border border-[var(--n-border-color)] bg-transparent">
+        <label class="block text-xs font-medium text-[var(--n-text-color)] opacity-80">
           扫描目录绝对路径
         </label>
         <NInputGroup>
@@ -35,7 +35,7 @@
 
         <div class="flex items-center justify-between pt-1">
           <div class="flex items-center gap-2">
-            <span class="text-xs text-[var(--text-muted)]">默认分类:</span>
+            <span class="text-xs text-[var(--n-text-color)] opacity-60">默认分类:</span>
             <NSelect
               v-model:value="defaultCatId"
               :options="categoryOptions"
@@ -54,7 +54,7 @@
       <!-- Candidate Results -->
       <div v-if="hasScanned">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold text-[var(--text-secondary)]">
+          <span class="text-xs font-semibold text-[var(--n-text-color)] opacity-80">
             发现便携应用候选 ({{ selectedCount }} / {{ candidates.length }})
           </span>
         </div>
@@ -71,7 +71,7 @@
             <div
               v-for="item in candidates"
               :key="item.exePath"
-              class="flex items-center justify-between p-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-primary)] cursor-pointer transition-colors"
+              class="flex items-center justify-between p-2 rounded-lg border border-[var(--n-border-color)] bg-[var(--n-color)] hover:border-[var(--n-primary-color)] cursor-pointer transition-colors"
               @click="item.selected = !item.selected"
             >
               <div class="flex items-center gap-2.5 min-w-0 flex-1">
@@ -80,10 +80,10 @@
                   @click.stop
                 />
                 <div class="min-w-0 flex-1">
-                  <div class="text-xs font-medium text-[var(--text-primary)] truncate">
+                  <div class="text-xs font-medium text-[var(--n-text-color)] truncate">
                     {{ item.name }}
                   </div>
-                  <div class="text-[10px] text-[var(--text-muted)] font-mono truncate">
+                  <div class="text-[10px] text-[var(--n-text-color)] opacity-60 font-mono truncate">
                     {{ item.exePath }}
                   </div>
                 </div>
@@ -96,7 +96,7 @@
 
     <template #footer>
       <div class="flex items-center justify-between w-full">
-        <span class="text-[11px] text-[var(--text-muted)]">
+        <span class="text-[11px] text-[var(--n-text-color)] opacity-60">
           自动过滤卸载向导与冗余运行时文件
         </span>
         <NSpace :size="12">

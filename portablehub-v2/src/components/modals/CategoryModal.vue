@@ -9,7 +9,7 @@
   >
     <div class="space-y-4">
       <div>
-        <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
+        <label class="block text-xs font-medium text-[var(--n-text-color)] opacity-80 mb-1.5">
           分类名称 <span class="text-rose-500">*</span>
         </label>
         <NInput
@@ -21,7 +21,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
+        <label class="block text-xs font-medium text-[var(--n-text-color)] opacity-80 mb-1.5">
           标识色彩
         </label>
         <NColorPicker

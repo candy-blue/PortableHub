@@ -2,7 +2,7 @@
   <NCard
     hoverable
     size="small"
-    class="cursor-pointer group select-none transition-all duration-150 border-[var(--border-subtle)]"
+    class="cursor-pointer group select-none transition-all duration-150"
     :class="{ 'opacity-60 border-dashed border-amber-500': software.isMissing }"
     @click="handleCardClick"
     @contextmenu.prevent="handleContextMenu"
@@ -45,7 +45,7 @@
 
         <Shield
           v-if="software.runAsAdmin"
-          class="w-3 h-3 text-[var(--accent-primary)] shrink-0"
+          class="w-3 h-3 text-[var(--n-primary-color)] shrink-0"
           title="默认以管理员身份运行"
         />
       </div>
@@ -62,7 +62,7 @@
           <template #icon>
             <Star
               class="w-3.5 h-3.5 transition-colors"
-              :class="software.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[var(--text-muted)]'"
+              :class="software.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[var(--n-text-color)] opacity-60'"
             />
           </template>
         </NButton>
@@ -80,7 +80,7 @@
             title="更多操作"
           >
             <template #icon>
-              <MoreVertical class="w-3.5 h-3.5" />
+              <MoreVertical class="w-3.5 h-3.5 text-[var(--n-text-color)] opacity-60" />
             </template>
           </NButton>
         </NDropdown>
@@ -102,17 +102,17 @@
 
       <!-- Texts -->
       <div class="flex-1 min-w-0">
-        <h3 class="text-xs font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent-primary)] transition-colors">
+        <h3 class="text-xs font-semibold text-[var(--n-text-color)] truncate group-hover:text-[var(--n-primary-color)] transition-colors">
           {{ software.name }}
         </h3>
-        <p class="text-[11px] text-[var(--text-muted)] truncate mt-0.5" :title="software.description || software.exePath">
+        <p class="text-[11px] text-[var(--n-text-color)] opacity-60 truncate mt-0.5" :title="software.description || software.exePath">
           {{ software.description || software.exePath }}
         </p>
       </div>
     </div>
 
     <!-- Bottom Meta: Launch Count & Quick Launch Action -->
-    <div class="mt-3 pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+    <div class="mt-3 pt-2 border-t border-[var(--n-border-color)] flex items-center justify-between text-[11px] text-[var(--n-text-color)] opacity-70">
       <span>启动 {{ software.launchCount }} 次</span>
 
       <!-- Quick Launch Hover Button -->

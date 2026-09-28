@@ -1,6 +1,6 @@
 <template>
   <header
-    class="h-10 w-full flex items-center justify-between pl-3 pr-0 select-none border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] shrink-0 z-30"
+    class="h-full w-full flex items-center justify-between pl-3 pr-0 select-none bg-transparent shrink-0 z-30"
   >
     <!-- Left: App Brand & Breadcrumb (Draggable region) -->
     <div
@@ -8,17 +8,17 @@
       data-tauri-drag-region
       @dblclick="toggleMaximize"
     >
-      <div class="w-5 h-5 rounded bg-[var(--accent-primary)] flex items-center justify-center text-white font-bold text-[11px] shadow-xs pointer-events-none">
+      <div class="w-5 h-5 rounded bg-[var(--n-primary-color)] flex items-center justify-center text-white font-bold text-[11px] shadow-xs pointer-events-none">
         PH
       </div>
-      <span class="font-semibold text-xs tracking-tight text-[var(--text-primary)] pointer-events-none">PortableHub</span>
+      <span class="font-semibold text-xs tracking-tight text-[var(--n-text-color)] pointer-events-none">PortableHub</span>
       <NTag size="small" :bordered="false" round type="info" class="text-[10px] pointer-events-none font-mono">
         v2.0
       </NTag>
 
-      <div class="hidden sm:flex items-center text-xs text-[var(--text-muted)] gap-1 pl-2 border-l border-[var(--border-subtle)] pointer-events-none">
+      <div class="hidden sm:flex items-center text-xs text-[var(--n-text-color)] opacity-50 gap-1 pl-2 border-l border-[var(--n-border-color)] pointer-events-none">
         <span>/</span>
-        <span class="text-[var(--text-secondary)] font-medium">{{ currentViewTitle }}</span>
+        <span class="font-medium">{{ currentViewTitle }}</span>
       </div>
     </div>
 
@@ -30,13 +30,13 @@
     >
       <button
         @click.stop="libraryStore.isCommandPaletteOpen = true"
-        class="w-full max-w-sm h-7 px-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-strong)] flex items-center justify-between text-xs text-[var(--text-muted)] cursor-pointer transition-all shadow-xs"
+        class="w-full max-w-sm h-7 px-3 rounded-md border border-[var(--n-border-color)] bg-[var(--n-color)] hover:bg-[var(--n-color-modal)] flex items-center justify-between text-xs text-[var(--n-text-color)] opacity-80 cursor-pointer transition-all shadow-xs"
       >
         <div class="flex items-center gap-2 pointer-events-none">
-          <Search class="w-3.5 h-3.5" />
+          <Search class="w-3.5 h-3.5 opacity-70" />
           <span>搜索便携软件、分类、拼音...</span>
         </div>
-        <kbd class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-secondary)] pointer-events-none">Ctrl K</kbd>
+        <kbd class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--n-color-modal)] border border-[var(--n-border-color)] pointer-events-none">Ctrl K</kbd>
       </button>
     </div>
 
@@ -45,7 +45,7 @@
       <!-- Theme Switcher -->
       <button
         @click.stop="themeStore.toggleTheme"
-        class="w-9 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+        class="w-10 h-full flex items-center justify-center text-[var(--n-text-color)] opacity-70 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
         :title="themeStore.isDark ? '切换至浅色模式' : '切换至深色模式'"
       >
         <Sun v-if="themeStore.isDark" class="w-3.5 h-3.5" />
@@ -55,7 +55,7 @@
       <!-- Window Minimize -->
       <button
         @click.stop="minimizeWindow"
-        class="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+        class="w-11 h-full flex items-center justify-center text-[var(--n-text-color)] opacity-70 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
         title="最小化"
       >
         <Minus class="w-3.5 h-3.5" />
@@ -64,7 +64,7 @@
       <!-- Window Maximize / Restore -->
       <button
         @click.stop="toggleMaximize"
-        class="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+        class="w-11 h-full flex items-center justify-center text-[var(--n-text-color)] opacity-70 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
         title="最大化 / 还原"
       >
         <Square class="w-3.5 h-3.5" />
@@ -73,7 +73,7 @@
       <!-- Window Close -->
       <button
         @click.stop="closeWindow"
-        class="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[#e81123] transition-colors cursor-pointer"
+        class="w-11 h-full flex items-center justify-center text-[var(--n-text-color)] opacity-70 hover:text-white hover:opacity-100 hover:bg-[#e81123] transition-colors cursor-pointer"
         title="关闭"
       >
         <X class="w-4 h-4" />

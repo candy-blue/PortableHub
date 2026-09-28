@@ -1,25 +1,37 @@
 <template>
-  <div
-    class="h-screen w-screen flex flex-col overflow-hidden bg-[var(--bg-app)] select-none border border-[var(--border-subtle)]"
+  <NLayout
+    position="absolute"
+    class="h-screen w-screen overflow-hidden select-none"
     @dragover.prevent
     @dragenter.prevent
     @drop.prevent="handleFileDrop"
   >
     <!-- Window Custom Titlebar -->
-    <TopBar />
+    <NLayoutHeader bordered class="h-10 shrink-0">
+      <TopBar />
+    </NLayoutHeader>
 
-    <!-- Main Workspace -->
-    <div class="flex-1 flex overflow-hidden">
+    <NLayout has-sider position="absolute" style="top: 40px; bottom: 0;">
       <!-- Collapsible Sidebar -->
-      <Sidebar />
+      <NLayoutSider
+        bordered
+        collapse-mode="width"
+        :collapsed-width="64"
+        :width="220"
+        :collapsed="isCollapsed"
+        show-trigger="bar"
+        @update:collapsed="isCollapsed = $event"
+      >
+        <Sidebar :collapsed="isCollapsed" />
+      </NLayoutSider>
 
       <!-- Main Content Area -->
-      <main class="flex-1 flex flex-col overflow-hidden bg-[var(--bg-app)]">
+      <NLayoutContent class="flex flex-col h-full bg-transparent">
         <!-- Subheader Toolbar -->
-        <div class="h-11 px-5 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] shrink-0">
+        <div class="h-12 px-5 flex items-center justify-between border-b border-[var(--n-border-color)] shrink-0 transition-colors">
           <!-- Left: Filter Title & Count -->
           <div class="flex items-center gap-2.5">
-            <h2 class="text-xs font-bold text-[var(--text-primary)]">
+            <h2 class="text-xs font-bold text-[var(--n-text-color)] transition-colors">
               {{ currentTitle }}
             </h2>
             <NTag round :bordered="false" size="small" type="default" class="text-[11px] font-mono">
@@ -31,7 +43,7 @@
           <div class="flex items-center gap-3">
             <!-- Sort dropdown via Naive UI NSelect -->
             <div class="flex items-center gap-1.5">
-              <span class="text-xs text-[var(--text-muted)]">排序:</span>
+              <span class="text-xs text-[var(--n-text-color)] opacity-70 transition-colors">排序:</span>
               <NSelect
                 v-model:value="libraryStore.sortBy"
                 size="small"
@@ -91,8 +103,8 @@
             />
           </Transition>
         </div>
-      </main>
-    </div>
+      </NLayoutContent>
+    </NLayout>
 
     <!-- Modals & Quick Launch Palette -->
     <CommandPalette />
@@ -100,12 +112,12 @@
     <ScannerModal />
     <CategoryModal />
     <SettingsModal />
-  </div>
+  </NLayout>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { NTag, NSelect, NButtonGroup, NButton } from "naive-ui";
+import { computed, ref } from "vue";
+import { NTag, NSelect, NButtonGroup, NButton, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent } from "naive-ui";
 import TopBar from "@/components/shell/TopBar.vue";
 import Sidebar from "@/components/shell/Sidebar.vue";
 import SoftwareGrid from "@/components/software/SoftwareGrid.vue";
@@ -119,6 +131,7 @@ import { LayoutGrid, List, Plus } from "@lucide/vue";
 import { useLibraryStore } from "@/stores/library";
 
 const libraryStore = useLibraryStore();
+const isCollapsed = ref(false);
 
 const sortOptions = [
   { label: "默认排序", value: "Custom" },

@@ -1,11 +1,9 @@
 <template>
-  <div>
+  <div class="h-full">
     <!-- Empty State -->
-    <div
-      v-if="softwareList.length === 0"
-      class="h-72 flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-card)]/50"
-    >
+    <div v-if="softwareList.length === 0" class="h-full flex items-center justify-center">
       <NEmpty
+        class="h-72 flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-[var(--n-border-color)] bg-[var(--n-color-modal)] opacity-80"
         :description="libraryStore.searchQuery ? '未找到匹配软件' : '暂无便携软件'"
         size="large"
       >
@@ -34,7 +32,7 @@
       <div
         v-for="(item, index) in softwareList"
         :key="item.id"
-        class="stagger-item group flex items-center justify-between p-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-strong)] transition-all cursor-pointer select-none"
+        class="stagger-item group flex items-center justify-between p-2 rounded-lg border border-transparent hover:border-[var(--n-border-color)] bg-[var(--n-color)] hover:bg-[var(--n-color-modal)] transition-all cursor-pointer select-none shadow-sm"
         :style="{ '--stagger-index': Math.min(index, 12) }"
         @click="libraryStore.launchSoftware(item.id)"
         @contextmenu.prevent="handleContextMenu($event, item)"
@@ -48,7 +46,7 @@
 
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] truncate">
+              <span class="text-xs font-semibold text-[var(--n-text-color)] group-hover:text-[var(--n-primary-color)] truncate transition-colors">
                 {{ item.name }}
               </span>
               <span v-if="item.isRunning" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -56,7 +54,7 @@
                 缺失
               </NTag>
             </div>
-            <div class="text-[11px] text-[var(--text-muted)] truncate flex items-center gap-2 mt-0.5">
+            <div class="text-[11px] text-[var(--n-text-color)] opacity-60 truncate flex items-center gap-2 mt-0.5">
               <NTag size="tiny" :bordered="false" class="text-[10px]">
                 {{ item.categoryName || '默认' }}
               </NTag>
@@ -67,7 +65,7 @@
 
         <!-- Right: Meta & Actions -->
         <div class="flex items-center gap-1.5 shrink-0" @click.stop>
-          <span class="text-[11px] text-[var(--text-muted)] hidden sm:inline mr-2">启动 {{ item.launchCount }} 次</span>
+          <span class="text-[11px] text-[var(--n-text-color)] opacity-60 hidden sm:inline mr-2">启动 {{ item.launchCount }} 次</span>
 
           <NButton
             quaternary
@@ -79,7 +77,7 @@
             <template #icon>
               <Star
                 class="w-3.5 h-3.5 transition-colors"
-                :class="item.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[var(--text-muted)]'"
+                :class="item.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[var(--n-text-color)] opacity-60'"
               />
             </template>
           </NButton>
@@ -93,7 +91,7 @@
             title="打开所在目录"
           >
             <template #icon>
-              <FolderOpen class="w-3.5 h-3.5" />
+              <FolderOpen class="w-3.5 h-3.5 text-[var(--n-text-color)] opacity-60" />
             </template>
           </NButton>
 
@@ -106,7 +104,7 @@
             title="编辑应用"
           >
             <template #icon>
-              <Edit3 class="w-3.5 h-3.5" />
+              <Edit3 class="w-3.5 h-3.5 text-[var(--n-text-color)] opacity-60" />
             </template>
           </NButton>
 

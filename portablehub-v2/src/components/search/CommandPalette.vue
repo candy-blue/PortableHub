@@ -14,14 +14,14 @@
       class="animate-palette-modal relative w-full max-w-xl rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface-elevated)] shadow-[var(--shadow-palette)] overflow-hidden z-10 flex flex-col"
     >
       <!-- Search Input Area -->
-      <div class="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-        <Search class="w-5 h-5 text-[var(--accent-primary)] shrink-0" />
+      <div class="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--n-border-color)] bg-transparent">
+        <Search class="w-5 h-5 text-[var(--n-primary-color)] shrink-0" />
         <input
           ref="searchInputRef"
           v-model="query"
           type="text"
           placeholder="快速搜索便携软件、分类、拼音首字母..."
-          class="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none"
+          class="w-full bg-transparent text-sm text-[var(--n-text-color)] placeholder-[var(--text-muted)] outline-none"
           @keydown.down.prevent="navigate(1)"
           @keydown.up.prevent="navigate(-1)"
           @keydown.enter.prevent="handleEnter"
@@ -30,18 +30,18 @@
         <button
           v-if="query"
           @click="query = ''"
-          class="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md"
+          class="text-[var(--n-text-color)] opacity-60 hover:text-[var(--n-text-color)] p-1 rounded-md"
         >
           <X class="w-4 h-4" />
         </button>
-        <kbd class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-muted)]">ESC</kbd>
+        <kbd class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-transparent border border-[var(--n-border-color)] text-[var(--n-text-color)] opacity-60">ESC</kbd>
       </div>
 
       <!-- Results List -->
       <div class="max-h-80 overflow-y-auto p-2 space-y-1">
         <div
           v-if="results.length === 0"
-          class="py-10 text-center text-xs text-[var(--text-muted)]"
+          class="py-10 text-center text-xs text-[var(--n-text-color)] opacity-60"
         >
           未找到相关软件
         </div>
@@ -53,8 +53,8 @@
           @mouseenter="selectedIndex = index"
           class="flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all"
           :class="selectedIndex === index
-            ? 'bg-[var(--accent-primary)] text-white shadow-xs'
-            : 'hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)]'"
+            ? 'bg-[var(--n-primary-color)] text-white shadow-xs'
+            : 'hover:bg-[var(--bg-card-hover)] text-[var(--n-text-color)]'"
         >
           <!-- Left: App Icon + Name + Category -->
           <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -82,7 +82,7 @@
               </div>
               <p
                 class="text-[11px] truncate mt-0.5"
-                :class="selectedIndex === index ? 'text-white/80' : 'text-[var(--text-muted)]'"
+                :class="selectedIndex === index ? 'text-white/80' : 'text-[var(--n-text-color)] opacity-60'"
               >
                 {{ item.description || item.exePath }}
               </p>
@@ -93,7 +93,7 @@
           <div class="flex items-center gap-2 pl-3 shrink-0">
             <span
               class="text-[10px] px-2 py-0.5 rounded-md font-mono"
-              :class="selectedIndex === index ? 'bg-white/20 text-white' : 'bg-[var(--bg-app)] text-[var(--text-secondary)]'"
+              :class="selectedIndex === index ? 'bg-white/20 text-white' : 'bg-transparent text-[var(--n-text-color)] opacity-80'"
             >
               {{ item.categoryName }}
             </span>
@@ -109,11 +109,11 @@
       </div>
 
       <!-- Footer Hints -->
-      <div class="px-4 py-2 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+      <div class="px-4 py-2 bg-transparent border-t border-[var(--n-border-color)] flex items-center justify-between text-[11px] text-[var(--n-text-color)] opacity-60">
         <div class="flex items-center gap-3">
-          <span class="flex items-center gap-1"><kbd class="px-1 py-0.5 rounded font-mono bg-[var(--bg-app)] text-[10px]">↑↓</kbd> 选择</span>
-          <span class="flex items-center gap-1"><kbd class="px-1 py-0.5 rounded font-mono bg-[var(--bg-app)] text-[10px]">↵</kbd> 启动</span>
-          <span class="flex items-center gap-1"><kbd class="px-1 py-0.5 rounded font-mono bg-[var(--bg-app)] text-[10px]">Ctrl+↵</kbd> 管理员</span>
+          <span class="flex items-center gap-1"><kbd class="px-1 py-0.5 rounded font-mono bg-transparent text-[10px]">↑↓</kbd> 选择</span>
+          <span class="flex items-center gap-1"><kbd class="px-1 py-0.5 rounded font-mono bg-transparent text-[10px]">↵</kbd> 启动</span>
+          <span class="flex items-center gap-1"><kbd class="px-1 py-0.5 rounded font-mono bg-transparent text-[10px]">Ctrl+↵</kbd> 管理员</span>
         </div>
         <span>共 {{ results.length }} 项</span>
       </div>

@@ -21,8 +21,7 @@ html, body, #app {
   height: 100%;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
-  background-color: var(--bg-app);
-  color: var(--text-primary);
+  background-color: transparent;
   font-size: 14px;
 }
 
@@ -52,14 +51,3 @@ html, body, #app {
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
 }
-
-/* Utility Shortcuts */
-.bg-app { background-color: var(--bg-app); }
-.bg-sidebar { background-color: var(--bg-sidebar); }
-.bg-surface { background-color: var(--bg-surface); }
-.bg-card { background-color: var(--bg-card); }
-.border-subtle { border-color: var(--border-subtle); }
-.border-strong { border-color: var(--border-strong); }
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-muted { color: var(--text-muted); }

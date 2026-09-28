@@ -10,7 +10,7 @@
     <div class="space-y-4 text-xs">
       <!-- Theme Setting -->
       <div>
-        <label class="block font-medium text-[var(--text-secondary)] mb-2">
+        <label class="block font-medium text-[var(--n-text-color)] opacity-80 mb-2">
           界面外观主题
         </label>
         <NRadioGroup
@@ -34,7 +34,7 @@
 
       <!-- View Preference -->
       <div>
-        <label class="block font-medium text-[var(--text-secondary)] mb-2">
+        <label class="block font-medium text-[var(--n-text-color)] opacity-80 mb-2">
           默认视图布局
         </label>
         <NRadioGroup
@@ -53,18 +53,18 @@
       </div>
 
       <!-- Portable Mode Info -->
-      <div class="p-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-app)] space-y-1.5">
-        <div class="flex items-center gap-2 font-medium text-[var(--text-primary)]">
+      <div class="p-3.5 rounded-lg border border-[var(--n-border-color)] bg-transparent space-y-1.5">
+        <div class="flex items-center gap-2 font-medium text-[var(--n-text-color)]">
           <ShieldCheck class="w-4 h-4 text-emerald-500" />
           <span>完全便携模式已生效</span>
         </div>
-        <p class="text-[11px] text-[var(--text-muted)] leading-relaxed">
-          SQLite 数据库及图标缓存全量存储于同级 <code class="px-1 py-0.5 rounded bg-[var(--bg-card)] font-mono text-[10px]">data/PortableHub.db</code>，不向 Windows 注册表写入任何残留。
+        <p class="text-[11px] text-[var(--n-text-color)] opacity-60 leading-relaxed">
+          SQLite 数据库及图标缓存全量存储于同级 <code class="px-1 py-0.5 rounded bg-[var(--n-color)] font-mono text-[10px]">data/PortableHub.db</code>，不向 Windows 注册表写入任何残留。
         </p>
       </div>
 
       <!-- Version & Architecture -->
-      <div class="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-muted)] flex items-center justify-between">
+      <div class="pt-2 border-t border-[var(--n-border-color)] text-[11px] text-[var(--n-text-color)] opacity-60 flex items-center justify-between">
         <span>PortableHub 2.0 (Tauri 2 + Naive UI + Rust)</span>
         <span class="font-mono">v2.0.0</span>
       </div>

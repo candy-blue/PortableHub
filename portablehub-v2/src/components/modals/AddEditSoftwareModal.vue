@@ -68,7 +68,7 @@
         />
       </NFormItem>
 
-      <div class="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between">
+      <div class="pt-3 border-t border-[var(--n-border-color)] flex items-center justify-between">
         <div class="flex items-center gap-2">
           <NSwitch v-model:value="form.runAsAdmin" size="small" />
           <span class="text-xs">以管理员身份运行</span>
